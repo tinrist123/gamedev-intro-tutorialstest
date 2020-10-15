@@ -19,7 +19,7 @@ void Item::Render()
 		else ani = 2;
 		animation_set->at(ani)->Render(x, y);
 	}
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void Item::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

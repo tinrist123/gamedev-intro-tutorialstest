@@ -72,7 +72,7 @@ void CPlayScene::_ParseSection_SPRITES(string line)
 	LPDIRECT3DTEXTURE9 tex = CTextures::GetInstance()->Get(texID);
 	if (tex == NULL)
 	{
-		DebugOut(L"[ERROR] Texture ID %d not found!\n", texID);
+		//DebugOut(L"[ERROR] Texture ID %d not found!\n", texID);
 		return; 
 	}
 
@@ -148,13 +148,13 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	case OBJECT_TYPE_MARIO:
 		if (player!=NULL) 
 		{
-			DebugOut(L"[ERROR] MARIO object was created before!\n");
+			//DebugOut(L"[ERROR] MARIO object was created before!\n");
 			return;
 		}
 		obj = new CMario(x,y); 
 		player = (CMario*)obj;  
 
-		DebugOut(L"[INFO] Player object created!\n");
+		//DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: obj = new CGoomba(); break;
 	case OBJECT_TYPE_CloudBrick:
@@ -225,7 +225,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		}
 		break;
 	default:
-		DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
+		//DebugOut(L"[ERR] Invalid object type: %d\n", object_type);
 		return;
 	}
 
@@ -240,7 +240,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 void CPlayScene::Load()
 {
-	DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
+	//DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 
 	mapScence = new Map();
 	ifstream f;
@@ -283,7 +283,7 @@ void CPlayScene::Load()
 
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
-	DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
+	//DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -292,6 +292,7 @@ void CPlayScene::Update(DWORD dt)
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
 	vector<LPGAMEOBJECT> coObjects;
+	//DebugOut(L"Object size = %d\n", objects.size());
 	for (size_t i = 1; i < objects.size(); i++)
 	{
 		coObjects.push_back(objects[i]);
@@ -339,7 +340,7 @@ void CPlayScene::Unload()
 	objects.clear();
 	player = NULL;
 
-	DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
+	//DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
 }
 
 void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
@@ -403,6 +404,8 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	case DIK_A: 
 		mario->Reset();
 		break;
+	default:
+			break;
 	}
 }
 

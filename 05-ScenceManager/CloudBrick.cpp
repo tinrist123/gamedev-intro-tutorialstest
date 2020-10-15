@@ -9,7 +9,7 @@ CloudBrick::CloudBrick(int width, int height) : CBrick::CBrick(width,height)
 void CloudBrick::Render()
 {
 	animation_set->at(2)->Render(x, y);
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CloudBrick::GetBoundingBox(float& l, float& t, float& r, float& b)

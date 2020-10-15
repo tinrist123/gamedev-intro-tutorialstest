@@ -10,7 +10,7 @@ ColorBox::ColorBox(int width, int height) : Ground::Ground(width, height)
 
 void ColorBox::Render()
 {
-	//Ground::Render();
+	Ground::Render();
 }
 
 void ColorBox::GetBoundingBox(float& l, float& t, float& r, float& b)
