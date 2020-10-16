@@ -1,8 +1,10 @@
 #include "Constant.h"
 
-Constant::Constant(int kindMario)
+
+
+Constant::Constant(int level)
 {
-	this->kindMario = kindMario;
+	this->kindMario = level;
 	switch (this->kindMario)
 	{
 	case 2:

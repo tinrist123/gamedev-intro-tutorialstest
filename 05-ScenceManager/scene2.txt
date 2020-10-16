@@ -10,6 +10,11 @@
 # id	left	top	right	bottom	texture_id
 [SPRITES]
 
+# Item
+10	334	100	348	116	20
+11	156	121	171	137	20
+12	180	123	196	137	20
+
 # BIG MARIO HAVE TAIL
 # idle right
 11001	212	443	233	471	0
@@ -153,10 +158,7 @@
 # Pipe Flower
 50000	233	63	265	118	50
 
-# Item
-10	334	100	348	116	20
-11	156	121	171	137	20
-12	180	123	196	137	20
+
 
 #KOOPAS
 #walk left
@@ -171,6 +173,11 @@
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
 [ANIMATIONS]
+
+# ==== Item =========
+50	10	100
+51	11	100
+52	12	100
 
 # ==== MARIO =========
 #idle BIG right
@@ -244,7 +251,7 @@
 # falling left		(BIG_TAIL)
 4303	11032	100
 # attacking right	(BIG_TAIL)
-4311	11041	1000	11042	1000	11043	1000	11044	1000	11041	1000
+4311	11041	100	11042	100	11043	100	11044	100	11041	100
 # attacking left	(BIG_TAIL)
 4312	11043	100	11042	100	11041	100	11044	100	11043	100
 # running right		(BIG_TAIL)
@@ -277,10 +284,9 @@
 # flying when running left		(SMALL)	
 4410	100860	100
 
-# ==== Item =========
-50	10	100
-51	11	100
-52	12	100
+
+
+
 # ==== GOOMBA  =========
 # walk
 701	30001	100	30002	100
@@ -330,6 +336,9 @@
 # KOOPAS
 #3	20	124	4
 
+
+
+
 # BRICK 
 # --- platform (hint: I created the list using Excel!) ----
 1	1504	336	2	1	1
@@ -355,9 +364,9 @@
 
 
 # Weak Brick
-9	1439	128	2	1	1 	(PINK BOX)
+9	1440	128	2	1	1 	(PINK BOX)
 
-9	1951	400	2	1	1
+9	1952	400	2	1	1
 9	1968	400	2	1	1
 9	1968	384	2	1	1
 9	1984	400	2	1	1
@@ -420,7 +429,7 @@
 7	2320	384	2	2	2
 
 # Item
-#11	175	351	5	1	1	1
+#11	175	332	5	1	1	1
 # Question Brick
 8	175	351	22	1	1
 8	191	351	22	1	1
@@ -430,6 +439,7 @@
 8	655	383	22	1	1
 8	703	351	22	1	1
 8	1471	367	22	1	1
+
 
 # --- SCENE PORTAL ----
 # type	l	t	ani_set_id	r	b	scene_id

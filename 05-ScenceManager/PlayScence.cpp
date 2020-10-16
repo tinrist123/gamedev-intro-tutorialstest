@@ -33,7 +33,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_QUESTION_BRICK		8
 #define OBJECT_TYPE_WeakBrick			9
 #define OBJECT_TYPE_CloudBrick			10
-#define OBJECT_TYPE_Coin				11
+#define OBJECT_TYPE_Item				11
 
 #define OBJECT_TYPE_PORTAL				50
 
@@ -85,7 +85,7 @@ void CPlayScene::_ParseSection_ANIMATIONS(string line)
 
 	if (tokens.size() < 3) return; // skip invalid lines - an animation must at least has 1 frame and 1 frame time
 
-	//DebugOut(L"--> %s\n",ToWSTR(line).c_str());
+	DebugOut(L"--> %s\n",ToWSTR(line).c_str());
 
 	LPANIMATION ani = new CAnimation();
 
@@ -171,13 +171,13 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			obj = new CBrick(width, height);
 			break;
 		}
-		case OBJECT_TYPE_WeakBrick:
-		{
-			int width = atof(tokens[4].c_str());
-			int height = atof(tokens[5].c_str());
-			obj = new WeakBrick(width, height);
-			break;
-		}
+	case OBJECT_TYPE_WeakBrick:
+	{
+		int width = atof(tokens[4].c_str());
+		int height = atof(tokens[5].c_str());
+		obj = new WeakBrick(width, height);
+		break;
+	}
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
 	case OBJECT_TYPE_Flower: obj = new CFlower(); break;
 	case OBJECT_TYPE_Ground: 
@@ -208,7 +208,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new QuestionBrick(x,y,width, height);
 		break;
 	}
-	case OBJECT_TYPE_Coin:
+	case OBJECT_TYPE_Item:
 	{
 		int width = atof(tokens[4].c_str());
 		int height = atof(tokens[5].c_str());
@@ -292,17 +292,23 @@ void CPlayScene::Update(DWORD dt)
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
 	vector<LPGAMEOBJECT> coObjects;
-	//DebugOut(L"Object size = %d\n", objects.size());
+
 	for (size_t i = 1; i < objects.size(); i++)
 	{
 		coObjects.push_back(objects[i]);
 	}
-	objects.at(0)->Update(dt,&coObjects);
-
-	/*for (size_t i = 0; i < objects.size(); i++)
+	
+	for (size_t i = 0; i < objects.size(); i++)
 	{
+		if (objects[i]->health == 0 && dynamic_cast<QuestionBrick *>(objects[i]))
+		{
+			
+			Item* item = new Item(1, 1, 1, objects[0]->x, objects[0]->y - 32);
+			//CBrick* item = new CBrick(10, 20);
+			objects.push_back(item);
+		}
 		objects[i]->Update(dt, &coObjects);
-	}*/
+	}
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
 	if (player == NULL) return; 
@@ -388,6 +394,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		if (mario->level == MARIO_LEVEL_BIG_TAIL)
 		{
 			mario->SetState(MARIO_STATE_BIG_TAIL_KEEP_JUMP);
+			mario->tDraw = GetTickCount64();
 		}
 		break;
 	case DIK_Z:
@@ -418,6 +425,16 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
 	
+	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(300))
+	{
+		return;
+	}
+	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(300))
+	{
+		DebugOut(L"Im here\n");
+		return;
+	}
+
 	if (mario->isAttacking && GetTickCount64() - mario->tDraw < 500 && mario->	tDraw != 0)
 	{
 		return;
@@ -425,20 +442,26 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	else if (mario->isAttacking && GetTickCount64() - mario->tDraw > 500) {
 		mario->isAttacking = false;
 		mario->tDraw = 0;
-		return;
 	}
 
 	if (game->IsKeyDown(DIK_SPACE))
 	{
 		mario->SetState(MARIO_STATE_JUMP);
 	}
-	if (game->IsKeyDown(DIK_LSHIFT))
+	if (game->IsKeyDown(DIK_LSHIFT) && game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_SPACE))
 	{
-		mario->SetState(MARIO_STATE_RUNNING);
+		if (mario->isOnGround)
+			mario->SetState(MARIO_STATE_RUNNING);
+	}
+	if (game->IsKeyDown(DIK_LSHIFT) && game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_SPACE))
+	{
+		if (mario->isOnGround)
+			mario->SetState(MARIO_STATE_RUNNING);
 	}
 	if (game->IsKeyDown(DIK_LEFT))
 	{
 		mario->SetState(MARIO_STATE_WALKING_LEFT);
+		return;
 	}
 	else if(game->IsKeyDown(DIK_RIGHT))
 	{

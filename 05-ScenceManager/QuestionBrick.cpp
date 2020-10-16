@@ -1,5 +1,6 @@
 #include "QuestionBrick.h"
 #include "Item.h"
+#include "Utils.h"
 
 QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height) : CBrick(width,height)
 {
@@ -13,7 +14,7 @@ QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height) : CB
 void QuestionBrick::Render()
 {
 	animation_set->at(0)->Render(x, y);
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void QuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -42,8 +43,7 @@ void QuestionBrick::SetState(int state)
 	{
 	case QUESTION_BRICK_AVAILABLE:
 		vy = -0.05f;
-		Item* item = new Item(1, 1, 1, start_x, start_y);
-		item->SetState(1);
+		this->subHealth();
 		break;
 	}
 }

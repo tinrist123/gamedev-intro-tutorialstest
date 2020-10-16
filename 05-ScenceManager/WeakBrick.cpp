@@ -1,8 +1,9 @@
 #include "WeakBrick.h"
-#include "../03-Keyboard-States/debug.h"
 
 WeakBrick::WeakBrick(int width, int height) : CBrick::CBrick(width, height)
 {
+	this->width = width;
+	this->height = height;
 }
 
 void WeakBrick::Render()

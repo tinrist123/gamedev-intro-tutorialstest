@@ -143,9 +143,6 @@
     <ClInclude Include="MapScence.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Map.h">
       <Filter>Header Files</Filter>
     </ClInclude>

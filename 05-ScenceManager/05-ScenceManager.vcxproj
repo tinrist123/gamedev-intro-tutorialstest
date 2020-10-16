@@ -158,7 +158,6 @@
     <ClInclude Include="ColorBox.h" />
     <ClInclude Include="Constant.h" />
     <ClInclude Include="Flower.h" />
-    <ClInclude Include="GameMap.h" />
     <ClInclude Include="Ground.h" />
     <ClInclude Include="Koopas.h" />
     <ClInclude Include="Map.h" />

@@ -1,5 +1,4 @@
 #include "ColorBox.h"
-#include "../04-Collision/debug.h"
 
 
 ColorBox::ColorBox(int width, int height) : Ground::Ground(width, height)

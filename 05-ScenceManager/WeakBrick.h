@@ -1,5 +1,6 @@
 #pragma once
 #include "Brick.h"
+
 class WeakBrick :
     public CBrick
 {

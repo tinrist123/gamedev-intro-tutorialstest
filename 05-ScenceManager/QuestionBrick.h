@@ -11,15 +11,18 @@ public:
 
 	int height;
 	int width;
+
 	int state;
 
 	int start_x;
 	int start_y;
 
+	bool isTouched = false;
+
 public:
 	QuestionBrick(int start_x,int start_y,int width, int height);
 	virtual void Render();
-	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
+	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);	
 	void SetState(int state);
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 };
