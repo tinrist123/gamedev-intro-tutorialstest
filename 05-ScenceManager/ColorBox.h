@@ -1,7 +1,7 @@
-#include "Ground.h"
+#include "GameObject.h"
 
 
-class ColorBox : public Ground
+class ColorBox : public CGameObject
 {
 		int height;
 		int width;

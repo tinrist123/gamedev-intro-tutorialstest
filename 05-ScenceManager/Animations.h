@@ -24,12 +24,15 @@ typedef CAnimationFrame *LPANIMATION_FRAME;
 
 class CAnimation
 {
+public:
 	DWORD lastFrameTime;
 	int currentFrame;
 	int defaultTime;
 
 	int changeableTime ;
 	DWORD startFrameTime;
+	DWORD tDraw;
+	DWORD totalTimeFrame;
 	vector<LPANIMATION_FRAME> frames;
 public:
 	CAnimation(int defaultTime = 100) {
@@ -41,8 +44,8 @@ public:
 	void Render(float x, float y, int alpha = 255);
 
 	void SetCurrentFrame(int currentFrame = -1) { this->currentFrame = currentFrame; }
-	void StartRenderAnimation() { startFrameTime = GetTickCount64(); };
-	bool IsRenderOver(DWORD a) { return (GetTickCount64() - startFrameTime >= a); };
+	void StartRenderAnimation() { tDraw = GetTickCount64(); };
+	bool IsRenderOver(DWORD a) { return (GetTickCount64() - tDraw >= a); };
 };
 
 typedef CAnimation *LPANIMATION;

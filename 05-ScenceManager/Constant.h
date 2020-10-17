@@ -2,18 +2,18 @@
 #include <iostream>
 using namespace std;
 
-#define MARIO_RUNNING_PRE_MAX_SPEED						0.3f
-#define MARIO_RUNNING_MAX_SPEED							0.6f
+#define MARIO_RUNNING_PRE_MAX_SPEED						0.2f
+#define MARIO_RUNNING_MAX_SPEED							0.3f
 
-#define MARIO_WALKING_DECELERATION						0.00036875f
-#define MARIO_WALKING_ACCELEROMETER						0.006875f
+#define MARIO_WALKING_DECELERATION						0.006875f
+#define MARIO_WALKING_ACCELEROMETER						0.001875f
 #define MARIO_MAX_WALKING_SPEED							0.1f
-#define FRICTION										0.0016875f
+#define FRICTION										0.0056875f
 
-#define MARIO_JUMP_SPEED_Y								0.2f
+#define MARIO_JUMP_SPEED_Y								0.3f
 #define MARIO_JUMP_MAX_SPEED_Y							0.3f
 #define MARIO_JUMP_DEFLECT_SPEED						0.2f
-#define MARIO_GRAVITY									0.00021875f
+#define MARIO_GRAVITY									0.0006f
 #define MARIO_DIE_DEFLECT_SPEED							0.5f
 
 #define MARIO_STATE_IDLE								0
@@ -125,7 +125,13 @@ using namespace std;
 
 //================================FALLING  SLOWNLY WHEN SPACE ENTER CONSTANT ZONE=================================
 #define MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT	47
-#define MARIO_ANI_BIG_TAIL_SLOW_FALLING_LEFT			48
+#define MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT		48
+//================================END FLYING WHEN RUNNING  ZONE=================================
+
+//================================RUNNING FAILLING WHEN SPACE=================================
+#define MARIO_ANI_BIG_TAIL_RUNNING_FALLING_RIGHT		49
+#define MARIO_ANI_BIG_TAIL_RUNNING_FALLING_LEFT			50
+//================================END RUNNING FAILLING  ZONE=================================
 
 //================================END FALLING  SLOWNLY WHEN SPACE ENTER   ZONE=================================
 

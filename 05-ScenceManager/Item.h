@@ -1,5 +1,9 @@
 #pragma once
 #include "GameObject.h"
+//#include "QuestionBrick.h"
+//#include "Ground.h"
+//#include "ColorBox.h"
+//#include "Pipe.h"
 
 #define ITEM_COIN           1   
 #define SPECIAL_ITEM        2   

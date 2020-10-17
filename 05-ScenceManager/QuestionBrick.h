@@ -7,7 +7,8 @@ class QuestionBrick :
     public CBrick
 {
 public:
-	int level = 0;
+	bool isSpecial = false;
+
 
 	int height;
 	int width;

@@ -1,7 +1,7 @@
 #include "ColorBox.h"
 
 
-ColorBox::ColorBox(int width, int height) : Ground::Ground(width, height)
+ColorBox::ColorBox(int width, int height) : CGameObject::CGameObject()
 {
 	this->width = width;
 	this->height = height;
@@ -9,13 +9,13 @@ ColorBox::ColorBox(int width, int height) : Ground::Ground(width, height)
 
 void ColorBox::Render()
 {
-	Ground::Render();
+	RenderBoundingBox();
 }
 
 void ColorBox::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = x;
 	t = y;
-	r = x + BBOX_WIDTH * width;
-	b = y + BBOX_HEIGHT * height;
+	r = x + 16 * width;
+	b = y + 16 * height;
 }

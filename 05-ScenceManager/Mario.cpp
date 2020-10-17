@@ -27,14 +27,14 @@ CMario::CMario(float x, float y) : CGameObject()
 
 void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-	// Calculate dx, dy 
+	// Calculate dx, dy
 	this->dt = dt;
 	dx = vx * dt;
 	dy = vy * dt;
-	if (fabs(vx) > MARIO_MAX_WALKING_SPEED && !isOnGround)
+	/*if (fabs(vx) > MARIO_MAX_WALKING_SPEED && !isOnGround && !isRunning)
 	{
 		vx -= min(fabs(vx), FRICTION) * nx;
-	}
+	}*/
 
 	lastVx = vx;
 	// Simple fall down
@@ -88,7 +88,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			vy = 0;
 		}
 
-
 		if (isRollBack && GetTickCount64() - tDraw > 100 && tDraw != 0 && isTested)
 		{
 			isRollBack = false;
@@ -118,28 +117,30 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 
 			}
-			if (dynamic_cast<CBrick*>(e->obj))
+			if (dynamic_cast<Item *>(e->obj))
 			{
+				Item* item = dynamic_cast<Item *>(e->obj);
+				if (e->nx != 0)
+				{
+					if (item->health != 0)
+						item->SetState(2);
+				}
+			}
+			else if (dynamic_cast<QuestionBrick*>(e->obj))
+			{
+				QuestionBrick* questionbrick = dynamic_cast<QuestionBrick*>(e->obj);
+				if (e->ny > 0)
+				{
+					if (questionbrick->health != 0)
+						questionbrick->SetState(1);
+				}
 				if (e->ny < 0)
 				{
 					vy = 0;
 					isOnGround = true;
 				}
 			}
-			if (dynamic_cast<QuestionBrick*>(e->obj))
-			{
-				QuestionBrick* questionbrick = dynamic_cast<QuestionBrick*>(e->obj);
-				if (e->ny > 0)
-				{
-					isOnGround = true;
-					questionbrick->SetState(1);
-				}
-				if (e->ny < 0)
-				{
-					isOnGround = true;
-				}
-			}
-			else if (dynamic_cast<ColorBox *>(e->obj))
+			else if (dynamic_cast<ColorBox*>(e->obj))
 			{
 				if (e->ny < 0)
 				{
@@ -151,7 +152,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					x += vx * dt;
 				}
 			}
-			else if (dynamic_cast<Pipe *>(e->obj))
+			else if (dynamic_cast<Pipe*>(e->obj))
 			{
 				if (e->ny < 0)
 				{
@@ -159,10 +160,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					isOnGround = true;
 				}
 			}
-			else if (dynamic_cast<CPortal*>(e->obj))
+			else if (dynamic_cast<CBrick*>(e->obj))
 			{
-				CPortal* p = dynamic_cast<CPortal*>(e->obj);
-				CGame::GetInstance()->SwitchScene(p->GetSceneId());
+				if (e->ny < 0)
+				{
+					vy = 0;
+					isOnGround = true;
+				}
 			}
 		}
 	}
@@ -297,8 +301,9 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 	}
 	if (mario->onSitting == false)
 	{
-		if (mario->isFalling == false)
+		if (mario->isFalling == false && fabs(mario->vx) < MARIO_RUNNING_MAX_SPEED)
 		{
+			
 			if (mario->nx == 1)
 			{
 				mario->ani = listAnimationForResMario.at(8);
@@ -307,21 +312,31 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 			{
 				mario->ani = listAnimationForResMario.at(9);
 			}
+			
+		}
+		else if (mario->isFalling == false && !mario->isOnGround  && fabs(mario->vx) >= MARIO_RUNNING_MAX_SPEED)
+		{
+			if (mario->nx == 1)
+			{
+				mario->ani = listAnimationForResMario.at(14);
+			}
+			else if (mario->nx == -1)
+			{
+				mario->ani = listAnimationForResMario.at(15);
+			}
 		}
 		else
 		{
-			if (mario->isOnGround == false && !mario->isRunning )
+			if (mario->isOnGround == false)
 			{
 				if (mario->nx == 1)
 				{
 					if (mario->state == MARIO_STATE_BIG_TAIL_KEEP_JUMP)
 					{
-						//if (mario->isKeepJumping && mario->tDraw == 0)
+						if (mario->isKeepJumping)
 						{
-							//mario->tDraw = GetTickCount64();
 							mario->ani = listAnimationForResMario.at(16);
 						}
-						
 					}
 					else {
 						mario->ani = listAnimationForResMario.at(10);
@@ -341,17 +356,7 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 					}
 				}
 			}
-			else if (!mario->isOnGround && mario->isRunning && mario->vx >= MARIO_RUNNING_MAX_SPEED)
-			{
-				if (mario->nx == 1)
-				{
-					mario->ani = listAnimationForResMario.at(14);
-				}
-				else if (mario->nx == -1)
-				{
-					mario->ani = listAnimationForResMario.at(15);
-				}
-			}
+			
 		}
 	}
 	return mario->ani;
@@ -430,7 +435,7 @@ void CMario::Render()
 	}
 	else if (level == MARIO_LEVEL_BIG)
 	{
-		if (vx == 0)
+		/*if (vx == 0)
 		{
 			if (nx > 0)
 			{
@@ -452,7 +457,7 @@ void CMario::Render()
 			}
 		}
 		else if (vx != 0)
-		{
+		{*/
 			//if (isOnGround == false)
 			//{
 			//	onSitting = false;
@@ -487,8 +492,9 @@ void CMario::Render()
 			//	}
 			//}
 
-		}
-		if (onSitting == false)
+
+		//}
+		/*if (onSitting == false)
 		{
 			if (isFalling == false)
 			{
@@ -498,10 +504,20 @@ void CMario::Render()
 				}
 				else ani = MARIO_ANI_BIG_FLYING_LEFT;
 			}
-		}
+		}*/
 		Constant *constant = new Constant(level);
 		ani = CalcRenderForMARIO_BIG(this,constant->listAni_Mario_Big);
-		
+		if (fabs(vx) >= MARIO_RUNNING_MAX_SPEED && !isOnGround && isFalling)
+		{
+			if (nx == 1)
+			{
+				ani = MARIO_ANI_BIG_RUNNING_FLYING_RIGHT;
+			}
+			else if (nx == -1)
+			{
+				ani = MARIO_ANI_BIG_RUNNING_FLYING_LEFT;
+			}
+		}
 	}
 	else if (level == MARIO_LEVEL_BIG_TAIL)
 	{
@@ -518,32 +534,38 @@ void CMario::Render()
 				ani = MARIO_ANI_BIG_TAIL_ATTACKING_LEFT;
 			}
 		}
+		else if (fabs(vx) >= MARIO_RUNNING_MAX_SPEED && !isOnGround && isFalling)
+		{
+			if (nx == 1)
+			{
+				ani = constant->listAni_Mario_Big.at(18);
+			}
+			else if (nx == -1)
+			{
+				ani = constant->listAni_Mario_Big.at(19);
+			}
+		}
 	}
 
 
 	int alpha = 255;
 	if (untouchable) alpha = 128;
-
 	animation_set->at(ani)->setTimeAnimation(isRunning? setTimeRenderingAni :100)->Render(x, y, alpha);
 	
 	RenderBoundingBox();
 }
-
 void CMario::SetState(int state)
 {
-	
 	CGameObject::SetState(state);
 
 	switch (state)
 	{
-	case MARIO_STATE_STOP_SITTING:
+	/*case MARIO_STATE_STOP_SITTING:
 		onSitting = false;
-		break;
+		break;*/
 	case MARIO_STATE_BIG_TAIL_ATTACK:
-
-		break;
-	case MARIO_STATE_WALKING:
-		isWalking = true;
+		if ( nx == 1 ) animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->StartRenderAnimation();
+		if ( nx == -1 ) animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->StartRenderAnimation();
 		break;
 	case MARIO_STATE_NOT_WALKING:
 		isWalking = false;
@@ -553,7 +575,7 @@ void CMario::SetState(int state)
 		isWalking = true;
 		if (vx < 0)
 		{
-			vx += MARIO_WALKING_ACCELEROMETER;
+			vx += MARIO_WALKING_DECELERATION;
 			isRollBack = true;
 		}
 		else if (vx <= MARIO_MAX_WALKING_SPEED)
@@ -563,6 +585,10 @@ void CMario::SetState(int state)
 			{
 				vx = MARIO_MAX_WALKING_SPEED;
 			}
+		}
+		else if (vx >= MARIO_MAX_WALKING_SPEED && !isRunning)
+		{
+			vx -= MARIO_WALKING_ACCELEROMETER;
 		}
 		if ((double)lastVx * vx <= 0)
 		{
@@ -575,7 +601,7 @@ void CMario::SetState(int state)
 		isWalking = true;
 		if (vx > 0)
 		{
-			vx -= MARIO_WALKING_ACCELEROMETER;
+			vx -= MARIO_WALKING_DECELERATION;
 			isRollBack = true;
 		}
 		else if (vx >= -MARIO_MAX_WALKING_SPEED)
@@ -585,6 +611,10 @@ void CMario::SetState(int state)
 			{
 				vx = -MARIO_MAX_WALKING_SPEED;
 			}
+		}
+		else if (vx <= -MARIO_MAX_WALKING_SPEED && !isRunning)
+		{
+			vx += MARIO_WALKING_ACCELEROMETER;
 		}
 		if ((double)lastVx * vx <= 0)
 		{
@@ -603,7 +633,7 @@ void CMario::SetState(int state)
 		isRunning = true;
 		if (nx == 1)
 		{
-			vx += MARIO_WALKING_ACCELEROMETER;
+			vx += MARIO_WALKING_ACCELEROMETER*1.5;
 			if (vx >= MARIO_RUNNING_PRE_MAX_SPEED)
 			{
 				setTimeRenderingAni = 40;
@@ -617,7 +647,7 @@ void CMario::SetState(int state)
 		}
 		else if (nx == -1)
 		{
-			vx -= MARIO_WALKING_ACCELEROMETER;
+			vx -= MARIO_WALKING_ACCELEROMETER * 1.5;
 			if (vx <= -MARIO_RUNNING_PRE_MAX_SPEED)
 			{
 				setTimeRenderingAni = 40;
@@ -652,13 +682,12 @@ void CMario::SetState(int state)
 			if (nx == 1 ) animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->StartRenderAnimation();
 			if (nx == -1)
 			{
-				DebugOut(L"Im in left failling\n");
 				animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->StartRenderAnimation();
 			}
 		}
 		break;
 	case MARIO_ANI_SHORT_JUMP:
-		if (!isOnGround && !isFalling && !isRunning)
+		if (!isOnGround && !isFalling)
 		{
 			vy = vy + MARIO_GRAVITY*dt*10;
 		}
@@ -677,12 +706,12 @@ void CMario::SetState(int state)
 				}
 				isFalling = false;
 				isOnGround = false;
-				holdingSpaceCounting = 0;
 				blockJumping = true;
 			}
 		break;
-	case MARIO_STATE_IDLE: 
+	case MARIO_STATE_IDLE:
 		onSitting = false;
+		isRunning = false;
 		if (lastVx * vx <= 0)
 		{
 			isRollBack = false;
@@ -704,12 +733,31 @@ void CMario::SetState(int state)
 			lastNx = 0;
 		}
 		break;
-	case MARIO_STATE_SITTING:
+	case MARIO_STATE_SITTING: 
 		if (isWalking == false)
 		{
 			onSitting = true;
 		}
+		if (lastVx * vx <= 0)
+		{
+			isRollBack = false;
+		}
+		if (nx == -1 && vx > 0)
+		{
+			lastNx = nx;
+			nx = 1;
+		}
+		else if (nx == 1 && vx < 0) {
+			lastNx = nx;
+			nx = -1;
+		}
 		if (isOnGround) vx -= min(fabs(vx), FRICTION) * nx;
+		if (lastNx != 0)
+		{
+			isRollBack = false;
+			nx = lastNx;
+			lastNx = 0;
+		}
 		break;
 	case MARIO_STATE_DIE:
 		vy = -MARIO_DIE_DEFLECT_SPEED;

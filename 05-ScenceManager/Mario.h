@@ -12,7 +12,6 @@
 class CMario : public CGameObject
 {
 public:
-	int ani = -1;
 	int level = 1;
 	int setTimeRenderingAni = 100;
 
@@ -20,7 +19,6 @@ public:
 	int untouchable;
 	bool onSitting = false;
 
-	bool isOnGround = true;
 	bool isFalling = true;
 	bool blockJumping = false;
 	bool isKeepJumping = false;
@@ -32,9 +30,6 @@ public:
 	int  lastNx;
 
 	bool isRunning = false;
-
-
-	int holdingSpaceCounting = 0;
 
 	float lastVx;
 

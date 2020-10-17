@@ -300,11 +300,19 @@ void CPlayScene::Update(DWORD dt)
 	
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->health == 0 && dynamic_cast<QuestionBrick *>(objects[i]))
+		if (objects[i]->health == 0 && objects[i]->isDisappeared)
 		{
-			
-			Item* item = new Item(1, 1, 1, objects[0]->x, objects[0]->y - 32);
-			//CBrick* item = new CBrick(10, 20);
+			continue;
+		}
+		if (objects[i]->health == 0 && dynamic_cast<QuestionBrick *>(objects[i]) && !objects[i]->isCreated)
+		{
+			int typeItem = (player->level < 3 )?player->level:3;
+			Item* item = new Item(1, 1,typeItem, objects[i]->x, objects[i]->y - 32);
+			CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+			LPANIMATION_SET ani_set = animation_sets->Get(5);
+			item->SetAnimationSet(ani_set);
+			objects[i]->isCreated = true;
+			item->SetState(1);	
 			objects.push_back(item);
 		}
 		objects[i]->Update(dt, &coObjects);
@@ -329,10 +337,16 @@ void CPlayScene::Update(DWORD dt)
 void CPlayScene::Render()
 {
 	
-	//mapScence->DrawMap();
-
+	mapScence->DrawMap();
+	
 	for (int i = 0; i < objects.size(); i++)
+	{
+		if (objects[i]->health == 0 && objects[i]->isDisappeared)
+		{
+			continue;
+		}
 		objects[i]->Render();
+	}
 }
 
 /*
@@ -353,11 +367,30 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 {
 	CMario* mario = ((CPlayScene*)scence)->GetPlayer();
 	
+	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
+	{
+		return;
+	}
+	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(200))
+	{
+		return;
+	}
+
+	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(385))
+	{
+		DebugOut(L"Im here sub = %d \n", GetTickCount64() - mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->tDraw);
+		return;
+
+	}
+	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(385))
+	{
+		return;
+	}
 	switch (KeyCode)
 	{
-	case (DIK_DOWN):
+	/*case (DIK_DOWN):
 		mario->SetState(MARIO_STATE_STOP_SITTING);
-		break;
+		break;*/
 	case (DIK_SPACE):
 		mario->SetState(MARIO_ANI_SHORT_JUMP);
 		break;
@@ -382,28 +415,35 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 {
 
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
+	{
+		return;
+	}
+	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(200))
+	{
+		return;
+	}
+
+	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(385))
+	{
+		return;
+
+	}
+	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(385))
+	{
+		return;
+	}
 	switch (KeyCode)
 	{
-	case DIK_RIGHT:
-		mario->SetState(MARIO_STATE_WALKING);
-		break;
-	case DIK_LEFT:
-		mario->SetState(MARIO_STATE_WALKING);
-		break;
 	case DIK_SPACE:
 		if (mario->level == MARIO_LEVEL_BIG_TAIL)
 		{
 			mario->SetState(MARIO_STATE_BIG_TAIL_KEEP_JUMP);
-			mario->tDraw = GetTickCount64();
 		}
 		break;
 	case DIK_Z:
 		if (mario->level == MARIO_LEVEL_BIG_TAIL)
 		{
-			if (mario->isAttacking == false)
-			{
-				mario->tDraw = GetTickCount64();
-			}
 			mario->isAttacking = true;
 			mario->SetState(MARIO_STATE_BIG_TAIL_ATTACK);
 		}
@@ -425,23 +465,24 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
 	
-	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(300))
+	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
 	{
+		DebugOut(L"Im here sub = %d \n", GetTickCount64() - mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->tDraw);
 		return;
 	}
-	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(300))
+	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(200))
 	{
-		DebugOut(L"Im here\n");
 		return;
 	}
 
-	if (mario->isAttacking && GetTickCount64() - mario->tDraw < 500 && mario->	tDraw != 0)
+	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(385))
 	{
 		return;
+	
 	}
-	else if (mario->isAttacking && GetTickCount64() - mario->tDraw > 500) {
-		mario->isAttacking = false;
-		mario->tDraw = 0;
+	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(385))
+	{
+		return;
 	}
 
 	if (game->IsKeyDown(DIK_SPACE))
@@ -461,7 +502,6 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	if (game->IsKeyDown(DIK_LEFT))
 	{
 		mario->SetState(MARIO_STATE_WALKING_LEFT);
-		return;
 	}
 	else if(game->IsKeyDown(DIK_RIGHT))
 	{

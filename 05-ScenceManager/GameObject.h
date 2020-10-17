@@ -44,6 +44,10 @@ struct CCollisionEvent
 class CGameObject
 {
 public:
+	bool isDisappeared = false;
+	bool isCreated = false;
+	bool isOnGround = true;
+	int ani = -1;
 
 	float x; 
 	float y;
@@ -86,7 +90,7 @@ public:
 		float &min_ty, 
 		float &nx, 
 		float &ny, 
-		float &rdx, 
+		float &rdx,		
 		float &rdy);
 
 	CGameObject();
