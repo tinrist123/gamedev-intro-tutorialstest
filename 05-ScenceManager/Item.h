@@ -12,6 +12,9 @@ class Item :
     public CGameObject
 {
 public:
+    bool tested = false;
+    bool isGrowthUp = false;
+
     int width;
     int height;
 

@@ -2,7 +2,7 @@
 #include "Item.h"
 #include "Utils.h"
 
-QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height) : CBrick(width,height)
+QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height) : CGameObject()
 {
 	this->width = width;
 	this->height = height;
@@ -26,6 +26,7 @@ void QuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (y >= start_y)
 	{
 		y = start_y;
+		vy = 0;
 	}
 	else if (y < start_y)
 	{

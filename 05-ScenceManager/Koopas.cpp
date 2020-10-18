@@ -1,7 +1,11 @@
 #include "Koopas.h"
+#include "Utils.h"
 
 CKoopas::CKoopas()
 {
+	health++;
+	ani = KOOPAS_ANI_WALKING_LEFT;
+
 	SetState(KOOPAS_STATE_WALKING);
 }
 
@@ -20,13 +24,12 @@ void CKoopas::GetBoundingBox(float &left, float &top, float &right, float &botto
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	CGameObject::Update(dt, coObjects);
-
 	//
 	// TO-DO: make sure Koopas can interact with the world and to each of them too!
 	// 
-
 	x += dx;
 	y += dy;
+
 
 	if (vx < 0 && x < 0) {
 		x = 0; vx = -vx;
@@ -35,16 +38,13 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (vx > 0 && x > 290) {
 		x = 290; vx = -vx;
 	}
+	DebugOut(L"vx = %f\n", vx);
 }
 
 void CKoopas::Render()
 {
-	int ani = KOOPAS_ANI_WALKING_LEFT;
-	if (state == KOOPAS_STATE_DIE) {
-		ani = KOOPAS_ANI_DIE;
-	}
-	else if (vx > 0) ani = KOOPAS_ANI_WALKING_RIGHT;
-	else if (vx <= 0) ani = KOOPAS_ANI_WALKING_LEFT;
+	if (vx > 0) ani = KOOPAS_ANI_WALKING_RIGHT;
+	else if ( vx < 0) ani = KOOPAS_ANI_WALKING_LEFT;
 
 	animation_set->at(ani)->Render(x, y);
 
@@ -59,10 +59,25 @@ void CKoopas::SetState(int state)
 	case KOOPAS_STATE_DIE:
 		y += KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_DIE + 1;
 		vx = 0;
+		vy = -0.2f;
+		ani = KOOPAS_ANI_DIE;
+		break;
+	case KOOPAS_STATE_SHELL:
+		y += KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_DIE + 1;
+		vx = 0;
 		vy = 0;
+		ani = KOOPAS_ANI_SHELL;
 		break;
 	case KOOPAS_STATE_WALKING:
 		vx = KOOPAS_WALKING_SPEED;
+
+		break;
+	case KOOPAS_STATE_SHELL_MOVING:
+		vx = 0.1f*nx;
+		ani = KOOPAS_ANI_SHELL_MOVING;
+		break;
+	default:
+		break;
 	}
 
 }

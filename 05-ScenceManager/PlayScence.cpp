@@ -300,6 +300,13 @@ void CPlayScene::Update(DWORD dt)
 	
 	for (size_t i = 0; i < objects.size(); i++)
 	{
+		if (player->x <= 360.0f || player->x > 272.0f)
+		{
+			CFlower* flower = new CFlower();
+			CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+			LPANIMATION_SET ani_set = animation_sets->Get(6);
+			flower->SetAnimationSet(ani_set);
+		}
 		if (objects[i]->health == 0 && objects[i]->isDisappeared)
 		{
 			continue;
@@ -307,11 +314,16 @@ void CPlayScene::Update(DWORD dt)
 		if (objects[i]->health == 0 && dynamic_cast<QuestionBrick *>(objects[i]) && !objects[i]->isCreated)
 		{
 			int typeItem = (player->level < 3 )?player->level:3;
-			Item* item = new Item(1, 1,typeItem, objects[i]->x, objects[i]->y - 32);
+			Item* item = new Item(1, 1,typeItem, objects[i]->x, objects[i]->y);
 			CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 			LPANIMATION_SET ani_set = animation_sets->Get(5);
 			item->SetAnimationSet(ani_set);
 			objects[i]->isCreated = true;
+
+			if (player->x > ( item->x + 8 )) item->nx = -1;
+			else if (player->x < (item->x + 8)) item->nx = 1;
+			else item->nx = 1;
+			
 			item->SetState(1);	
 			objects.push_back(item);
 		}
@@ -337,7 +349,7 @@ void CPlayScene::Update(DWORD dt)
 void CPlayScene::Render()
 {
 	
-	mapScence->DrawMap();
+	//mapScence->DrawMap();
 	
 	for (int i = 0; i < objects.size(); i++)
 	{
@@ -366,6 +378,8 @@ void CPlayScene::Unload()
 void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 {
 	CMario* mario = ((CPlayScene*)scence)->GetPlayer();
+
+	if (mario->GetState() == MARIO_STATE_DIE) return;
 	
 	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
 	{
@@ -378,7 +392,6 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 
 	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(385))
 	{
-		DebugOut(L"Im here sub = %d \n", GetTickCount64() - mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->tDraw);
 		return;
 
 	}
@@ -415,6 +428,9 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 {
 
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+
+	if (mario->GetState() == MARIO_STATE_DIE) return;
+
 	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
 	{
 		return;
@@ -467,7 +483,6 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	
 	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
 	{
-		DebugOut(L"Im here sub = %d \n", GetTickCount64() - mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->tDraw);
 		return;
 	}
 	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(200))

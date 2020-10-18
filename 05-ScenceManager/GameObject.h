@@ -47,6 +47,8 @@ public:
 	bool isDisappeared = false;
 	bool isCreated = false;
 	bool isOnGround = true;
+	bool isBoundingBox = true;
+
 	int ani = -1;
 
 	float x; 

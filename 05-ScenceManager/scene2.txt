@@ -15,6 +15,54 @@
 11	156	121	171	137	20
 12	180	123	196	137	20
 
+# BIG MARIO FIRE
+# idle right
+12001	216	683	230	710	0
+# walk right
+12002	255	683	271	710	0
+12003	295	684	311	710	0
+# idle left
+12005	176	683	190	710	0
+# walk left
+12006	135	683	151	710	0
+12007	95	684	111	710	0
+# sitting left
+12011	16	680	30	716	0
+# sitting right
+12012	376	680	390	716	0
+# stop right
+12016	175	723	191	751	0
+# stop left
+12017	215	723	231	751	0
+# fly right
+12021	335	684	351	710	0
+# fly left
+12022	55	684	71	710	0
+# attack right
+12041	366	803	380	830	0
+12042	386	803	400	830	0
+# attack left
+12043	26	803	40	830	0
+12044	6	803	20	830	0
+# running right
+120002	213	763	232	790	0
+120003	253	763	272	790	0
+120004	293	764	312	790	0
+# running left
+120006	174	763	193	790	0
+120007	134	763	153	790	0
+120008	94	764	113	790	0
+# flying when running right
+120211	333	804	352	830	0
+# flying when running left
+120221	54	804	73	830	0
+# flying attack right
+120310	253	803	272	830	0
+# flying attack left
+120320	134	803	153	830	0
+# =========-----End BIG MARIO FIRE -------========
+
+
 # BIG MARIO HAVE TAIL
 # idle right
 11001	212	443	233	471	0
@@ -39,19 +87,19 @@
 # fly left
 11022	52	443	75	470	0
 # falling right
-11031	211	603	244	631	0
+11031	211	603	234	631	0
 # falling left
-11032	172	603	195	630	0
+11032	172	603	195	631	0
 # attack right
 11041	236	443	259	471	0
-11042	348	483	371	511	0
-11043	8	4	38	32	40
-11044	383	483	406	511	0
+11042	355	483	378	511	0
+11043	147	443	170	471	0
+11044	390	483	413	511	0
 # attack left
-#11043	147	443	170	471	0
-#11042	355	483	371	511	0
-#11041	238	443	259	471	0
-#11044	390	483	406	511	0
+11043	147	443	170	471	0
+11042	355	483	371	511	0
+11041	236	443	259	471	0
+11044	390	483	406	511	0
 # running right
 110002	211	523	235	551	0
 110003	251	523	275	551	0
@@ -65,13 +113,13 @@
 # flying when running left
 110221	91	603	115	631	0
 # falling down slownly right (mario tail down) 
-110310	252	603	274	631	0
+110310	251	603	274	633	0
 # falling down slownly left   (mario tail down)
-110320	132	603	154	631	0
-# falling down slownly right (mario tail up) 
-110311	331	603	355	631	0
+110320	132	603	155	630	0
+# falling down slownly right (mario tail up)
+110311	331	603	355	630	0
 # falling down slownly left   (mario tail up)
-110321	51	603	75	631	0
+110321	51	603	75	630	0
 # =========-----End BIG MARIO HAVE TAIL-------========
 # BIG MARIO 
 # idle right
@@ -160,7 +208,8 @@
 30003	45	21	61	29	10
 
 # Pipe Flower
-50000	233	63	265	118	50
+80000	324	91	340	123	30
+80001	307	91	323	123	30
 
 
 
@@ -171,8 +220,16 @@
 #walk right
 50011	187	191	202	217	30
 50012	170	191	185	217	30
-#die
+# turtle shell
+50030	239	202	255	218	30
+#SHELL
 50031	152	202	168	217	20
+# turtle shell MOVE
+50032	256	202	272	218	30
+50033	273	202	289	218	30
+50034	290	202	306	218	30
+#DIE
+50035	152	202	168	218	30
 
 
 # ani_id	sprite1_id	time1	sprite2_id	time2	...
@@ -197,6 +254,7 @@
 #idle big have tail left
 405	11005	100
 
+
 #walk right big
 500	10001	100	10002	100	10003	100
 #walk left big
@@ -209,6 +267,7 @@
 504	11001	100	11002	100	11003	100
 #walk left big have tail
 505	11005	100	11006	100	11007	100
+
 #die
 599	10099	100
 #sitting big left	(BIG)
@@ -276,6 +335,52 @@
 43023	110321	100
 
 
+
+################### BIG FIRE  ########################
+
+#idle big FIRE right
+406	12001	100
+#idle big FIRE 	left
+407	12005	100
+
+#walk right big have tail	(BIG_FIRE)
+506	12001	100	12002	100	12003	100
+#walk left big have tail	(BIG_FIRE)
+507	12005	100	12006	100	12007	100
+
+#sitting big left	(BIG_FIRE)
+100	12012	100
+#sitting big right	(BIG_FIRE)
+101	12011	100
+#fly big right 		(BIG_FIRE)
+102	12016	100
+#fly big left 		(BIG_FIRE)
+103	12017	100
+#stop right 		(BIG_FIRE) 
+104	12021	100
+#stop left		(BIG_FIRE)	 
+105	12022	100
+# falling right		(BIG_FIRE)
+106	12003	100
+# falling left		(BIG_FIRE)
+107	12007	100
+# attacking right	(BIG_FIRE)
+108	12041	75	12042	75
+# attacking left	(BIG_FIRE)
+109	12043	75	12044	75
+# running right		(BIG_FIRE)
+110	120002	100	120003	100	120004	100
+# running left		(BIG_FIRE)
+111	120006	100	120007	100	120008	100
+# flying when running right	(BIG_FIRE)
+112	120211	100
+# flying when running left	(BIG_FIRE)
+113	120221	100
+# flying attack right		(BIG_FIRE)
+114	120211	100	120310	100
+# flying attack left		(BIG_FIRE)
+115	120221	100	120320	100
+
 #stop right 	(SMALL)
 460	10080	100
 #stop left	(SMALL)
@@ -307,8 +412,14 @@
 801	50001	100	50002	100
 #walk right
 802	50011	100	50012	100'
-#die
+#SHELL
 803	50031	100
+# shell appearance
+804	50030	100
+# SHELL MOVE
+805	50032	100	50033	100	50034	100
+# DIE
+806	50035	100
 
 # ==== BRICK =========
 601	20001	100
@@ -319,12 +430,15 @@
 1	20011	75	20012	75	20013	75	20014	75	20011	75
 2	20010	100
 
+#FLOWER
+6	80000	100	80001	100
+
 #
 # id	ani1	ani2	ani3
 #
 [ANIMATION_SETS]
 # MARIO
-1	400	401	402	403	500	501	502	503	599 	415	416	430	431	450	451	460	461	440	441	404	405	504	505	417	418	432	433	452	453	4300	4301	4302	4303	4311	4312	510	511	4321	4322	4323	4324	4331	4332	4333	4334	4400	4410	43020	43021	43022	43023
+1	400	401	402	403	500	501	502	503	599 	415	416	430	431	450	451	460	461	440	441	404	405	504	505	417	418	432	433	452	453	4300	4301	4302	4303	4311	4312	510	511	4321	4322	4323	4324	4331	4332	4333	4334	4400	4410	43020	43021	43022	43023	506	507	100	101	102	103	104	105	106	107	108	109	110	111	112	113	114	115	406	407
 # BRICK 
 2	601	602	603
 # QUESTION BRICK 
@@ -332,9 +446,11 @@
 # GOOMBA
 3	701	702
 #KOOPAS
-4	801	802	803
+4	801	802	803	804	805	806
 #Item
 5	50	51	52
+# FLOWER
+6	6
 [OBJECTS]
 # type	x	y	ani_set_id	extra_settings per object type
 # type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas,4 = Flower, 5 = Ground, 6 = ColorBox, 7 = Pipe, 8 = QuestionBrick, 9 = WeakBreak, 10 = CloundBrick, 11 = Item
@@ -343,7 +459,7 @@
 0	10	0	1
 
 # KOOPAS
-#3	20	124	4
+3	20	386	4
 
 
 
@@ -400,6 +516,9 @@
 10	1407	191	2	4	1 	(CLOUD BOX)
 10	1487	175	2	13	1 	(CLOUD BOX)
 
+#Flower
+4	360	336	6
+
 # Ground
 5	0	416	2	38	1
 5	624	400	2	28	1
@@ -454,3 +573,5 @@
 # type	l	t	ani_set_id	r	b	scene_id
 #50	300	98	0	380	150	1
 
+
+100    	101     102     103     104     105     106     107     108     109	110      111     112     113     114     115 

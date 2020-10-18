@@ -4,7 +4,7 @@
 #define QUESTION_BRICK_AVAILABLE	1
 
 class QuestionBrick :
-    public CBrick
+    public CGameObject
 {
 public:
 	bool isSpecial = false;

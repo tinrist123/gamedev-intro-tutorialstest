@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "Utils.h"
 #include "Pipe.h"
+#include "Koopas.h"
 
 
 /// <summary>
@@ -15,7 +16,7 @@
 CMario::CMario(float x, float y) : CGameObject()
 {
 	//level = MARIO_LEVEL_BIG;
-	level = 3;
+	level = 2;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
 	constant = new Constant(level);
@@ -36,9 +37,9 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		vx -= min(fabs(vx), FRICTION) * nx;
 	}*/
 
+	vy += MARIO_GRAVITY * dt;
 	lastVx = vx;
 	// Simple fall down
-	vy += MARIO_GRAVITY * dt;
 	if (vy > 0)
 	{
 		isFalling = true;
@@ -59,6 +60,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		untouchable_start = 0;
 		untouchable = 0;
 	}
+
+	
 
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
@@ -83,7 +86,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		x += min_tx * dx + nx * 0.4f;
 		y += min_ty * dy + ny * 0.4f;
 
-		//if (nx != 0) vx = 0;
 		if (ny != 0) {
 			vy = 0;
 		}
@@ -120,10 +122,17 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			if (dynamic_cast<Item *>(e->obj))
 			{
 				Item* item = dynamic_cast<Item *>(e->obj);
-				if (e->nx != 0)
+				if (e->nx != 0 || e->ny != 0)
 				{
-					if (item->health != 0)
-						item->SetState(2);
+					if (item->health != 0) item->SetState(2);
+					//else
+					{
+						item->SetState(3);
+						level = (level >= 3) ? 3 : ++level;
+						constant->changeLevelMario(level);
+						if (level == 2) y += -15.0f;
+						else y += -0.4f;
+					}
 				}
 			}
 			else if (dynamic_cast<QuestionBrick*>(e->obj))
@@ -142,6 +151,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			}
 			else if (dynamic_cast<ColorBox*>(e->obj))
 			{
+
 				if (e->ny < 0)
 				{
 					vy = 0;
@@ -168,12 +178,84 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					isOnGround = true;
 				}
 			}
+			else if (dynamic_cast<CKoopas*>(e->obj))
+			{
+				CKoopas* koopas = dynamic_cast<CKoopas*>(e->obj);
+
+				if (koopas->GetState() == KOOPAS_STATE_SHELL_MOVING)
+				{
+					if (e->ny != 0 || e->nx != 0)
+					{
+						if (untouchable == 0)
+						{
+							if (level == MARIO_LEVEL_SMALL)
+							{
+								SetState(MARIO_STATE_DIE);
+								isBoundingBox = false;
+							}
+							else
+							{
+								level--;
+
+								constant->changeLevelMario(level);
+
+								StartUntouchable();
+							}
+						}
+					}
+				}
+				else if (koopas->GetState() == KOOPAS_STATE_SHELL)
+				{
+					if (e->ny != 0 || e->nx != 0)
+					{
+						if (x > koopas->x + 8) koopas->nx = -1;
+						else if (x < koopas->x + 8) koopas->nx = 1;
+						else koopas->nx = 1;
+
+						koopas->SetState(KOOPAS_STATE_SHELL_MOVING);
+					}
+				}
+				else if (koopas->GetState() == KOOPAS_STATE_WALKING)
+				{
+					if (e->ny == -1)
+					{
+						isOnGround = true;
+						if (koopas->health == 2)
+						{
+							koopas->SetState(KOOPAS_STATE_SHELL);
+							koopas->subHealth();
+							isOnGround = false;
+							vy = -0.15f;
+						}
+						DebugOut(L"isOnGround = %d\n", isOnGround);
+					}
+					else if (e->nx != 0)
+					{
+						if (untouchable == 0)
+						{
+							if (level == MARIO_LEVEL_SMALL)
+							{
+								SetState(MARIO_STATE_DIE);
+								isBoundingBox = false;
+							}
+							else
+							{
+								level--;
+
+								constant->changeLevelMario(level);
+								
+								StartUntouchable();
+							}
+						}
+						
+					}
+				}
+			}
+			
 		}
 	}
 	// clean up collision events
 	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
-
-	
 }
 
 
@@ -546,7 +628,22 @@ void CMario::Render()
 			}
 		}
 	}
-
+	else if (level == MARIO_LEVEL_BIG_FIRE)
+	{
+		Constant* constant = new Constant(level);
+		ani = CalcRenderForMARIO_BIG(this, constant->listAni_Mario_Big);
+		if (fabs(vx) >= MARIO_RUNNING_MAX_SPEED && !isOnGround && isFalling)
+		{
+			if (nx == 1)
+			{
+				ani = constant->listAni_Mario_Big.at(14);
+			}
+			else if (nx == -1)
+			{
+				ani = constant->listAni_Mario_Big.at(15);
+			}
+		}
+	}
 
 	int alpha = 255;
 	if (untouchable) alpha = 128;
@@ -637,6 +734,7 @@ void CMario::SetState(int state)
 			if (vx >= MARIO_RUNNING_PRE_MAX_SPEED)
 			{
 				setTimeRenderingAni = 40;
+				
 			}
 			else setTimeRenderingAni = 100;
 			if (vx >= MARIO_RUNNING_MAX_SPEED)
@@ -673,11 +771,14 @@ void CMario::SetState(int state)
 		}
 		else if (isFalling)
 		{
-			if ((vy - (MARIO_GRAVITY + 0.003f) * dt) < 0)
+			if (vy - ((MARIO_GRAVITY * 15.0f + 0.0002f) * dt) < 0)
 			{
+				DebugOut(L"vy = %f\n", vy);
 				break;
 			}	
-			vy -= ((MARIO_GRAVITY + 0.003f ) * dt);
+			else {
+				vy -= ((MARIO_GRAVITY * 15.0f + 0.0004f*6) * dt);
+			}
 			isKeepJumping = true;
 			if (nx == 1 ) animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->StartRenderAnimation();
 			if (nx == -1)
@@ -777,23 +878,32 @@ void CalcRenderBoxBIG_MARIO(float &top,float &right,float &bottom,int state,bool
 
 void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom)
 {
-	left = x;
-	top = y ;
-	
-	if (level == MARIO_LEVEL_BIG)
+	if (!isBoundingBox)
 	{
-		
-		CalcRenderBoxBIG_MARIO(top, right, bottom, state, isOnGround, isWalking, x, y, constant->listBBox_Mario_Big);
-	}
-	else if (level == MARIO_LEVEL_BIG_TAIL)
-	{
-		CalcRenderBoxBIG_MARIO(top, right, bottom, state, isOnGround, isWalking, x, y, constant->listBBox_Mario_Big);
+		left = right;
+		top = bottom;
 	}
 	else
 	{
-		right = x + MARIO_SMALL_BBOX_WIDTH;
-		bottom = y + MARIO_SMALL_BBOX_HEIGHT;
+		left = x;
+		top = y;
+
+		if (level == MARIO_LEVEL_BIG || level == MARIO_LEVEL_BIG_FIRE)
+		{
+
+			CalcRenderBoxBIG_MARIO(top, right, bottom, state, isOnGround, isWalking, x, y, constant->listBBox_Mario_Big);
+		}
+		else if (level == MARIO_LEVEL_BIG_TAIL)
+		{
+			CalcRenderBoxBIG_MARIO(top, right, bottom, state, isOnGround, isWalking, x, y, constant->listBBox_Mario_Big);
+		}
+		else
+		{
+			right = x + MARIO_SMALL_BBOX_WIDTH;
+			bottom = y + MARIO_SMALL_BBOX_HEIGHT;
+		}
 	}
+	
 	
 }
 

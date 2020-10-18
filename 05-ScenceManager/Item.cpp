@@ -12,6 +12,7 @@ Item::Item(int width, int height, int typeitem, int x, int y)
 	this->start_y = y;
 	this->x = x;
 	this->y = y;
+	
 }
 
 void Item::Render()
@@ -29,22 +30,32 @@ void Item::Render()
 void Item::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	CGameObject::Update(dt, coObjects);
-
+	
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
 
 	coEvents.clear();
 
 	// turn off collision when die 
-	if (state != 4)
-		CalcPotentialCollisions(coObjects, coEvents);
+	if (state != 4) CalcPotentialCollisions(coObjects, coEvents);
 	// reset untouchable timer if untouchable time has passed
 	vy += 0.0006f * dt;
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
 	{
-		x += dx;
-		y += dy;
+		if (y <= start_y - 20 && !isGrowthUp)
+		{
+			y = start_y - 20;
+			isGrowthUp = true;
+			vy = 0;
+			vx = 0.1f*nx;
+		}
+		else
+		{
+			y += dy;
+			x += dx;
+		}
+
 	}
 	else
 	{
@@ -60,7 +71,7 @@ void Item::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			//x += nx*abs(rdx); 
 
 		// block every object first!
-		x += min_tx * dx + nx * 0.4f;
+		x += min_tx * dx + nx * 0.4f;	
 		y += min_ty * dy + ny * 0.4f;
 
 		if (nx != 0) vx = 0;
@@ -81,14 +92,6 @@ void Item::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					isOnGround = true;
 				}
 			}
-			/*if (dynamic_cast<CMario *>(e->obj))
-			{
-				if (e->nx != 0)
-				{
-					SetState(2);
-				}
-
-			}*/
 		}
 	}
 	// clean up collision events
@@ -99,12 +102,15 @@ void Item::SetState(int state)
 {
 	switch (state) {
 	case 1 :
-		vy = -0.1f;
-		vx = 0.1f;
+		vy = -0.3f;
+		
 		break;
 	case 2 :
 		isDisappeared = true;
 		subHealth();
+		break;
+	case 3 :
+		tested = true;
 		break;
 	default:
 		break;
@@ -113,10 +119,17 @@ void Item::SetState(int state)
 
 void Item::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = x;
-	t = y;
-	r = x + 16;
-	b = y + 16;
+	if (tested)
+	{
+		return;
+	}
+	else {
+		l = x;
+		t = y;
+		r = x + 16;
+		b = y + 16;
+	}
+	
 }
 
 
