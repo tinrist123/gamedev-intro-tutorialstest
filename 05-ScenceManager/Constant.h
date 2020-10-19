@@ -6,14 +6,15 @@ using namespace std;
 #define MARIO_RUNNING_MAX_SPEED							0.3f
 
 #define MARIO_WALKING_DECELERATION						0.006875f
-#define MARIO_WALKING_ACCELEROMETER						0.001875f
-#define MARIO_MAX_WALKING_SPEED							0.1f
+#define MARIO_WALKING_ACCELEROMETER						0.002875f
+#define MARIO_MAX_WALKING_SPEED							0.12f
 #define FRICTION										0.0056875f
 
-#define MARIO_JUMP_SPEED_Y								0.3f
+#define MARIO_JUMP_SPEED_Y								0.25f
 #define MARIO_JUMP_MAX_SPEED_Y							0.3f
 #define MARIO_JUMP_DEFLECT_SPEED						0.2f
-#define MARIO_GRAVITY									0.0005f
+#define MARIO_GRAVITY									0.0006f
+#define MARIO_GRAVITY_KEPP_JUMP							0.0003f
 #define MARIO_DIE_DEFLECT_SPEED							0.1f
 
 #define MARIO_STATE_IDLE								0
@@ -30,6 +31,7 @@ using namespace std;
 #define MARIO_STATE_RUNNING								700
 #define MARIO_STATE_STOP_RUNNING						701
 #define MARIO_STATE_BIG_TAIL_ATTACK						800
+#define MARIO_STATE_BIG_FIRE_ATTACK						801
 
 // 66
 
@@ -180,7 +182,7 @@ using namespace std;
 #define MARIO_BIG_TAIL_BBOX_WIDTH						23
 #define MARIO_BIG_TAIL_BBOX_HEIGHT						27
 
-#define MARIO_BIG_BBOX_SITTING_HEIGHT					19
+#define MARIO_BIG_BBOX_SITTING_HEIGHT					14
 #define MARIO_BIG_TAIL_BBOX_SITTING_HEIGHT				20
 
 #define MARIO_SMALL_BBOX_WIDTH							13

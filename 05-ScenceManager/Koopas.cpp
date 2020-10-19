@@ -38,17 +38,19 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	if (vx > 0 && x > 290) {
 		x = 290; vx = -vx;
 	}
-	DebugOut(L"vx = %f\n", vx);
 }
 
 void CKoopas::Render()
 {
-	if (vx > 0) ani = KOOPAS_ANI_WALKING_RIGHT;
-	else if ( vx < 0) ani = KOOPAS_ANI_WALKING_LEFT;
+	if (state == KOOPAS_STATE_WALKING)
+	{
+		if (vx > 0) ani = KOOPAS_ANI_WALKING_RIGHT;
+		else if (vx < 0) ani = KOOPAS_ANI_WALKING_LEFT;
+	}
 
 	animation_set->at(ani)->Render(x, y);
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CKoopas::SetState(int state)

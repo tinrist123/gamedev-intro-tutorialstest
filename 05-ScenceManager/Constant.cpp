@@ -7,15 +7,15 @@ Constant::Constant(int level)
 	this->kindMario = level;
 	switch (this->kindMario)
 	{
-	case 2:
+	case MARIO_LEVEL_BIG:
 		listAni_Mario_Big = getAnimationMARIO_BIG();
 		listBBox_Mario_Big = getBBox_MARIO_BIG();
 		break;
-	case 3:
+	case MARIO_LEVEL_BIG_TAIL:
 		listAni_Mario_Big = getAnimationMARIO_BIG_HAVE_TAIL();
 		listBBox_Mario_Big = getBBox_MARIO_BIG_HAVE_TAIL();
 		break;
-	case 4:
+	case MARIO_LEVEL_BIG_FIRE:
 		listAni_Mario_Big = getAnimationMARIO_BIG_HAVE_FIRE();
 		listBBox_Mario_Big = getBBox_MARIO_BIG();
 		break;
@@ -26,17 +26,18 @@ Constant::Constant(int level)
 
 void Constant::changeLevelMario(int level)
 {
-	switch (level)
+	this->kindMario = level;
+	switch (this->kindMario)
 	{
-	case 2:
+	case MARIO_LEVEL_BIG:
 		listAni_Mario_Big = getAnimationMARIO_BIG();
 		listBBox_Mario_Big = getBBox_MARIO_BIG();
 		break;
-	case 3:
+	case MARIO_LEVEL_BIG_TAIL:
 		listAni_Mario_Big = getAnimationMARIO_BIG_HAVE_TAIL();
 		listBBox_Mario_Big = getBBox_MARIO_BIG_HAVE_TAIL();
 		break;
-	case 4:
+	case MARIO_LEVEL_BIG_FIRE:
 		listAni_Mario_Big = getAnimationMARIO_BIG_HAVE_FIRE();
 		listBBox_Mario_Big = getBBox_MARIO_BIG();
 		break;

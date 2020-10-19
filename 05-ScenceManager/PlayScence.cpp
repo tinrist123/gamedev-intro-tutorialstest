@@ -34,6 +34,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_WeakBrick			9
 #define OBJECT_TYPE_CloudBrick			10
 #define OBJECT_TYPE_Item				11
+#define OBJECT_TYPE_Bullet				12
 
 #define OBJECT_TYPE_PORTAL				50
 
@@ -178,6 +179,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new WeakBrick(width, height);
 		break;
 	}
+	case OBJECT_TYPE_Bullet: obj = new FireBullet(); break;
 	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
 	case OBJECT_TYPE_Flower: obj = new CFlower(); break;
 	case OBJECT_TYPE_Ground: 
@@ -300,12 +302,25 @@ void CPlayScene::Update(DWORD dt)
 	
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		if (player->x <= 360.0f || player->x > 272.0f)
+		if (objects[i]->x - player->x < 160.0f && dynamic_cast<CFlower *>(objects[i]))
 		{
-			CFlower* flower = new CFlower();
-			CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-			LPANIMATION_SET ani_set = animation_sets->Get(6);
-			flower->SetAnimationSet(ani_set);
+			CFlower* flower = dynamic_cast<CFlower*>(objects[i]);
+
+			if (flower->state == FLOWER_STATE_UP && flower->isDelayedShooting && flower->y == 336.0f)
+			{
+				flower->isDelayedShooting = false;
+				FireBullet* bullet = new FireBullet();
+				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+				LPANIMATION_SET ani_set = animation_sets->Get(7);
+				bullet->SetAnimationSet(ani_set);
+				bullet->x = flower->x - 10.0f;
+				bullet->y = flower->y;
+				bullet->nx = (player->x - flower->x < 0)?-1:1 ;
+				bullet->ny = (player->y - flower->y < 0)?-1:((player->y - flower->y < -16.0f))?1:0;
+				bullet->SetState(1);
+				objects.push_back(bullet);
+			}
+			
 		}
 		if (objects[i]->health == 0 && objects[i]->isDisappeared)
 		{
@@ -463,6 +478,11 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->isAttacking = true;
 			mario->SetState(MARIO_STATE_BIG_TAIL_ATTACK);
 		}
+		if (mario->level == MARIO_LEVEL_BIG_FIRE)
+		{
+			mario->isAttacking = true;
+			mario->SetState(MARIO_STATE_BIG_TAIL_ATTACK);
+		}
 		break;
 	case DIK_A: 
 		mario->Reset();
@@ -476,7 +496,6 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
 	CGame *game = CGame::GetInstance();
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-
 	
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
@@ -517,10 +536,12 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	if (game->IsKeyDown(DIK_LEFT))
 	{
 		mario->SetState(MARIO_STATE_WALKING_LEFT);
+		return;
 	}
 	else if(game->IsKeyDown(DIK_RIGHT))
 	{
 		mario->SetState(MARIO_STATE_WALKING_RIGHT);
+		return;
 	}
 	else if (game->IsKeyDown(DIK_DOWN))
 	{

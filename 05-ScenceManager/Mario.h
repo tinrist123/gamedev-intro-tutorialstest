@@ -28,6 +28,8 @@ public:
 	bool isTested = false;
 	bool isTested2 = false;
 
+	bool isSpecialGravity = false;
+
 	int  lastNx;
 
 	bool isRunning = false;

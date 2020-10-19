@@ -6,6 +6,7 @@
 #include "Utils.h"
 #include "Pipe.h"
 #include "Koopas.h"
+#include "FireBullet.h"
 
 
 /// <summary>
@@ -16,7 +17,7 @@
 CMario::CMario(float x, float y) : CGameObject()
 {
 	//level = MARIO_LEVEL_BIG;
-	level = 2;
+	level = 3;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
 	constant = new Constant(level);
@@ -37,7 +38,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		vx -= min(fabs(vx), FRICTION) * nx;
 	}*/
 
-	vy += MARIO_GRAVITY * dt;
+	if (isSpecialGravity) vy += MARIO_GRAVITY_KEPP_JUMP * dt;
+	else vy += MARIO_GRAVITY * dt;
 	lastVx = vx;
 	// Simple fall down
 	if (vy > 0)
@@ -83,7 +85,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			//x += nx*abs(rdx); 
 
 		// block every object first!
-		x += min_tx * dx + nx * 0.4f;
+		x += min_tx * dx + nx * 0.4f;	
 		y += min_ty * dy + ny * 0.4f;
 
 		if (ny != 0) {
@@ -159,7 +161,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 				if (e->nx != 0)
 				{
-					x += vx * dt;
+					x += dx;
 				}
 			}
 			else if (dynamic_cast<Pipe*>(e->obj))
@@ -176,6 +178,26 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					vy = 0;
 					isOnGround = true;
+				}
+			}
+			else if (dynamic_cast<FireBullet*>(e->obj))
+			{
+				if (e->ny != 0 || e->nx != 0)
+				{
+					if (untouchable == 0)
+					{
+						if (level == MARIO_LEVEL_SMALL)
+						{
+							SetState(MARIO_STATE_DIE);
+							isBoundingBox = false;
+						}
+						else
+						{
+							level--;
+							constant->changeLevelMario(level);
+							StartUntouchable();
+						}
+					}
 				}
 			}
 			else if (dynamic_cast<CKoopas*>(e->obj))
@@ -196,9 +218,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							else
 							{
 								level--;
-
 								constant->changeLevelMario(level);
-
 								StartUntouchable();
 							}
 						}
@@ -211,7 +231,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						if (x > koopas->x + 8) koopas->nx = -1;
 						else if (x < koopas->x + 8) koopas->nx = 1;
 						else koopas->nx = 1;
-
 						koopas->SetState(KOOPAS_STATE_SHELL_MOVING);
 					}
 				}
@@ -227,7 +246,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 							isOnGround = false;
 							vy = -0.15f;
 						}
-						DebugOut(L"isOnGround = %d\n", isOnGround);
 					}
 					else if (e->nx != 0)
 					{
@@ -603,7 +621,7 @@ void CMario::Render()
 	}
 	else if (level == MARIO_LEVEL_BIG_TAIL)
 	{
-		Constant* constant = new Constant(level);
+		constant->changeLevelMario(level);
 		ani = CalcRenderForMARIO_BIG(this,constant->listAni_Mario_Big);
 		if (state == MARIO_STATE_BIG_TAIL_ATTACK)
 		{
@@ -630,9 +648,20 @@ void CMario::Render()
 	}
 	else if (level == MARIO_LEVEL_BIG_FIRE)
 	{
-		Constant* constant = new Constant(level);
+		constant->changeLevelMario(level);
 		ani = CalcRenderForMARIO_BIG(this, constant->listAni_Mario_Big);
-		if (fabs(vx) >= MARIO_RUNNING_MAX_SPEED && !isOnGround && isFalling)
+		if (state == MARIO_STATE_BIG_FIRE_ATTACK)
+		{
+			if (nx > 0)
+			{
+				ani = MARIO_ANI_BIG_FIRE_ATTACKING_RIGHT;
+			}
+			else if (nx < 0)
+			{
+				ani = MARIO_ANI_BIG_FIRE_ATTACKING_LEFT;
+			}
+		}
+		else if (fabs(vx) >= MARIO_RUNNING_MAX_SPEED && !isOnGround && isFalling)
 		{
 			if (nx == 1)
 			{
@@ -655,14 +684,24 @@ void CMario::SetState(int state)
 {
 	CGameObject::SetState(state);
 
+
 	switch (state)
 	{
 	/*case MARIO_STATE_STOP_SITTING:
 		onSitting = false;
 		break;*/
 	case MARIO_STATE_BIG_TAIL_ATTACK:
-		if ( nx == 1 ) animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->StartRenderAnimation();
-		if ( nx == -1 ) animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->StartRenderAnimation();
+		if (level == MARIO_LEVEL_BIG_TAIL)
+		{
+			if (nx == 1) animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->StartRenderAnimation();
+			if (nx == -1) animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->StartRenderAnimation();
+		}
+		else if (level == MARIO_LEVEL_BIG_FIRE)
+		{
+			if (nx == 1) animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_RIGHT)->StartRenderAnimation();
+			if (nx == -1) animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_LEFT)->StartRenderAnimation();
+		}
+		
 		break;
 	case MARIO_STATE_NOT_WALKING:
 		isWalking = false;
@@ -771,13 +810,14 @@ void CMario::SetState(int state)
 		}
 		else if (isFalling)
 		{
-			if (vy - ((MARIO_GRAVITY * 15.0f + 0.0002f) * dt) < 0)
+			/*if (vy - ((MARIO_GRAVITY * 15.0f + 0.0002f) * dt) < 0)
 			{
 				DebugOut(L"vy = %f\n", vy);
 				break;
 			}	
-			else {
-				vy -= ((MARIO_GRAVITY * 15.0f + 0.0004f*6) * dt);
+			else*/ {
+				isSpecialGravity = true;
+				if (vy > 0) vy = 0;
 			}
 			isKeepJumping = true;
 			if (nx == 1 ) animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->StartRenderAnimation();
@@ -790,7 +830,7 @@ void CMario::SetState(int state)
 	case MARIO_ANI_SHORT_JUMP:
 		if (!isOnGround && !isFalling)
 		{
-			vy = vy + MARIO_GRAVITY*dt*10;
+			vy = vy + MARIO_GRAVITY*dt * 10;
 		}
 		blockJumping = false;
 		break;
@@ -811,6 +851,7 @@ void CMario::SetState(int state)
 			}
 		break;
 	case MARIO_STATE_IDLE:
+		isSpecialGravity = false;
 		onSitting = false;
 		isRunning = false;
 		if (lastVx * vx <= 0)

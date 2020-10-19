@@ -18,6 +18,7 @@
 #include "CloudBrick.h"
 #include "Item.h"
 #include "Map.h"
+#include "FireBullet.h"
 
 class CPlayScene: public CScene
 {

@@ -1,6 +1,7 @@
 # id	file_path	transparent_color_r	g	b
 [TEXTURES]
 0	textures\mario1.png	255	255	255
+10	textures\mario_01.png	255	255	255
 20	textures\misc.png	176	224	248
 50	textures\enemies.png	3	26	110
 30	textures\enemies-2.png	0	128	128
@@ -211,6 +212,16 @@
 80000	324	91	340	123	30
 80001	307	91	323	123	30
 
+# FIRE BULLET RIGHT
+50	240	554	248	562	10
+51	258	553	266	562	10
+52	258	574	266	582	10
+53	240	573	248	582	10
+# FIRE BULLET LEFT
+54	198	554	206	562	10
+55	180	553	188	562	10
+56	180	574	188	582	10
+57	198	573	206	582	10
 
 
 #KOOPAS
@@ -431,8 +442,11 @@
 2	20010	100
 
 #FLOWER
-6	80000	100	80001	100
-
+6	80000	100
+7	80001	100
+# BULLET
+15	50	200	51	200	52	200	53	200
+16	54	200	55	200	56	200	57	200
 #
 # id	ani1	ani2	ani3
 #
@@ -450,18 +464,21 @@
 #Item
 5	50	51	52
 # FLOWER
-6	6
+6	6	7
+# BULLET
+7	15	16
 [OBJECTS]
 # type	x	y	ani_set_id	extra_settings per object type
-# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas,4 = Flower, 5 = Ground, 6 = ColorBox, 7 = Pipe, 8 = QuestionBrick, 9 = WeakBreak, 10 = CloundBrick, 11 = Item
+# type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas,4 = Flower, 5 = Ground, 6 = ColorBox, 7 = Pipe, 8 = QuestionBrick, 9 = WeakBreak, 10 = CloundBrick, 11 = Item, 12 = Bullet
 
 # MARIO
 0	10	0	1
 
 # KOOPAS
-3	20	386	4
+3	20	390	4
 
-
+# Bullet
+#12	40	368	7
 
 
 # BRICK 
@@ -489,7 +506,7 @@
 
 
 # Weak Brick
-9	1440	128	2	1	1 	(PINK BOX)
+9	1440	128	2	1	1
 
 9	1952	400	2	1	1
 9	1968	400	2	1	1
@@ -517,7 +534,7 @@
 10	1487	175	2	13	1 	(CLOUD BOX)
 
 #Flower
-4	360	336	6
+4	360	384	6
 
 # Ground
 5	0	416	2	38	1

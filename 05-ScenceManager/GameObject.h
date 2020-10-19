@@ -60,9 +60,9 @@ public:
 	float vx;
 	float vy;
 
-	int nx;	 
+	int nx;
 
-	int state;
+	int state = -1;
 
 	int health = 1;
 
