@@ -2,7 +2,7 @@
 #include "Item.h"
 #include "Utils.h"
 
-QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height) : CGameObject()
+QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height) : CBrick(width,height)
 {
 	this->width = width;
 	this->height = height;
@@ -14,7 +14,7 @@ QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height) : CG
 void QuestionBrick::Render()
 {
 	animation_set->at(ani)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void QuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
@@ -30,7 +30,7 @@ void QuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else if (y < start_y)
 	{
-		vy += 0.00021875f * dt;
+		vy += GRAVITY * dt;
 	}
 }
 
@@ -39,9 +39,9 @@ void QuestionBrick::SetState(int state)
 	switch (state)
 	{
 	case QUESTION_BRICK_AVAILABLE:
-		vy = -0.05f;
+		vy = -QUESTION_BRICK_SPEED_X;
 		this->subHealth();
-		ani = 1;
+		ani = BRICK_ANI_EMPTY;
 		break;
 	}
 }

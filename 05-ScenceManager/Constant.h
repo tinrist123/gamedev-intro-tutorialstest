@@ -7,14 +7,16 @@ using namespace std;
 
 #define MARIO_WALKING_DECELERATION						0.006875f
 #define MARIO_WALKING_ACCELEROMETER						0.002875f
+#define MARIO_WALKING_ACCELEROMETER_RUNNING				0.001875f
 #define MARIO_MAX_WALKING_SPEED							0.12f
 #define FRICTION										0.0056875f
 
-#define MARIO_JUMP_SPEED_Y								0.25f
-#define MARIO_JUMP_MAX_SPEED_Y							0.3f
+#define MARIO_JUMP_SPEED_Y								0.275f
+#define MARIO_KEEP_JUMP_LIMITED							0.1f
+#define MARIO_JUMP_MAX_SPEED_Y							0.33f
 #define MARIO_JUMP_DEFLECT_SPEED						0.2f
 #define MARIO_GRAVITY									0.0006f
-#define MARIO_GRAVITY_KEPP_JUMP							0.0003f
+#define MARIO_GRAVITY_KEEP_JUMP							0.0003f
 #define MARIO_DIE_DEFLECT_SPEED							0.1f
 
 #define MARIO_STATE_IDLE								0
@@ -30,8 +32,7 @@ using namespace std;
 #define MARIO_STATE_NOT_WALKING							601
 #define MARIO_STATE_RUNNING								700
 #define MARIO_STATE_STOP_RUNNING						701
-#define MARIO_STATE_BIG_TAIL_ATTACK						800
-#define MARIO_STATE_BIG_FIRE_ATTACK						801
+#define MARIO_STATE_BIG_ATTACK							800
 
 // 66
 
@@ -168,6 +169,11 @@ using namespace std;
 #define MARIO_ANI_BIG_FIRE_FLYING_ATTACKING_LEFT		68
 //================================END RUNNING FAILLING  ZONE=================================
 
+//================================KEEP FLYING HIGHER WHEN RUNNING  WHEN SPACE=================================
+#define MARIO_ANI_BIG_TAIL_KEEP_FLYING_RUNNING_RIGHT	71
+#define MARIO_ANI_BIG_TAIL_KEEP_FLYING_RUNNING_LEFT		72
+//================================END KEEP FLYING HIGHER WHEN RUNNING  ZONE==================================
+
 //================================MARIO LEVEL CONSTANT ZONE=================================
 #define	MARIO_LEVEL_SMALL								1
 #define	MARIO_LEVEL_BIG									2
@@ -189,8 +195,11 @@ using namespace std;
 #define MARIO_SMALL_BBOX_HEIGHT							15
 
 
+#define MARIO_ELASTIC									0.15
+
 //================================ANOTHER CONSTANT ZONE=================================
 #define MARIO_UNTOUCHABLE_TIME							1000
+#define KOOPAS_MAX_HEALTH								2
 #pragma once
 class Constant
 {
@@ -200,6 +209,8 @@ public:
 	void changeLevelMario(int level);
 	vector<int> listAni_Mario_Big;
 	vector<int> listBBox_Mario_Big;
+
+
 	vector<int> getBBox_MARIO_BIG_HAVE_TAIL();
 	vector<int> getBBox_MARIO_BIG();
 	vector<int> getAnimationMARIO_BIG_HAVE_TAIL();

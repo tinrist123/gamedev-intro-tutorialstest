@@ -1,6 +1,8 @@
 #pragma once
 #include "Brick.h"
 
+#define WEAK_BREAK_ANI	1	
+
 class WeakBrick :
     public CBrick
 {

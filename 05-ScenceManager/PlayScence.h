@@ -19,6 +19,8 @@
 #include "Item.h"
 #include "Map.h"
 #include "FireBullet.h"
+#include "MarioBullet.h"
+#include "Effects.h"
 
 class CPlayScene: public CScene
 {
@@ -32,7 +34,7 @@ public:
 	void _ParseSection_ANIMATIONS(string line);
 	void _ParseSection_ANIMATION_SETS(string line);
 	void _ParseSection_OBJECTS(string line);
-
+	void _ParseSection_Map(string line);
 	
 public: 
 	CPlayScene(int id, LPCWSTR filePath);
@@ -42,6 +44,7 @@ public:
 	virtual void Render();
 	virtual void Unload();
 
+	TileMap* map;
 	CMario * GetPlayer() { return player; } 
 
 	//friend class CPlayScenceKeyHandler;

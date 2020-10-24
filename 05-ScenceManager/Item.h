@@ -5,8 +5,23 @@
 //#include "ColorBox.h"
 //#include "Pipe.h"
 
+#define ITEM_BBOX_WIDHT     16  
+#define ITEM_BBOX_HEIGHT    16  
+
 #define ITEM_COIN           1   
-#define SPECIAL_ITEM        2   
+#define SPECIAL_ITEM        2
+
+#define ITEM_ANI_COIN       0
+#define ITEM_ANI_MUSHROOM   1
+#define ITEM_ANI_LEAF       2
+
+#define GRAVITY                          0.0006f
+
+#define HEIGHT_MUSHROOM_UP               20
+#define MUSHROOM_SPEED_X                 0.1f
+#define MUSHROOM_SPEED_Y                 0.3f
+
+#define START_SPEED_Y                    0
 
 class Item :
     public CGameObject

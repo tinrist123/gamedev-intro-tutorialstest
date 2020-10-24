@@ -38,7 +38,7 @@ void CAnimation::Render(float x, float y, int alpha)
 			if (currentFrame == frames.size()) currentFrame = 0;
 		}
 	}
-	frames[currentFrame]->SetTime(this->changeableTime)->GetSprite()->Draw(x, y, alpha);
+	frames[currentFrame]->GetSprite()->Draw(x, y, alpha);
 }
 
 CAnimations * CAnimations::__instance = NULL;

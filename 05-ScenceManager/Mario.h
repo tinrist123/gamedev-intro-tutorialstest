@@ -14,9 +14,15 @@ class CMario : public CGameObject
 public:
 	int level = 1;
 	int setTimeRenderingAni = 100;
+	int untouchable;
 
 	Constant* constant;
-	int untouchable;
+	DWORD timeReload = 0;
+	DWORD autoReloadTime;
+
+	bool isEnteredFirstSpaceUp = false;
+	bool isKeepJumpingHigher = false;
+	bool isFireShoot = false;
 	bool onSitting = false;
 
 	bool isFalling = true;
@@ -29,13 +35,16 @@ public:
 	bool isTested2 = false;
 
 	bool isSpecialGravity = false;
+	bool isPreventedSpamSpace = false;
+	bool isMaxSpped = false;
 
 	int  lastNx;
+	int  totalOfBulletsReadyForFiring = 2;
 
 	bool isRunning = false;
 
 	float lastVx;
-
+	float lastVy = 0.07;
 	//CScene* s;
 	DWORD untouchable_start;
 
@@ -51,6 +60,12 @@ public:
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
+	void ReloadBullets() { timeReload = GetTickCount64(); }
+	bool IsReloadedBullets() { return GetTickCount64() - timeReload > 500; }
+
+	void setAutoReload() { autoReloadTime = GetTickCount64(); }
+	void resetAutoReload() { autoReloadTime = 0; }
+	bool isReloaded() { return GetTickCount64() - autoReloadTime > 500; }
 
 	void Reset();
 

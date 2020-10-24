@@ -21,6 +21,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define SCENE_SECTION_ANIMATIONS		4
 #define SCENE_SECTION_ANIMATION_SETS	5
 #define SCENE_SECTION_OBJECTS			6
+#define SCENE_SECTION_TILEMAP			7
 
 #define OBJECT_TYPE_MARIO				0
 #define OBJECT_TYPE_BRICK				1
@@ -35,12 +36,11 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_CloudBrick			10
 #define OBJECT_TYPE_Item				11
 #define OBJECT_TYPE_Bullet				12
+#define OBJECT_TYPE_Effects				13
 
 #define OBJECT_TYPE_PORTAL				50
 
 #define MAX_SCENE_LINE					1024
-
-Map* mapScence;
 
 void CPlayScene::_ParseSection_TEXTURES(string line)
 {
@@ -123,6 +123,27 @@ void CPlayScene::_ParseSection_ANIMATION_SETS(string line)
 	CAnimationSets::GetInstance()->Add(ani_set_id, s);
 }
 
+void CPlayScene::_ParseSection_Map(string line)
+{
+	vector<string> tokens = split(line);
+	if (tokens.size() < 9) return;
+	int ID = atoi(tokens[0].c_str());
+	wstring file_texture = ToWSTR(tokens[1]);
+	wstring file_path = ToWSTR(tokens[2]);
+
+
+
+
+	int row_on_textures = atoi(tokens[3].c_str());
+	int col_on_textures = atoi(tokens[4].c_str());
+	int row_on_tile_map = atoi(tokens[5].c_str());
+	int col_on_tile_map = atoi(tokens[6].c_str());
+	int tile_width = atoi(tokens[7].c_str());
+	int tile_height = atoi(tokens[8].c_str());
+	//int texID = atoi(tokens[0].c_str());
+	map = new TileMap(ID, file_texture.c_str(), file_path.c_str(), row_on_textures, col_on_textures, row_on_tile_map, col_on_tile_map, tile_width, tile_height);
+}
+
 /*
 	Parse a line in section [OBJECTS] 
 */
@@ -180,7 +201,13 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		break;
 	}
 	case OBJECT_TYPE_Bullet: obj = new FireBullet(); break;
-	case OBJECT_TYPE_KOOPAS: obj = new CKoopas(); break;
+	case OBJECT_TYPE_Effects: obj = new Effects(); break;
+	case OBJECT_TYPE_KOOPAS:
+	{
+		int typeKoopas = atof(tokens[4].c_str());
+		obj = new CKoopas(typeKoopas);
+		break;
+	}
 	case OBJECT_TYPE_Flower: obj = new CFlower(); break;
 	case OBJECT_TYPE_Ground: 
 	{
@@ -244,7 +271,7 @@ void CPlayScene::Load()
 {
 	//DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 
-	mapScence = new Map();
+	//mapScence = new TileMap();
 	ifstream f;
 	f.open(sceneFilePath);
 	// current resource section flag
@@ -266,6 +293,8 @@ void CPlayScene::Load()
 			section = SCENE_SECTION_ANIMATION_SETS; continue; }
 		if (line == "[OBJECTS]") { 
 			section = SCENE_SECTION_OBJECTS; continue; }
+		if (line == "[TILEMAP]") { 
+			section = SCENE_SECTION_TILEMAP; continue; }
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
 
 		//
@@ -278,6 +307,7 @@ void CPlayScene::Load()
 			case SCENE_SECTION_ANIMATIONS: _ParseSection_ANIMATIONS(line); break;
 			case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
+			case SCENE_SECTION_TILEMAP: _ParseSection_Map(line); break;
 		}
 	}
 
@@ -302,33 +332,66 @@ void CPlayScene::Update(DWORD dt)
 	
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->x - player->x < 160.0f && dynamic_cast<CFlower *>(objects[i]))
+		if (objects[i]->x - player->x <120.0f && dynamic_cast<CFlower *>(objects[i]))
 		{
 			CFlower* flower = dynamic_cast<CFlower*>(objects[i]);
 
-			if (flower->state == FLOWER_STATE_UP && flower->isDelayedShooting && flower->y == 336.0f)
+			if (flower->state == FLOWER_STATE_UP)
 			{
-				flower->isDelayedShooting = false;
-				FireBullet* bullet = new FireBullet();
-				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-				LPANIMATION_SET ani_set = animation_sets->Get(7);
-				bullet->SetAnimationSet(ani_set);
-				bullet->x = flower->x - 10.0f;
-				bullet->y = flower->y;
-				bullet->nx = (player->x - flower->x < 0)?-1:1 ;
-				bullet->ny = (player->y - flower->y < 0)?-1:((player->y - flower->y < -16.0f))?1:0;
-				bullet->SetState(1);
-				objects.push_back(bullet);
+				if (flower->isWaitingShooting && flower->y == 336.0f)
+				{
+					flower->isShooting = true;
+					if (flower->isReadyFire() && flower->delayBullet != 0)
+					{
+						flower->isWaitingShooting = false;
+
+						FireBullet* bullet = new FireBullet();
+						CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+						LPANIMATION_SET ani_set = animation_sets->Get(7);
+						bullet->SetAnimationSet(ani_set);
+						bullet->x = flower->x;
+						bullet->y = flower->y + 4;
+						bullet->nx = (player->x - flower->x < 0) ? -1 : 1;
+						bullet->ny = (player->y - flower->y < 0) ? -1 : ((player->y - flower->y > 16.0f)) ? 1 : 0;
+						bullet->SetState(1);
+						objects.push_back(bullet);
+
+						flower->delayBullet = 0;
+					}
+					else if (flower->delayBullet == 0)
+					{
+						flower->setTimeLoadingBullet();
+					}
+					
+				}
+				flower->nx = (player->x - flower->x < 0) ? -1 : 1;
+				flower->ny = (player->y - flower->y < 0) ? -1 : ((player->y - flower->y > 16.0f)) ? 1 : 0;
 			}
 			
 		}
 		if (objects[i]->health == 0 && objects[i]->isDisappeared)
 		{
+			if (dynamic_cast<MarioBullet*>(objects[i]) && !(objects[i])->isAddedEffect)
+			{
+				(objects[i])->isAddedEffect = true;
+				MarioBullet* marioBullet = dynamic_cast<MarioBullet*>(objects[i]);
+
+				Effects* effect = new Effects();
+				CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+				LPANIMATION_SET ani_set = animation_sets->Get(8);
+
+				effect->SetAnimationSet(ani_set);
+				effect->x = marioBullet->pointCollisionX;
+				effect->y = marioBullet->pointCollisionY;
+				objects.push_back(effect);
+				effect->SetState(EFFECTS_DEFLECT);
+			}
 			continue;
 		}
-		if (objects[i]->health == 0 && dynamic_cast<QuestionBrick *>(objects[i]) && !objects[i]->isCreated)
+		/*if (objects[i]->health == 0 && dynamic_cast<QuestionBrick *>(objects[i]) && !objects[i]->isCreated)
 		{
-			int typeItem = (player->level < 3 )?player->level:3;
+			int typeItem = (player->level < MARIO_LEVEL_BIG_TAIL)?player->level: MARIO_LEVEL_BIG_TAIL;
+
 			Item* item = new Item(1, 1,typeItem, objects[i]->x, objects[i]->y);
 			CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 			LPANIMATION_SET ani_set = animation_sets->Get(5);
@@ -341,6 +404,44 @@ void CPlayScene::Update(DWORD dt)
 			
 			item->SetState(1);	
 			objects.push_back(item);
+		}*/
+		if (player->isFireShoot)
+		{
+			MarioBullet* bullet = new MarioBullet();
+			CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+			LPANIMATION_SET ani_set = animation_sets->Get(7);
+
+
+			if (player->IsReloadedBullets() && player->timeReload != 0)
+			{
+				player->totalOfBulletsReadyForFiring = 2;
+				player->timeReload = 0;
+				player->resetAutoReload();
+			}
+			if (player->isReloaded() && player->autoReloadTime != 0)
+			{
+				player->totalOfBulletsReadyForFiring = 2;
+				player->timeReload = 0;
+				player->autoReloadTime = 0;
+			}
+			if (player->totalOfBulletsReadyForFiring > 0)
+			{
+				bullet->SetAnimationSet(ani_set);
+				bullet->x = player->x + 5*player->nx;
+				bullet->y = player->y;
+				bullet->nx = player->nx;
+				bullet->SetState(BULLET_STATE_NORMAL_MOVING);
+
+				player->totalOfBulletsReadyForFiring--;
+				player->setAutoReload();
+				player->isFireShoot = false;
+
+				objects.push_back(bullet);
+			}
+			if (player->totalOfBulletsReadyForFiring == 0 && player->timeReload == 0)
+			{
+				player->ReloadBullets();
+			}
 		}
 		objects[i]->Update(dt, &coObjects);
 	}
@@ -352,20 +453,24 @@ void CPlayScene::Update(DWORD dt)
 	float cx, cy;
 	player->GetPosition(cx, cy);
 
-	CGame *game = CGame::GetInstance();
-	cx -= game->GetScreenWidth() / 3;
-	cy -= game->GetScreenHeight() / 3;
+	/*CGame *game = CGame::GetInstance();
+	cx -= game->GetScreenWidth() / 2;
+	cy -= game->GetScreenHeight() / 2;*/
 
-	if (cx < 0) cx = 0;
-	
-	CGame::GetInstance()->SetCamPos(cx, 0 /*cy*/);
+	if (player->x > (SCREEN_WIDTH / 4) && player->x + (SCREEN_WIDTH / 4) < map->GetWidthTileMap())
+	{
+		cx = player->x - (SCREEN_WIDTH / 4);
+		CGame::GetInstance()->cam_x = cx;
+		
+	}
 }
 
 void CPlayScene::Render()
 {
 	
 	//mapScence->DrawMap();
-	
+	map->Draw();
+
 	for (int i = 0; i < objects.size(); i++)
 	{
 		if (objects[i]->health == 0 && objects[i]->isDisappeared)
@@ -396,31 +501,27 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
 	
-	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
-	{
-		return;
-	}
-	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(200))
-	{
-		return;
-	}
 
-	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(385))
-	{
-		return;
-
-	}
-	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(385))
-	{
-		return;
-	}
 	switch (KeyCode)
 	{
 	/*case (DIK_DOWN):
 		mario->SetState(MARIO_STATE_STOP_SITTING);
 		break;*/
 	case (DIK_SPACE):
-		mario->SetState(MARIO_ANI_SHORT_JUMP);
+		if (mario->level == MARIO_LEVEL_BIG_TAIL && !mario->isOnGround && mario->isFalling && mario->isEnteredFirstSpaceUp)
+		{
+			mario->vy = -MARIO_GRAVITY * mario->dt;
+			mario->SetState(MARIO_STATE_BIG_TAIL_KEEP_JUMP);
+			break;
+		}
+		//if (!isOnGround && !isFalling)
+		if (!mario->isPreventedSpamSpace)
+		{
+			mario->vy = mario->vy + MARIO_GRAVITY*mario->dt * 10;
+			mario->isEnteredFirstSpaceUp = true;
+			mario->isPreventedSpamSpace = true;
+		}
+		//mario->SetState(MARIO_ANI_SHORT_JUMP);
 		break;
 	case (DIK_LSHIFT):
 		mario->SetState(MARIO_STATE_STOP_RUNNING);
@@ -432,7 +533,8 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 		mario->SetState(MARIO_STATE_NOT_WALKING);
 		break;
 	case (DIK_Z):
-		//mario->isAttacking = false;
+		if (mario->level == MARIO_LEVEL_BIG_FIRE)
+			mario->isAttacking = false;
 		break;
 	default:
 		break;
@@ -445,50 +547,46 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
+	
 
-	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
-	{
-		return;
-	}
-	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(200))
-	{
-		return;
-	}
-
-	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(385))
-	{
-		return;
-
-	}
-	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(385))
-	{
-		return;
-	}
 	switch (KeyCode)
 	{
-	case DIK_SPACE:
+	/*case DIK_SPACE:
 		if (mario->level == MARIO_LEVEL_BIG_TAIL)
 		{
 			mario->SetState(MARIO_STATE_BIG_TAIL_KEEP_JUMP);
 		}
-		break;
+		break;*/
 	case DIK_Z:
-		if (mario->level == MARIO_LEVEL_BIG_TAIL)
+
+		if ( mario->level == MARIO_LEVEL_BIG_TAIL )
 		{
+			if(mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375)
+			|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
+				return;
+
 			mario->isAttacking = true;
-			mario->SetState(MARIO_STATE_BIG_TAIL_ATTACK);
+			mario->SetState(MARIO_STATE_BIG_ATTACK);
 		}
-		if (mario->level == MARIO_LEVEL_BIG_FIRE)
+		else if (mario->level == MARIO_LEVEL_BIG_FIRE && mario->IsReloadedBullets() && !mario->isFireShoot)
 		{
 			mario->isAttacking = true;
-			mario->SetState(MARIO_STATE_BIG_TAIL_ATTACK);
+			mario->isFireShoot = true;
+
+			mario->SetState(MARIO_STATE_BIG_ATTACK);
 		}
 		break;
+	case DIK_SPACE:
+	{
+		mario->SetState(MARIO_STATE_JUMP);
+		break;
+	}
 	case DIK_A: 
 		mario->Reset();
+		CGame::GetInstance()->cam_x = 0;
 		break;
 	default:
-			break;
+		break;
 	}
 }
 
@@ -500,29 +598,7 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
 	
-	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->IsRenderOver(200))
-	{
-		return;
-	}
-	if (mario->isKeepJumping && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->IsRenderOver(200))
-	{
-		return;
-	}
-
-	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(385))
-	{
-		return;
 	
-	}
-	if (mario->isAttacking && !mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(385))
-	{
-		return;
-	}
-
-	if (game->IsKeyDown(DIK_SPACE))
-	{
-		mario->SetState(MARIO_STATE_JUMP);
-	}
 	if (game->IsKeyDown(DIK_LSHIFT) && game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_SPACE))
 	{
 		if (mario->isOnGround)
@@ -533,15 +609,15 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 		if (mario->isOnGround)
 			mario->SetState(MARIO_STATE_RUNNING);
 	}
-	if (game->IsKeyDown(DIK_LEFT))
-	{
-		mario->SetState(MARIO_STATE_WALKING_LEFT);
-		return;
-	}
-	else if(game->IsKeyDown(DIK_RIGHT))
+	if(game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_LEFT))
 	{
 		mario->SetState(MARIO_STATE_WALKING_RIGHT);
-		return;
+		//return;
+	}
+	else if (game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_RIGHT))
+	{
+		mario->SetState(MARIO_STATE_WALKING_LEFT);
+		//return;
 	}
 	else if (game->IsKeyDown(DIK_DOWN))
 	{

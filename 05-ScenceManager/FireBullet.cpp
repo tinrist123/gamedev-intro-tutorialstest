@@ -1,4 +1,5 @@
 #include "FireBullet.h"
+#include "Ground.h"
 
 
 
@@ -33,11 +34,8 @@ void FireBullet::SetState(int state)
 	switch (state)
 	{
 	case 1:
-		vy = 0.015*ny;
-		vx = 0.015*nx;
-		break;
-	case 2:
-		vy = 0;
+		vy = ny*BULLET_SPEED_Y;
+		vx = nx*BULLET_SPEED_X;
 		break;
 	default:
 		break;

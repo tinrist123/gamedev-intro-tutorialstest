@@ -12,16 +12,15 @@ Item::Item(int width, int height, int typeitem, int x, int y)
 	this->start_y = y;
 	this->x = x;
 	this->y = y;
-	
+	ani = ITEM_ANI_COIN;
 }
 
 void Item::Render()
 {
 	if (this->typeItem)
 	{
-		int ani = 0;
-		if (this->typeItem == 1) ani = 1;
-		else ani = 2;
+		if (this->typeItem == 1) ani = ITEM_ANI_MUSHROOM;
+		else ani = ITEM_ANI_LEAF;
 		animation_set->at(ani)->Render(x,y,255);
 	}
 	RenderBoundingBox();
@@ -39,16 +38,16 @@ void Item::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	// turn off collision when die 
 	if (state != 4) CalcPotentialCollisions(coObjects, coEvents);
 	// reset untouchable timer if untouchable time has passed
-	vy += 0.0006f * dt;
+	vy += GRAVITY * dt;
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
 	{
-		if (y <= start_y - 20 && !isGrowthUp)
+		if (y <= start_y - HEIGHT_MUSHROOM_UP && !isGrowthUp)
 		{
-			y = start_y - 20;
+			y = start_y - HEIGHT_MUSHROOM_UP;
 			isGrowthUp = true;
-			vy = 0;
-			vx = 0.1f*nx;
+			vy = START_SPEED_Y;
+			vx = MUSHROOM_SPEED_X *nx;
 		}
 		else
 		{
@@ -76,7 +75,7 @@ void Item::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 		if (nx != 0) vx = 0;
 		if (ny != 0) {
-			vy = 0;
+			vy = START_SPEED_Y;
 		}
 		//
 		// Collision logic with other objects
@@ -88,7 +87,7 @@ void Item::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				if (e->ny < 0)
 				{
-					vy = 0;
+					vy = START_SPEED_Y;
 					isOnGround = true;
 				}
 			}
@@ -102,7 +101,7 @@ void Item::SetState(int state)
 {
 	switch (state) {
 	case 1 :
-		vy = -0.3f;
+		vy = -MUSHROOM_SPEED_Y;
 		
 		break;
 	case 2 :
@@ -126,8 +125,8 @@ void Item::GetBoundingBox(float& l, float& t, float& r, float& b)
 	else {
 		l = x;
 		t = y;
-		r = x + 16;
-		b = y + 16;
+		r = x + ITEM_BBOX_WIDHT;
+		b = y + ITEM_BBOX_HEIGHT;
 	}
 	
 }

@@ -8,6 +8,8 @@
 
 
 #define DIRECTINPUT_VERSION 0x0800
+#define SCREEN_WIDTH		640
+#define SCREEN_HEIGHT		480
 #include <dinput.h>
 
 #include "Scence.h"
@@ -35,6 +37,7 @@ class CGame
 
 	LPKEYEVENTHANDLER keyHandler;
 
+public:
 	float cam_x = 0.0f;
 	float cam_y = 0.0f;
 

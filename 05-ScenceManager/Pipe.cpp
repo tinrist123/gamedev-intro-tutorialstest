@@ -11,7 +11,7 @@ Pipe::Pipe(int width, int height)
 void Pipe::Render()
 {
 	//animation_set->at(0)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void Pipe::GetBoundingBox(float& l, float& t, float& r, float& b)

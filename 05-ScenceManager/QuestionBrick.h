@@ -2,9 +2,12 @@
 #include "Brick.h"
 
 #define QUESTION_BRICK_AVAILABLE	1
+#define QUESTION_BRICK_SPEED_X		0.05f	
+#define BRICK_ANI_EMPTY				1
+#define GRAVITY						0.00021875f
 
 class QuestionBrick :
-    public CGameObject
+    public CBrick
 {
 public:
 	bool isSpecial = false;

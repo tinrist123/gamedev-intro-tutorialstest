@@ -17,7 +17,7 @@
 CMario::CMario(float x, float y) : CGameObject()
 {
 	//level = MARIO_LEVEL_BIG;
-	level = 3;
+	level = 1;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
 	constant = new Constant(level);
@@ -38,13 +38,18 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		vx -= min(fabs(vx), FRICTION) * nx;
 	}*/
 
-	if (isSpecialGravity) vy += MARIO_GRAVITY_KEPP_JUMP * dt;
-	else vy += MARIO_GRAVITY * dt;
+	vy += MARIO_GRAVITY * dt;
 	lastVx = vx;
 	// Simple fall down
+
 	if (vy > 0)
 	{
 		isFalling = true;
+	}
+
+	if (fabs(vx) < MARIO_RUNNING_MAX_SPEED && isOnGround)
+	{
+		isMaxSpped = false;
 	}
 
 	vector<LPCOLLISIONEVENT> coEvents;
@@ -63,7 +68,34 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		untouchable = 0;
 	}
 
-	
+	if (nx == 1) {
+		if (isKeepJumping && animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT)->IsRenderOver(150))
+		{
+			isKeepJumping = false;
+		}
+		else if (isAttacking && animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375) && level == MARIO_LEVEL_BIG_TAIL)
+		{
+			isAttacking = false;
+		}
+	}	
+	else
+	{
+		if (isKeepJumping && animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT)->IsRenderOver(150))
+		{
+			isKeepJumping = false;
+		}
+		else if (isAttacking && animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375) && level == MARIO_LEVEL_BIG_TAIL)
+		{
+			isAttacking = false;
+		}
+	}
+
+	if (isRollBack && GetTickCount64() - tDraw > 100 && tDraw != 0 && isTested)
+	{
+		isRollBack = false;
+		tDraw = 0;
+		isTested = false;
+	}
 
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
@@ -90,20 +122,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 		if (ny != 0) {
 			vy = 0;
+			isEnteredFirstSpaceUp = false;
+			isPreventedSpamSpace = false;
 		}
 
-		if (isRollBack && GetTickCount64() - tDraw > 100 && tDraw != 0 && isTested)
-		{
-			isRollBack = false;
-			tDraw = 0;
-			isTested = false;
-		}
-
-		if (isKeepJumping && GetTickCount64() - tDraw > 300)
-		{
-			isKeepJumping = false;
-			tDraw = 0;
-		}
+		
 
 		//
 		// Collision logic with other objects
@@ -119,7 +142,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					vy = 0;
 					isOnGround = true;
 				}
-
 			}
 			if (dynamic_cast<Item *>(e->obj))
 			{
@@ -130,10 +152,37 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					//else
 					{
 						item->SetState(3);
-						level = (level >= 3) ? 3 : ++level;
+						level = (level >= MARIO_LEVEL_BIG_TAIL) ? MARIO_LEVEL_BIG_TAIL : ++level;
 						constant->changeLevelMario(level);
-						if (level == 2) y += -15.0f;
-						else y += -0.4f;
+						// GET ITEM AND UPDATE MARIO LEVEL
+						/*if (level == 2) y += -15.0f;
+						else y += -0.4f;*/
+					}
+				}
+			}
+			else if (dynamic_cast<CGoomba *>(e->obj))
+			{
+				CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
+				if (e->ny < 0)
+				{
+					goomba->SetState(GOOMBA_STATE_DIE);
+					vy = -MARIO_ELASTIC;
+				}
+				else if (e->nx != 0)
+				{
+					if (untouchable == 0)
+					{
+						if (level == MARIO_LEVEL_SMALL)
+						{
+							SetState(MARIO_STATE_DIE);
+							isBoundingBox = false;
+						}
+						else
+						{
+							level--;
+							constant->changeLevelMario(level);
+							StartUntouchable();
+						}
 					}
 				}
 			}
@@ -239,12 +288,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					if (e->ny == -1)
 					{
 						isOnGround = true;
-						if (koopas->health == 2)
+						if (koopas->health == KOOPAS_MAX_HEALTH)
 						{
 							koopas->SetState(KOOPAS_STATE_SHELL);
 							koopas->subHealth();
 							isOnGround = false;
-							vy = -0.15f;
+							vy = -MARIO_ELASTIC;
 						}
 					}
 					else if (e->nx != 0)
@@ -414,7 +463,7 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 			}
 			
 		}
-		else if (mario->isFalling == false && !mario->isOnGround  && fabs(mario->vx) >= MARIO_RUNNING_MAX_SPEED)
+		else if (!mario->isKeepJumpingHigher &&mario->isFalling == false && !mario->isOnGround  && fabs(mario->vx) >= MARIO_RUNNING_MAX_SPEED)
 		{
 			if (mario->nx == 1)
 			{
@@ -425,35 +474,42 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 				mario->ani = listAnimationForResMario.at(15);
 			}
 		}
-		else
+		else if (mario->isFalling)
 		{
 			if (mario->isOnGround == false)
 			{
 				if (mario->nx == 1)
 				{
-					if (mario->state == MARIO_STATE_BIG_TAIL_KEEP_JUMP)
+					//if (mario->state == MARIO_STATE_BIG_TAIL_KEEP_JUMP)
 					{
 						if (mario->isKeepJumping)
 						{
 							mario->ani = listAnimationForResMario.at(16);
 						}
-					}
-					else {
+						else if (mario->animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT)->IsRenderOver(150)) {
 						mario->ani = listAnimationForResMario.at(10);
+						}
+						
 					}
+					/*else if (mario->animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT)->IsRenderOver(75)) {
+						mario->ani = listAnimationForResMario.at(10);
+					}*/
 				}
 				else if (mario->nx == -1)
 				{
-					if (mario->state == MARIO_STATE_BIG_TAIL_KEEP_JUMP)
+					//if (mario->state == MARIO_STATE_BIG_TAIL_KEEP_JUMP)
 					{
 						if (mario->isKeepJumping)
 						{
 							mario->ani = listAnimationForResMario.at(17);
 						}
+						else if(mario->animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT)->IsRenderOver(150)) {
+							mario->ani = listAnimationForResMario.at(11);
+						}
 					}
-					else {
+					/*else if (mario->animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT)->IsRenderOver(75)) {
 						mario->ani = listAnimationForResMario.at(11);
-					}
+					}*/
 				}
 			}
 			
@@ -511,7 +567,6 @@ void CMario::Render()
 		{
 			if (nx == 1)
 			{
-
 				if (isRunning && vx >= MARIO_RUNNING_MAX_SPEED)
 				{
 					ani = MARIO_ANI_SMALL_RUNNING_FLYING_RIGHT;
@@ -519,7 +574,7 @@ void CMario::Render()
 				else 
 					ani = MARIO_ANI_SMALL_FLYING_RIGHT;
 
-			}
+			} 
 			else if ( nx == -1 )
 			{
 
@@ -618,20 +673,32 @@ void CMario::Render()
 				ani = MARIO_ANI_BIG_RUNNING_FLYING_LEFT;
 			}
 		}
+	
 	}
 	else if (level == MARIO_LEVEL_BIG_TAIL)
 	{
 		constant->changeLevelMario(level);
 		ani = CalcRenderForMARIO_BIG(this,constant->listAni_Mario_Big);
-		if (state == MARIO_STATE_BIG_TAIL_ATTACK)
+		if (isAttacking)
 		{
-			if (nx > 0)
+			if (nx == 1)
 			{
 				ani = MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT;
 			}
-			else if (nx < 0)
+			else if (nx == -1)
 			{
 				ani = MARIO_ANI_BIG_TAIL_ATTACKING_LEFT;
+			}
+		}
+		else if (isKeepJumpingHigher && isMaxSpped && !isOnGround)
+		{
+			if (nx == 1)
+			{
+				ani = MARIO_ANI_BIG_TAIL_KEEP_FLYING_RUNNING_RIGHT;
+			}
+			else if (nx == -1)
+			{
+				ani = MARIO_ANI_BIG_TAIL_KEEP_FLYING_RUNNING_LEFT;
 			}
 		}
 		else if (fabs(vx) >= MARIO_RUNNING_MAX_SPEED && !isOnGround && isFalling)
@@ -645,18 +712,19 @@ void CMario::Render()
 				ani = constant->listAni_Mario_Big.at(19);
 			}
 		}
+		
 	}
 	else if (level == MARIO_LEVEL_BIG_FIRE)
 	{
 		constant->changeLevelMario(level);
 		ani = CalcRenderForMARIO_BIG(this, constant->listAni_Mario_Big);
-		if (state == MARIO_STATE_BIG_FIRE_ATTACK)
+		if (isAttacking)
 		{
-			if (nx > 0)
+			if (nx == 1)
 			{
 				ani = MARIO_ANI_BIG_FIRE_ATTACKING_RIGHT;
 			}
-			else if (nx < 0)
+			else if (nx == -1)
 			{
 				ani = MARIO_ANI_BIG_FIRE_ATTACKING_LEFT;
 			}
@@ -676,7 +744,8 @@ void CMario::Render()
 
 	int alpha = 255;
 	if (untouchable) alpha = 128;
-	animation_set->at(ani)->setTimeAnimation(isRunning? setTimeRenderingAni :100)->Render(x, y, alpha);
+	
+	animation_set->at(ani)->Render(x, y, alpha);
 	
 	RenderBoundingBox();
 }
@@ -690,16 +759,24 @@ void CMario::SetState(int state)
 	/*case MARIO_STATE_STOP_SITTING:
 		onSitting = false;
 		break;*/
-	case MARIO_STATE_BIG_TAIL_ATTACK:
+	case MARIO_STATE_BIG_ATTACK:
 		if (level == MARIO_LEVEL_BIG_TAIL)
 		{
-			if (nx == 1) animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->StartRenderAnimation();
-			if (nx == -1) animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->StartRenderAnimation();
+			if (nx == 1) 
+			{
+				animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->SetCurrentFrame();
+				animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->StartRenderAnimation();
+			}
+			else if (nx == -1)
+			{
+				animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->SetCurrentFrame();
+				animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->StartRenderAnimation();
+			}
 		}
 		else if (level == MARIO_LEVEL_BIG_FIRE)
 		{
 			if (nx == 1) animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_RIGHT)->StartRenderAnimation();
-			if (nx == -1) animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_LEFT)->StartRenderAnimation();
+			else if (nx == -1) animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_LEFT)->StartRenderAnimation();
 		}
 		
 		break;
@@ -735,7 +812,8 @@ void CMario::SetState(int state)
 		break;
 	case MARIO_STATE_WALKING_LEFT:
 		isWalking = true;
-		if (vx > 0)
+		
+		if (vx > 0 )
 		{
 			vx -= MARIO_WALKING_DECELERATION;
 			isRollBack = true;
@@ -752,6 +830,7 @@ void CMario::SetState(int state)
 		{
 			vx += MARIO_WALKING_ACCELEROMETER;
 		}
+		
 		if ((double)lastVx * vx <= 0)
 		{
 			isTested = true;
@@ -769,74 +848,67 @@ void CMario::SetState(int state)
 		isRunning = true;
 		if (nx == 1)
 		{
-			vx += MARIO_WALKING_ACCELEROMETER*1.5;
+			vx += (vx <= MARIO_MAX_WALKING_SPEED)? MARIO_WALKING_ACCELEROMETER :MARIO_WALKING_ACCELEROMETER_RUNNING;
 			if (vx >= MARIO_RUNNING_PRE_MAX_SPEED)
 			{
-				setTimeRenderingAni = 40;
-				
+				isMaxSpped = false;
+				//setTimeRenderingAni = 40;
+				isMaxSpped = false;
 			}
 			else setTimeRenderingAni = 100;
 			if (vx >= MARIO_RUNNING_MAX_SPEED)
 			{
+				isMaxSpped = true;
 				vx = MARIO_RUNNING_MAX_SPEED;
-				setTimeRenderingAni = 10;
+				//setTimeRenderingAni = 10;
 			}
 		}
 		else if (nx == -1)
 		{
-			vx -= MARIO_WALKING_ACCELEROMETER * 1.5;
+			vx -= (vx >= -MARIO_MAX_WALKING_SPEED) ? MARIO_WALKING_ACCELEROMETER : MARIO_WALKING_ACCELEROMETER_RUNNING;
 			if (vx <= -MARIO_RUNNING_PRE_MAX_SPEED)
 			{
-				setTimeRenderingAni = 40;
+				isMaxSpped = false;
+				//setTimeRenderingAni = 40;
 			}
 			else setTimeRenderingAni = 100;
 			if (vx <= -MARIO_RUNNING_MAX_SPEED)
 			{
+				isMaxSpped = true;
 				vx = -MARIO_RUNNING_MAX_SPEED;
-				setTimeRenderingAni = 10;
+				//setTimeRenderingAni = 10;
 			}
 		}
 
 		break;	
 	} 
 	case MARIO_STATE_BIG_TAIL_KEEP_JUMP:
-		if (isRunning && vx >= MARIO_RUNNING_MAX_SPEED)
+		if (isMaxSpped)
 		{
-			vy -= (MARIO_GRAVITY + 0.002f * 2) * dt;
-			if (vy <= -0.5f)
+			isKeepJumpingHigher = true;
+			vy = -(MARIO_GRAVITY + 0.002f * 4) * dt;
+			if (vy <= -MARIO_KEEP_JUMP_LIMITED)
 			{
-				vy = -0.5f;
+				vy = -MARIO_KEEP_JUMP_LIMITED;
 			}
 		}
 		else if (isFalling)
 		{
-			/*if (vy - ((MARIO_GRAVITY * 15.0f + 0.0002f) * dt) < 0)
-			{
-				DebugOut(L"vy = %f\n", vy);
-				break;
-			}	
-			else*/ {
-				isSpecialGravity = true;
-				if (vy > 0) vy = 0;
-			}
 			isKeepJumping = true;
-			if (nx == 1 ) animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_RIGHT)->StartRenderAnimation();
-			if (nx == -1)
+			if (nx == 1 && animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT)->IsRenderOver(150))
 			{
-				animation_set->at(MARIO_ANI_BIG_TAIL_FALLING_LEFT)->StartRenderAnimation();
+				animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT)->StartRenderAnimation();
+			}
+			if (nx == -1 && animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT)->IsRenderOver(150))
+			{
+				animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT)->StartRenderAnimation();
 			}
 		}
-		break;
-	case MARIO_ANI_SHORT_JUMP:
-		if (!isOnGround && !isFalling)
-		{
-			vy = vy + MARIO_GRAVITY*dt * 10;
-		}
-		blockJumping = false;
 		break;
 	case MARIO_STATE_JUMP:
 		// TODO: need to check if Mario is *current* on a platform before allowing to jump again
-			if (isOnGround && blockJumping == false )
+			//if (isOnGround && blockJumping == false )
+			if (isOnGround)
 			{
 				if (isRunning && vx >= MARIO_RUNNING_MAX_SPEED)
 				{
@@ -911,7 +983,7 @@ void CalcRenderBoxBIG_MARIO(float &top,float &right,float &bottom,int state,bool
 {
 	if (state == MARIO_STATE_SITTING && isWalking == false)
 	{
-		top = y + 8;
+		top = y + MARIO_BIG_BBOX_HEIGHT - MARIO_BIG_TAIL_BBOX_SITTING_HEIGHT;
 	}
 	right = x + listBBox_Render.at(0);
 	bottom = y + listBBox_Render.at(1);
@@ -926,7 +998,18 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 	}
 	else
 	{
-		left = x;
+		if (level == MARIO_LEVEL_BIG_TAIL)
+		{
+			if (nx == 1)
+				left = x + MARIO_BIG_TAIL_BBOX_WIDTH - MARIO_BIG_BBOX_WIDTH + 1;
+			else if (nx == -1)
+			{
+				left = x + MARIO_BIG_TAIL_BBOX_WIDTH - MARIO_BIG_BBOX_WIDTH;
+			}
+		}
+		else {
+			left = x;
+		}
 		top = y;
 
 		if (level == MARIO_LEVEL_BIG || level == MARIO_LEVEL_BIG_FIRE)
@@ -954,7 +1037,8 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 void CMario::Reset()
 {
 	SetState(MARIO_STATE_IDLE);
-	SetLevel(level);
+	SetLevel((level > MARIO_LEVEL_BIG_TAIL)? MARIO_LEVEL_SMALL:++level);
+	constant->changeLevelMario(level);
 	SetPosition(start_x, start_y);
 	SetSpeed(0, 0);
 }

@@ -25,6 +25,9 @@ typedef CAnimationFrame *LPANIMATION_FRAME;
 class CAnimation
 {
 public:
+	bool isAllowChangeAni;
+
+
 	DWORD lastFrameTime;
 	int currentFrame;
 	int defaultTime;
