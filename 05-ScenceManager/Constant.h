@@ -2,8 +2,8 @@
 #include <iostream>
 using namespace std;
 
-#define MARIO_RUNNING_PRE_MAX_SPEED						0.2f
-#define MARIO_RUNNING_MAX_SPEED							0.3f
+#define MARIO_RUNNING_PRE_MAX_SPEED						0.15f
+#define MARIO_RUNNING_MAX_SPEED							0.2f
 
 #define MARIO_WALKING_DECELERATION						0.006875f
 #define MARIO_WALKING_ACCELEROMETER						0.002875f
@@ -174,6 +174,44 @@ using namespace std;
 #define MARIO_ANI_BIG_TAIL_KEEP_FLYING_RUNNING_LEFT		72
 //================================END KEEP FLYING HIGHER WHEN RUNNING  ZONE==================================
 
+
+//================================KICK KOOPAS =================================
+#define MARIO_ANI_BIG_FIRE_KICK_KOOPAS_RIGHT			73
+#define MARIO_ANI_BIG_FIRE_KICK_KOOPAS_LEFT				74
+
+#define MARIO_ANI_BIG_TAIL_KICK_KOOPAS_RIGHT			75
+#define MARIO_ANI_BIG_TAIL_KICK_KOOPAS_LEFT				76
+
+#define MARIO_ANI_BIG_KICK_KOOPAS_RIGHT					77
+#define MARIO_ANI_BIG_KICK_KOOPAS_LEFT					78
+//================================END KICK KOOPAS==================================
+
+
+//================================IDLE HOLD KOOPAS =================================
+#define MARIO_ANI_BIG_FIRE_IDLE_HOLD_KOOPAS_RIGHT			79
+#define MARIO_ANI_BIG_FIRE_IDLE_HOLD_KOOPAS_LEFT			81
+
+#define MARIO_ANI_BIG_TAIL_IDLE_HOLD_KOOPAS_RIGHT			83
+#define MARIO_ANI_BIG_TAIL_IDLE_HOLD_KOOPAS_LEFT			85
+
+#define MARIO_ANI_BIG_IDLE_HOLD_KOOPAS_RIGHT				87
+#define MARIO_ANI_BIG_IDLE_HOLD_KOOPAS_LEFT					89
+//================================ END IDLE HOLD KOOPAS =================================
+
+
+//================================WALKING HOLD KOOPAS =================================
+#define MARIO_ANI_BIG_FIRE_WALKING_HOLD_KOOPAS_RIGHT			80
+#define MARIO_ANI_BIG_FIRE_WALKING_HOLD_KOOPAS_LEFT				82
+
+#define MARIO_ANI_BIG_TAIL_WALKING_HOLD_KOOPAS_RIGHT			84
+#define MARIO_ANI_BIG_TAIL_WALKING_HOLD_KOOPAS_LEFT				86
+
+#define MARIO_ANI_BIG_WALKING_HOLD_KOOPAS_RIGHT					88
+#define MARIO_ANI_BIG_WALKING_HOLD_KOOPAS_LEFT					90
+//================================ END WALKING HOLD KOOPAS =================================
+
+
+
 //================================MARIO LEVEL CONSTANT ZONE=================================
 #define	MARIO_LEVEL_SMALL								1
 #define	MARIO_LEVEL_BIG									2
@@ -182,20 +220,24 @@ using namespace std;
 
 
 //================================MARIO RENDER BOX CONSTANT ZONE=================================
-#define MARIO_BIG_BBOX_WIDTH							15
-#define MARIO_BIG_BBOX_HEIGHT							28
-
-#define MARIO_BIG_TAIL_BBOX_WIDTH						23
-#define MARIO_BIG_TAIL_BBOX_HEIGHT						27
-
-#define MARIO_BIG_BBOX_SITTING_HEIGHT					14
-#define MARIO_BIG_TAIL_BBOX_SITTING_HEIGHT				20
-
-#define MARIO_SMALL_BBOX_WIDTH							13
-#define MARIO_SMALL_BBOX_HEIGHT							15
+#define MARIO_BIG_BBOX									14.0f
+#define MARIO_TAIL_WIDTH								4.0f
 
 
-#define MARIO_ELASTIC									0.15
+#define MARIO_BIG_BBOX_WIDTH							23.0f
+#define MARIO_BIG_BBOX_HEIGHT							28.0f
+
+#define MARIO_BIG_TAIL_BBOX_WIDTH						23.0f
+#define MARIO_BIG_TAIL_BBOX_HEIGHT						27.0f
+
+#define MARIO_BIG_BBOX_SITTING_HEIGHT					14.0f
+#define MARIO_BIG_TAIL_BBOX_SITTING_HEIGHT				20.0f
+
+#define MARIO_SMALL_BBOX_WIDTH							13.0f
+#define MARIO_SMALL_BBOX_HEIGHT							15.0f
+
+
+#define MARIO_ELASTIC									0.25f
 
 //================================ANOTHER CONSTANT ZONE=================================
 #define MARIO_UNTOUCHABLE_TIME							1000

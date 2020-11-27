@@ -13,6 +13,8 @@ public:
 	bool isSpecial = false;
 
 
+	int ItemInside;
+
 	int height;
 	int width;
 
@@ -24,7 +26,7 @@ public:
 	bool isTouched = false;
 
 public:
-	QuestionBrick(int start_x,int start_y,int width, int height);
+	QuestionBrick(int start_x,int start_y,int width, int height,int);
 	virtual void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);	
 	void SetState(int state);

@@ -1,9 +1,9 @@
-#include "GameObject.h"
-
+#pragma once
+#include "Ground.h"
 #define BBOX_WIDTH	16
 #define BBOX_HEIGHT	16
 
-class ColorBox : public CGameObject
+class ColorBox : public Ground
 {
 		int height;
 		int width;

@@ -1,9 +1,9 @@
-
+#pragma once
 #define BBOX_WIDTH  16
 #define BBOX_HEIGHT 16
-#include "GameObject.h"
+#include "Ground.h"
 
-class Pipe : public CGameObject
+class Pipe : public Ground
 {
 	int height;
 	int width;

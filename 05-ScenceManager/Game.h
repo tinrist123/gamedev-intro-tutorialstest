@@ -72,6 +72,12 @@ public:
 	int GetScreenWidth() { return screen_width; }
 	int GetScreenHeight() { return screen_height; }
 
+	bool CheckAABB(float b1left, float b1top, float b1right, float b1bottom, float b2left, float b2top, float b2right, float b2bottom)
+	{
+		return !(b1right < b2left || b1left > b2right || b1top > b2bottom || b1bottom < b2top);
+	}
+
+
 	static void SweptAABB(
 		float ml,			// move left 
 		float mt,			// move top

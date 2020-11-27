@@ -1,13 +1,30 @@
 #include <d3dx9.h>
 #include <algorithm>
-
-
 #include "Utils.h"
 #include "Textures.h"
 #include "Game.h"
 #include "GameObject.h"
 #include "Sprites.h"
+#include "Coin.h"
 
+bool CGameObject::AABBCollision(LPGAMEOBJECT obj)
+{
+	
+	if (obj == NULL)
+		return false;
+	else
+	{
+		float l1, l2, b1, b2, r1, r2, t1, t2;
+		this->GetBoundingBox(l1, t1, r1, b1);
+		obj->GetBoundingBox(l2, t2, r2, b2);
+		if (CGame::GetInstance()->CheckAABB(l1, t1, r1, b1, l2, t2, r2, b2))
+			return true;
+		LPCOLLISIONEVENT e = SweptAABBEx(obj);
+		bool res = e->t > 0 && e->t <= 1.0f;
+		SAFE_DELETE(e);
+		return res;
+	}
+}
 CGameObject::CGameObject()
 {
 	x = y = 0;
@@ -69,7 +86,8 @@ void CGameObject::CalcPotentialCollisions(
 {
 	for (UINT i = 0; i < coObjects->size(); i++)
 	{
-		LPCOLLISIONEVENT e = SweptAABBEx(coObjects->at(i));
+		LPCOLLISIONEVENT e = 
+		SweptAABBEx(coObjects->at(i));
 
 		if (e->t > 0 && e->t <= 1.0f)
 			coEvents.push_back(e);

@@ -42,6 +42,13 @@ void FireBullet::SetState(int state)
 	}
 }
 
+FireBullet::FireBullet()
+{
+	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(7);
+	SetAnimationSet(ani_set);
+}
+
 void FireBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 

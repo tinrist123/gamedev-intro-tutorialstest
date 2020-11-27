@@ -96,12 +96,16 @@ vector<int> Constant::getAnimationMARIO_BIG_HAVE_TAIL()
 
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_RUNNING_FLYING_RIGHT);
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_RUNNING_FLYING_LEFT);
-
-	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT);
-	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT);
 	
-	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_RUNNING_FALLING_RIGHT);
-	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_RUNNING_FALLING_LEFT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_KICK_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_KICK_KOOPAS_LEFT);
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_IDLE_HOLD_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_IDLE_HOLD_KOOPAS_LEFT);
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_WALKING_HOLD_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_WALKING_HOLD_KOOPAS_LEFT);
+
 	return listAni_Mario_Big;
 }
 
@@ -133,6 +137,17 @@ vector<int> Constant::getAnimationMARIO_BIG_HAVE_FIRE()
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_RUNNING_FLYING_RIGHT);
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_RUNNING_FLYING_LEFT);
 
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_KICK_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_KICK_KOOPAS_LEFT);
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_IDLE_HOLD_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_IDLE_HOLD_KOOPAS_LEFT);
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_WALKING_HOLD_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_WALKING_HOLD_KOOPAS_LEFT);
+
+
+
 	return listAni_Mario_Big;
 }
 
@@ -163,5 +178,16 @@ vector<int> Constant::getAnimationMARIO_BIG()
 
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_RUNNING_FLYING_RIGHT);
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_RUNNING_FLYING_LEFT);
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_KICK_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_KICK_KOOPAS_LEFT);
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_IDLE_HOLD_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_IDLE_HOLD_KOOPAS_LEFT);
+
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_WALKING_HOLD_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_WALKING_HOLD_KOOPAS_LEFT);
+
 	return listAni_Mario_Big;
 }

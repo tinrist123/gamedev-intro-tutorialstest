@@ -20,14 +20,21 @@
 #include "Map.h"
 #include "FireBullet.h"
 #include "MarioBullet.h"
-#include "Effects.h"
-
+#include "EffectsFire.h"
+#include "Coin.h"
+#include "ListEffects.h"
 class CPlayScene: public CScene
 {
 public: 
 	CMario *player;					// A play scene has to have player, right? 
 
 	vector<LPGAMEOBJECT> objects;
+	
+	// Waiting for Grid
+	vector<LPITEM> items;
+	vector<LPENEMY> enemies;
+	vector<LPGAMEOBJECT> staticObjects;
+	vector<LPEFFECTS> effects;
 
 	void _ParseSection_TEXTURES(string line);
 	void _ParseSection_SPRITES(string line);
@@ -43,6 +50,9 @@ public:
 	virtual void Update(DWORD dt);
 	virtual void Render();
 	virtual void Unload();
+
+	Enemy *CreateFlowerBullet(CFlower *flower);
+	void playerHittingSpecialItem(Item*& item);
 
 	TileMap* map;
 	CMario * GetPlayer() { return player; } 

@@ -2,6 +2,12 @@
 #include "Utils.h"
 
 
+CFlower::CFlower(float y,int HeightPipe)
+{
+	this->start_y = y;
+	this->HeightPipe = HeightPipe;
+}
+
 void CFlower::Render()
 {
 	if (isShooting)
@@ -18,7 +24,7 @@ void CFlower::Render()
 	}
 	
 	animation_set->at(ani)->Render(x, y);
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 void CFlower::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
@@ -40,6 +46,8 @@ void CFlower::SetState(int state)
 		break;
 	case FLOWER_STATE_DOWN:
 		isShooting = false;
+		isWaitingShooting = false;
+		delayBullet = 0;
 		vy = 0;
 		break;
 	case FLOWER_STATE_AIM_TARGET:
@@ -55,9 +63,8 @@ void CFlower::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	CGameObject::Update(dt, coObjects);
 
 
-	x += dx;
-	y += (y == 336.0f && state == FLOWER_STATE_UP) ? 0 : dy;
-	vy += MARIO_GRAVITY * dt;
+	y += (y == start_y -16 * HeightPipe && state == FLOWER_STATE_UP) ? 0 : dy;
+	vy += 0.0001 * dt;
 
 
 	
@@ -70,7 +77,7 @@ void CFlower::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else if (GetTickCount64() - setInterval > 3000)
 	{
-		if (state == FLOWER_STATE_UP )
+		if (state == FLOWER_STATE_UP)
 		{
 			SetState(FLOWER_STATE_DOWN);
 		}
@@ -82,13 +89,13 @@ void CFlower::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		
 	}
 
-	if (y <= 336.0f)
+	if (y <= start_y - 16 * HeightPipe)
 	{
-		y = 336.0f;
+		y = start_y - 16 * HeightPipe;
 	}
-	if (y >= 384.0f)
+	if (y >= start_y)
 	{
-		y = 384.0f;
+		y = start_y;
 	}
 	
 }

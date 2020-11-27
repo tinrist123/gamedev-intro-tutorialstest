@@ -12,6 +12,17 @@ using namespace std;
 
 #define ID_TEX_BBOX -100		// special texture to draw object bounding box
 #define MARIO_GRAVITY									0.0006f
+#define BBOX_BIT										16.0f
+
+#ifndef SAFE_DELETE
+#define SAFE_DELETE(ptr) \
+if(ptr) \
+{\
+	delete (ptr); \
+	ptr = nullptr; \
+} \
+
+#endif
 
 
 class CGameObject; 
@@ -51,11 +62,12 @@ public:
 	bool isOnGround = true;
 	bool isBoundingBox = true;
 	bool isAddedEffect = false;
+	bool isDamageable = true;
 
 	int ani = -1;
 
-	float x; 
-	float y;
+	float x = 0; 
+	float y = 0;
 
 	float dx;	// dx = vx*dt
 	float dy;	// dy = vy*dt
@@ -78,9 +90,25 @@ public:
 	void SetSpeed(float vx, float vy) { this->vx = vx, this->vy = vy; }
 	void GetPosition(float &x, float &y) { x = this->x; y = this->y; }
 	void GetSpeed(float &vx, float &vy) { vx = this->vx; vy = this->vy; }
+
 	void setHealth(int health) { this->health = health; }
 	void subHealth() { if (this->health > 0 )this->health--; }
+	int GetHealth() { return health; }
+
 	int GetState() { return this->state; }
+	bool isAliveObject() { return health >= 1; }
+
+	bool objectDisappear()
+	{
+		return health == 0 && isDisappeared && !isBoundingBox;
+	}
+
+	void setObjDisappear()
+	{
+		health = 0;
+		isDisappeared = true;
+		isBoundingBox = false;
+	}
 
 	void RenderBoundingBox();
 
@@ -98,14 +126,14 @@ public:
 		float &rdx,		
 		float &rdy);
 
-	CGameObject();
+public:
+	bool AABBCollision(LPGAMEOBJECT b);
 
+	CGameObject();
 	virtual void GetBoundingBox(float &left, float &top, float &right, float &bottom) = 0;
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects = NULL);
 	virtual void Render() = 0;
 	virtual void SetState(int state) { this->state = state; }
-
-
 	~CGameObject();
 };
 

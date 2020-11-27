@@ -1,10 +1,10 @@
 #pragma once
-#include "GameObject.h"
+#include "Enemy.h"
 
 #define FLOWER_BBOX_WIDTH								16.0f
 #define FLOWER_BBOX_HEIGHT								32.0f
 
-#define FLOWER_SHOOT_SPEED_X							0.15f
+#define FLOWER_SHOOT_SPEED_X							0.1f
 
 #define FLOWER_STATE_UP									0
 #define FLOWER_STATE_DOWN								1
@@ -24,19 +24,25 @@
 #define FLOWER_ANI_DOWN_OPEN_MOUTH_RIGHT				7
 
 class CFlower :
-    public CGameObject
+    public Enemy
 {
 
 public:
 	bool priority = false;
 	bool isWaitingShooting = false;
 	bool isShooting = false;
-	int ny;
+
+
+	int typeFlower = 1;
+	int ny = 0;
+
+	int	  HeightPipe;
+	float start_y;
 
 	DWORD delayBullet = 0;
 	DWORD setInterval = 0;
 	DWORD setInterval2 = 0;
-	//CFlower();
+	CFlower(float y,int);
 	virtual void Render();
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

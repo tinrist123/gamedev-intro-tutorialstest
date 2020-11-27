@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include <d3dx9.h>
 #include <unordered_map>
-
+#include "Utils.h"
 #include "Sprites.h"
 
 /*
@@ -48,7 +48,9 @@ public:
 
 	void SetCurrentFrame(int currentFrame = -1) { this->currentFrame = currentFrame; }
 	void StartRenderAnimation() { tDraw = GetTickCount64(); };
-	bool IsRenderOver(DWORD a) { return (GetTickCount64() - tDraw >= a); };
+	bool IsRenderOver(DWORD a) { 
+		return GetTickCount64() - tDraw >= a;
+	};
 };
 
 typedef CAnimation *LPANIMATION;

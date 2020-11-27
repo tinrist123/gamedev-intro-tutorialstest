@@ -1,7 +1,7 @@
 #include "ColorBox.h"
 
 
-ColorBox::ColorBox(int width, int height) : CGameObject()
+ColorBox::ColorBox(int width, int height) : Ground(width, height)
 {
 	this->width = width;
 	this->height = height;

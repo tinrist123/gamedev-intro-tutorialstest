@@ -13,24 +13,33 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Enemy">
+      <UniqueIdentifier>{d881755c-2085-45ff-9072-ce4cd3314d30}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Effect">
+      <UniqueIdentifier>{47b7f363-b49f-4509-b975-8abda4f1cd13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\StaticObj">
+      <UniqueIdentifier>{b8dc3e2e-c5e3-4240-91d0-e4b435508da0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Item">
+      <UniqueIdentifier>{dd450271-56af-4117-9301-8a13c8ba6fea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EnemyWeapon">
+      <UniqueIdentifier>{3a0677d9-465c-4e7b-9913-ed7b2082c1f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\MarioWeapon">
+      <UniqueIdentifier>{343858aa-4dd3-4770-b4ab-44ffeca9fd5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{d66c6e6c-8d5b-4797-8ba1-dc601c593d5c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Mario">
+      <UniqueIdentifier>{2f0df138-5482-4c38-82a4-92912dc6d26f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Brick.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GameObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Goomba.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mario.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Sprites.cpp">
@@ -51,16 +60,7 @@
     <ClCompile Include="Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Koopas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Portal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Flower.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Constant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MapScence.cpp">
@@ -69,35 +69,80 @@
     <ClCompile Include="Map.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Ground.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Enemy.cpp">
+      <Filter>Source Files\Enemy</Filter>
     </ClCompile>
-    <ClCompile Include="ColorBox.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Goomba.cpp">
+      <Filter>Source Files\Enemy</Filter>
     </ClCompile>
-    <ClCompile Include="Pipe.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Flower.cpp">
+      <Filter>Source Files\Enemy</Filter>
     </ClCompile>
-    <ClCompile Include="QuestionBrick.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Koopas.cpp">
+      <Filter>Source Files\Enemy</Filter>
     </ClCompile>
-    <ClCompile Include="WeakBrick.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="Brick.cpp">
+      <Filter>Source Files\StaticObj</Filter>
     </ClCompile>
     <ClCompile Include="CloudBrick.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\StaticObj</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorBox.cpp">
+      <Filter>Source Files\StaticObj</Filter>
+    </ClCompile>
+    <ClCompile Include="Ground.cpp">
+      <Filter>Source Files\StaticObj</Filter>
     </ClCompile>
     <ClCompile Include="Item.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Item</Filter>
     </ClCompile>
     <ClCompile Include="FireBullet.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\EnemyWeapon</Filter>
+    </ClCompile>
+    <ClCompile Include="QuestionBrick.cpp">
+      <Filter>Source Files\StaticObj</Filter>
+    </ClCompile>
+    <ClCompile Include="WeakBrick.cpp">
+      <Filter>Source Files\StaticObj</Filter>
+    </ClCompile>
+    <ClCompile Include="MarioWeapon.cpp">
+      <Filter>Source Files\MarioWeapon</Filter>
     </ClCompile>
     <ClCompile Include="MarioBullet.cpp">
+      <Filter>Source Files\MarioWeapon</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Constant.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Mario.cpp">
+      <Filter>Source Files\Mario</Filter>
+    </ClCompile>
+    <ClCompile Include="Pipe.cpp">
+      <Filter>Source Files\StaticObj</Filter>
+    </ClCompile>
+    <ClCompile Include="DetectFuture.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Coin.cpp">
+      <Filter>Source Files\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectPoint.cpp">
+      <Filter>Source Files\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectsFire.cpp">
+      <Filter>Source Files\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="ListEffects.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Effects.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="MarioTail.cpp">
+      <Filter>Source Files\MarioWeapon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -182,7 +227,28 @@
     <ClInclude Include="MarioBullet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Effects.h">
+    <ClInclude Include="MarioWeapon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Enemy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DetectFuture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Coin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectsFire.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ListEffects.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectPoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MarioTail.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

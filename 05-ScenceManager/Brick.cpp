@@ -3,7 +3,7 @@
 
 
 
-CBrick::CBrick(int width, int height)
+CBrick::CBrick(int width, int height) : Ground(width,height)
 {
 	this->width = width;
 	this->height = height;
@@ -12,7 +12,7 @@ CBrick::CBrick(int width, int height)
 void CBrick::Render()
 {
 	//animation_set->at(0)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CBrick::GetBoundingBox(float &l, float &t, float &r, float &b)

@@ -6,6 +6,15 @@
 #include "Ground.h"
 #include "Item.h"
 #include "Portal.h"
+#include <algorithm>
+#include <assert.h>
+#include "ColorBox.h"
+#include "Game.h"
+#include "Utils.h"
+#include "Pipe.h"
+#include "Koopas.h"
+#include "FireBullet.h"
+#include "Flower.h"
 //#include "Scence.h"
 
 
@@ -19,7 +28,10 @@ public:
 	Constant* constant;
 	DWORD timeReload = 0;
 	DWORD autoReloadTime;
+	DWORD timeFlyingForTail = 0;
 
+
+	bool isCanHoldingKoopas = false;
 	bool isEnteredFirstSpaceUp = false;
 	bool isKeepJumpingHigher = false;
 	bool isFireShoot = false;
@@ -32,16 +44,21 @@ public:
 	bool isRollBack = false;
 	bool isWalking = false;
 	bool isTested = false;
-	bool isTested2 = false;
 
-	bool isSpecialGravity = false;
 	bool isPreventedSpamSpace = false;
-	bool isMaxSpped = false;
+	bool isMaxSpeed = false;
 
 	int  lastNx;
 	int  totalOfBulletsReadyForFiring = 2;
 
 	bool isRunning = false;
+
+	
+
+	bool isAttackPress = false;
+	bool isKickedKoopas = false;
+	void KickingKoopas() { isKickedKoopas = true; tDraw = GetTickCount64(); }
+
 
 	float lastVx;
 	float lastVy = 0.07;
@@ -53,6 +70,14 @@ public:
 public:
 	DWORD tDraw = 0;
 	bool isAttacking = false;
+	bool isJumpingAttack = false;
+
+	void OffPreventSpamSpace()
+	{
+		isEnteredFirstSpaceUp = false;
+		isPreventedSpamSpace = false;
+	}
+
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* colliable_objects = NULL);
 	virtual void Render();
@@ -67,6 +92,15 @@ public:
 	void resetAutoReload() { autoReloadTime = 0; }
 	bool isReloaded() { return GetTickCount64() - autoReloadTime > 500; }
 
+	void SetTimeFlyingForTail() { timeFlyingForTail = GetTickCount64(); }
+	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 2000;	}
+	void ChainKickKoopas(CKoopas* &koopas,bool isElastic);
+
+	void MarioHitEnemy();
+	void AccurateCollisionWithEnemy(LPGAMEOBJECT enemies);
+
+	void CollideWithEnemy(vector<LPENEMY> enemies);
+	void CollideWithItem(vector<LPITEM> items);
 	void Reset();
 
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);

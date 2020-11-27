@@ -2,9 +2,22 @@
 #include "Ground.h"
 #include "ColorBox.h"
 #include "Pipe.h"
-CGoomba::CGoomba()
+#include "Utils.h"
+CGoomba::CGoomba(int typeGoomba)
 {
-	SetState(GOOMBA_STATE_WALKING);
+	this->level = typeGoomba;
+	if (this->level == PARAGOOMBA)
+	{
+		SetState(GOOMBA_STATE_WALKING_WITH_WING);
+		health++;
+		//SetState(GOOMBA_STATE_DIE);
+	}
+	else if (this->level == GOOMBA_LEVEL_BROWN)
+	{
+		SetState(GOOMBA_STATE_WALKING);
+	}
+	DebugOut(L"health = %d\n", health);
+
 }
 
 void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &bottom)
@@ -16,41 +29,78 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 	}
 	else {
 		left = x;
+		right = x + GOOMBA_BBOX_WIDTH_BROWN_GOOMBA;
 		top = y;
-		right = x + GOOMBA_BBOX_WIDTH;
-
-		if (state == GOOMBA_STATE_DIE)
-			bottom = y + GOOMBA_BBOX_HEIGHT_DIE;
-		else
+		bottom = y + GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_DISTANCE_MAX_HEIGHT;
+		if (this->level == PARAGOOMBA)
+		{
+			top = y + GOOMBA_BBOX_DISTANCE_MAX_HEIGHT - 1;
 			bottom = y + GOOMBA_BBOX_HEIGHT;
+			right = x + GOOMBA_BBOX_WIDTH ;
+		}
+		if (state == GOOMBA_STATE_DIE)
+		{
+			bottom = y + GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_DISTANCE_MAX_HEIGHT;
+		}
 	}
-	
 }
-
-void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
+void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+
+	if (effectPoint)
+	{
+		effectPoint->UpdateOrDeleteEffect(dt, coObjects, effectPoint);
+	}
+
+
 	CGameObject::Update(dt, coObjects);
 
-	//
-	// TO-DO: make sure Goomba can interact with the world and to each of them too!
-	// 
+
+	if (state == GOOMBA_STATE_DIE)
+	{
+		if (this->timeWaitingDeath == 0)
+		{
+			this->setTimeWaitingDeath();
+		}
+		else if (checkTimeWaitingDeath())
+		{
+			setObjDisappear();
+		}
+	}
 
 	vy += MARIO_GRAVITY * dt;
-
 	vector<LPCOLLISIONEVENT> coEvents;
 	vector<LPCOLLISIONEVENT> coEventsResult;
-
 	coEvents.clear();
 
+	if (health == 2)
+	{
+		if (changeStateTo_MiniJumpGoomba() && state != GOOMBA_STATE_PRE_JUMPING)
+		{
+			SetState(GOOMBA_STATE_PRE_JUMPING);
+		}
+		else if (changeStateTo_MaxJumpGoomba() && state != GOOMBA_STATE_JUMPING)
+		{
+			SetState(GOOMBA_STATE_JUMPING);
+			resetTimeChangeState();
+		}
+	}
+
+
 	// turn off collision when die 
-	if (state != 4) CalcPotentialCollisions(coObjects, coEvents);
+	CalcPotentialCollisions(coObjects, coEvents);
 	// reset untouchable timer if untouchable time has passed
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
 	{
 		y += dy;
 		x += dx;
-
+		if (x < 0)
+		{
+			x = 1;
+			nx = -nx;
+			vx = -vx;
+		}
 	}
 	else
 	{
@@ -58,14 +108,13 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		float rdx = 0;
 		float rdy = 0;
 
-		// TODO: This is a very ugly designed function!!!!
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
 
 		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
 		/*if (rdx != 0 && rdx!=dx)
 			x += nx*abs(rdx); */
 
-		// block every object first!
+			// block every object first!
 		x += min_tx * dx + nx * 0.4f;
 		y += min_ty * dy + ny * 0.4f;
 
@@ -83,21 +132,42 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			{
 				if (e->ny < 0)
 				{
-					vy = 0;
+					if (state == GOOMBA_STATE_PRE_JUMPING)
+					{
+						vy = -GOOMBA_STATE_MINI_JUMPING_VY;
+					}
+					else if (state == GOOMBA_STATE_JUMPING)
+					{
+						if (!firstTimeHighJump)
+						{
+							vy = -GOOMBA_STATE_JUMPING_VY;
+							firstTimeHighJump = true;
+						}
+						else if (firstTimeHighJump)
+						{
+							firstTimeHighJump = false;
+							SetState(GOOMBA_STATE_WALKING_WITH_WING);
+							blockingChangeState(false);
+						}
+					}
+					else {
+						vy = 0;
+					}
 				}
 				else if (e->nx != 0)
 				{
 					vx = -vx;
+					
 				}
 			}
-			if (dynamic_cast<ColorBox *>(e->obj))
+			if (dynamic_cast<ColorBox*>(e->obj))
 			{
 				if (e->nx != 0)
 				{
 					x += vx * dt;
 				}
 			}
-			else if (dynamic_cast<Pipe *>(e->obj))
+			else if (dynamic_cast<Pipe*>(e->obj))
 			{
 				if (e->nx != 0)
 				{
@@ -112,14 +182,43 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 void CGoomba::Render()
 {
-	int ani = GOOMBA_ANI_WALKING;
-	if (state == GOOMBA_STATE_DIE) {
-		ani = GOOMBA_ANI_DIE;
+	if (this->level == PARAGOOMBA)
+	{
+		if (state == GOOMBA_STATE_WALKING)
+		{
+			ani = GOOMBA_RED_ANI_WALKING;
+		}
+		else  if (state == GOOMBA_STATE_DIE) {
+			ani = GOOMBA_RED_ANI_DIE;
+		}
+		else if (state == GOOMBA_STATE_JUMPING || state == GOOMBA_STATE_PRE_JUMPING)
+		{
+			ani = GOOMBA_RED_ANI_JUMPING;
+		}
+		else if (state == GOOMBA_STATE_WALKING_WITH_WING)
+		{
+			ani = GOOMBA_RED_ANI_WALKING_WING;
+		}
+	}
+	else if (this->level == GOOMBA_LEVEL_BROWN)
+	{
+		if (state == GOOMBA_STATE_WALKING)
+		{
+			ani = GOOMBA_ANI_WALKING;
+		}
+		else  if (state == GOOMBA_STATE_DIE) {
+			ani = GOOMBA_ANI_DIE;
+		}
 	}
 
 	animation_set->at(ani)->Render(x,y);
 
-	//RenderBoundingBox();
+	if (effectPoint)
+	{
+		effectPoint->Render();
+	}
+
+	RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)
@@ -130,10 +229,20 @@ void CGoomba::SetState(int state)
 		case GOOMBA_STATE_DIE:
 			y += GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE + 1;
 			vx = 0;
-			vy = -0.2f;
-			isBoundingBox = false;
 			break;
 		case GOOMBA_STATE_WALKING: 
-			vx = -GOOMBA_WALKING_SPEED;
+			vx = nx * GOOMBA_WALKING_SPEED;
+			break;
+		case GOOMBA_STATE_WALKING_WITH_WING:
+			vx = nx * GOOMBA_WALKING_SPEED;
+			break;
+		case GOOMBA_STATE_PRE_JUMPING:
+			//vy = -0.1;
+			break;
+		case GOOMBA_STATE_JUMPING:
+			//vy = -0.3;
+			break;
 	}
 }
+
+
