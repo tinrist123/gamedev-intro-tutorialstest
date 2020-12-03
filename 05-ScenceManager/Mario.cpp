@@ -1,13 +1,13 @@
 #include "Mario.h"
-#include "Coin.h"
+#include "P_Switch.h"
 
 
 
 // TODO: MARIO CAM RUA THA NUT ATACKKING CHUA DA DUOC	DONE
 // TODO: ANIMATION CAM RUA CON CHUA ON DINH				DONE
 // TODO: CHUA LAM CON GOOMBA ( 2 LOAI)					DONE
-// TODO: CHUA LAM COIN
-// TODO: Chua lam Con mario chon` Atackking
+// TODO: CHUA LAM COIN									DONE
+// TODO: Chua lam Con mario chon` Atackking				DONE
 // TODO: (Dangerous) Chua lam HUB
 // TODO: MARIO DE SHIFT CHAY BAY CO VAN DE ANIMATION	DONE	
 // TODO: CAM CON RUA ROI THA RA CHUA DUOC NEU ADD NHIEU CON KOOPAS	DONE
@@ -18,11 +18,11 @@
 // TODO: NGAY MAI
 //	FIX MARIO FIRE ATTACK					DONE
 //	KOOPAS NEVER FALL						DONE
-//	KOOPAS BI LOI 2 CUC GACH
+//	KOOPAS BI LOI 2 CUC GACH				DONE
 //	FLOWER ATTACK BY MOUTH
 //	GRID
 //	SEPERATE OBJECT TO UPDATE AND RENDER
-//	COIN									50%
+//	COIN									DONEs
 //	HUB!!!!!
 //	isRenderOver co van de					hot/fix
 
@@ -31,6 +31,21 @@
 /// Constant field
 /// <param name="kindMario"></param>
 /// </summary>
+
+int  CMario::DetectLevelSpeedMario()
+{
+	if (vx > 0.12f)
+	{
+		for (int i = 6; i >= 1; i--)
+		{
+			if (vx - 0.12f >= (float)((1.0*8 / 600)*i*1.0))
+			{
+				return i;
+			}
+		}
+	}
+	return 0;
+}
 
 CMario::CMario(float x, float y) : CGameObject()
 {
@@ -43,6 +58,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	start_y = y; 
 	this->x = x; 
 	this->y = y; 
+	this->type = 0;
 }
 
 
@@ -52,9 +68,8 @@ void  CMario::ChainKickKoopas(CKoopas* &koopas,bool isElastic)
 	{
 		vy = -MARIO_ELASTIC;
 	}
-	if (x > koopas->x + 8) koopas->nx = -1;
-	else if (x < koopas->x + 8) koopas->nx = 1;
-	else koopas->nx = 1;
+	if (x > koopas->x ) koopas->nx = -1;
+	else if (x < koopas->x) koopas->nx = 1;
 	koopas->SetState(KOOPAS_STATE_SHELL_MOVING);
 	koopas->subHealth();
 	// Mario Kick Koopas
@@ -87,6 +102,7 @@ void CMario::AccurateCollisionWithEnemy(LPGAMEOBJECT enemies)
 		return;
 	if (untouchable == 1)
 		return;
+	if (this->y > enemies->y) return;
 	if (dynamic_cast<CGoomba*>(enemies)) return;
 	if (dynamic_cast<CKoopas*>(enemies)) return;
 	if (!enemies->GetHealth() == 0 && enemies->isDamageable)
@@ -104,13 +120,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	this->dt = dt;
 	dx = vx * dt;
 	dy = vy * dt;
-	
+	if (level == MARIO_LEVEL_BIG_TAIL && isAttacking)
+	{
+		setTailPos();
+		Tail->Update(dt, coObjects);
+	}
 
 	vy += MARIO_GRAVITY * dt;
 	lastVx = vx;
 
+	DebugOut(L"vx = %f\n", vx);
 	if (vy > 0)
 	{
+		//if (!isOnGround) this->ReduceVelocityWhenFly();
 		isFalling = true;
 	}
 
@@ -197,6 +219,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		isKickedKoopas = false;
 		tDraw = 0;
 	}
+
+	/*if (!this->isGround(this->x + constant->listBBox_Mario_Big.at(0) + 3.0f, this->y + MARIO_BIG_BBOX_HEIGHT + 3, *coObjects) && !this->isGround(this->x - 1, this->y + constant->listBBox_Mario_Big.at(1) + 8, *coObjects))
+	{
+		this->MarioIsFalling();
+	}*/
+
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
 	{
@@ -219,11 +247,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		x += min_tx * dx + nx * 0.4f;	
 		y += min_ty * dy + ny * 0.4f;
 
-		/*if (ny != 0) {
+		if (nx != 0)
+		{
+			if (imMovable)
+			{
+				imMovable = false;
+			}
+		}
+		else imMovable = true;
+		if (ny != 0) {
 			vy = 0;
 			isEnteredFirstSpaceUp = false;
 			isPreventedSpamSpace = false;
-		}	*/	
+		}		
 		//
 		// Collision logic with other objects
 		//
@@ -417,6 +453,15 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					}
 				}*/
 			}
+			else if (e->obj->getTypeObject() == Type::P_SWITCH)
+			{
+				P_Switch * p = dynamic_cast<P_Switch*>(e->obj);
+				if (e->ny < 0)
+				{
+					this->MarioSetOnGround();
+					p->isActived = true;
+				}
+			}
 		}
 	}
 	// clean up collision events
@@ -557,6 +602,7 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 		}
 		else if (mario->isFalling)
 		{
+			DebugOut(L"isKeepJumping = %d\n", mario->isKeepJumping);
 			if (mario->isOnGround == false)
 			{
 				if (mario->nx == 1)
@@ -567,11 +613,16 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 						{
 							mario->ani = MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT;
 						}
+						else if (fabs(mario->vx) >= MARIO_RUNNING_MAX_SPEED && !mario->isOnGround && mario->isFalling
+							&& mario->level == MARIO_LEVEL_BIG_TAIL
+							)
+						{
+							mario->ani = MARIO_ANI_BIG_TAIL_RUNNING_FALLING_RIGHT;
+						}
 						else if (mario->animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT)->IsRenderOver(150)) 
 						{
-						mario->ani = listAnimationForResMario.at(10);
+							mario->ani = listAnimationForResMario.at(10);
 						}
-						
 					}
 				}
 				else if (mario->nx == -1)
@@ -580,6 +631,12 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 						if (mario->isKeepJumping)
 						{
 							mario->ani = MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT;
+						}
+						else if(fabs(mario->vx) >= MARIO_RUNNING_MAX_SPEED && !mario->isOnGround && mario->isFalling
+							&& mario->level == MARIO_LEVEL_BIG_TAIL
+						)
+						{
+							mario->ani = MARIO_ANI_BIG_TAIL_RUNNING_FALLING_LEFT;
 						}
 						else if(mario->animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_LEFT)->IsRenderOver(150)) {
 							mario->ani = listAnimationForResMario.at(11);
@@ -779,17 +836,6 @@ void CMario::Render()
 					ani = MARIO_ANI_BIG_TAIL_KEEP_FLYING_RUNNING_LEFT;
 				}
 			}
-			else if (fabs(vx) >= MARIO_RUNNING_MAX_SPEED && !isOnGround && isFalling)
-			{
-				if (nx == 1)
-				{
-					ani = MARIO_ANI_BIG_TAIL_RUNNING_FALLING_RIGHT;
-				}
-				else if (nx == -1)
-				{
-					ani = MARIO_ANI_BIG_TAIL_RUNNING_FALLING_LEFT;
-				}
-			}
 		}
 		
 		
@@ -847,7 +893,11 @@ void CMario::Render()
 	if (untouchable) alpha = 128;
 	
 	animation_set->at(ani)->Render(x, y, alpha);
-	
+
+	if (isAttacking && level == MARIO_LEVEL_BIG_TAIL)
+	{
+		Tail->Render();
+	}
 	RenderBoundingBox();
 }
 void CMario::SetState(int state)
@@ -1016,9 +1066,10 @@ void CMario::SetState(int state)
 		}
 		else if (isFalling)
 		{
+			this->ReduceVelocityWhenFly();
 			isKeepJumping = true;
 			this->timeFlyingForTail = 0;
-			if (nx == 1 && animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT)->IsRenderOver(150))
+			if (nx == 1 )
 			{
 				animation_set->at(MARIO_ANI_BIG_TAIL_SLOW_FALLING_FLYING_RIGHT)->StartRenderAnimation();
 			}
@@ -1181,14 +1232,24 @@ void CMario::CollideWithEnemy(vector<LPENEMY> enemies)
 		}
 	}
 }
+
+
+
 void CMario::CollideWithItem(vector<LPITEM> items)
 {
 	for (size_t i = 0; i < items.size(); i++)
 	{
+		if (!items[i]->getTypeObject() == Type::P_SWITCH && items[i]->GetState() == ITEM_STATE_COIN_JUMP)
+		{
+			continue;
+		}
 		if (this->AABBCollision(items[i]))
 		{
-			items[i]->setObjDisappear();
-			// Increase Poin of Player
+			if (items[i]->isTouchable)
+			{
+				items[i]->setObjDisappear();
+				// Increase Poin of Player
+			}
 		}
 	}
 }

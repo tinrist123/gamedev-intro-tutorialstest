@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Mario">
       <UniqueIdentifier>{2f0df138-5482-4c38-82a4-92912dc6d26f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Grid">
+      <UniqueIdentifier>{4ce0f0cb-e490-463b-9479-42451a4ba98d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\BoardGame">
+      <UniqueIdentifier>{f1f69a39-376b-4c08-b4f4-4fe1e6c7afb8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -126,9 +132,6 @@
     <ClCompile Include="Pipe.cpp">
       <Filter>Source Files\StaticObj</Filter>
     </ClCompile>
-    <ClCompile Include="DetectFuture.cpp">
-      <Filter>Source Files\Common</Filter>
-    </ClCompile>
     <ClCompile Include="Coin.cpp">
       <Filter>Source Files\Item</Filter>
     </ClCompile>
@@ -138,11 +141,44 @@
     <ClCompile Include="EffectsFire.cpp">
       <Filter>Source Files\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="ListEffects.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MarioTail.cpp">
       <Filter>Source Files\MarioWeapon</Filter>
+    </ClCompile>
+    <ClCompile Include="Leaf.cpp">
+      <Filter>Source Files\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Mushroom.cpp">
+      <Filter>Source Files\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="ListEffects.cpp">
+      <Filter>Source Files\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectHitTail.cpp">
+      <Filter>Source Files\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="P_Switch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid.cpp">
+      <Filter>Source Files\Grid</Filter>
+    </ClCompile>
+    <ClCompile Include="BoardGame.cpp">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClCompile>
+    <ClCompile Include="Number.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PMaxSpeed.cpp">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClCompile>
+    <ClCompile Include="Letter.cpp">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClCompile>
+    <ClCompile Include="CarretSpeed.cpp">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClCompile>
+    <ClCompile Include="BoardAddSprite.cpp">
+      <Filter>Source Files\BoardGame</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -233,9 +269,6 @@
     <ClInclude Include="Enemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DetectFuture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Coin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -250,6 +283,42 @@
     </ClInclude>
     <ClInclude Include="MarioTail.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Leaf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mushroom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="define.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectHitTail.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="P_Switch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoardGame.h">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClInclude>
+    <ClInclude Include="CarretSpeed.h">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClInclude>
+    <ClInclude Include="PMaxSpeed.h">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Letter.h">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Number.h">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClInclude>
+    <ClInclude Include="BoardAddSprite.h">
+      <Filter>Source Files\BoardGame</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

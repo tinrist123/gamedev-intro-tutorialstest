@@ -1,13 +1,9 @@
 #include "Koopas.h"
-#include "Utils.h"
-#include "Ground.h"
-#include "ColorBox.h"
-#include "Pipe.h"
-#include "MarioWeapon.h"
-#include "QuestionBrick.h"
+
 
 CKoopas::CKoopas(int typeKoopas, int typeColorKoopas)
 {
+	this->type = Type::KOOPAS;
 	this->TypeKoopas = typeKoopas;
 	this->TypeColorKoopas = typeColorKoopas;
 	nx = 1;
@@ -29,10 +25,6 @@ CKoopas::CKoopas(int typeKoopas, int typeColorKoopas)
 		break;
 	}
 	health++;
-	boxCalcFutureRight = new DetectFuture();
-	boxCalcFutureRight->UpdatePosition(x+20 , y);
-	boxCalcFutureLeft = new DetectFuture();
-	boxCalcFutureLeft->UpdatePosition(x - 20, y);
 }
 
 
@@ -72,38 +64,62 @@ void CKoopas::ExecuteRevingKoopas()
 
 void CKoopas::GetBoundingBox(float& left, float& top, float& right, float& bottom)
 {
-	left = x;
-	if (state == KOOPAS_ANI_SHELL_OVERTURNED_MOVING
-		||
-		state == KOOPAS_ANI_SHELL_OVERTURNED
-		||
-		state == KOOPAS_ANI_SHELL_MOVING
-		||
-		state == KOOPAS_ANI_SHELL_OVERTURNED_HEALTH
-		||
-		state == KOOPAS_STATE_PRE_REVIE
-		||
-		state == KOOPAS_STATE_PRE_REVIE_2
-		||
-		state == KOOPAS_STATE_SHELL_OUT_CONTROL
-		)
+	if (!isBoundingBox)
 	{
-		top = y + 9;
+		left = top = right = bottom;
 	}
-	else{
-		top = y;
-	}
-	right = x + KOOPAS_BBOX_WIDTH;
-
-	if (state == KOOPAS_STATE_DIE)
-		bottom = y + KOOPAS_BBOX_HEIGHT_DIE;
 	else
-		bottom = y + KOOPAS_BBOX_HEIGHT - 2;
+	{
+		left = x;
+		if (state == KOOPAS_STATE_SHELL_MOVING
+			||
+			state == KOOPAS_STATE_PRE_REVIE
+			||
+			state == KOOPAS_STATE_PRE_REVIE_2
+			||
+			state == KOOPAS_STATE_SHELL_OUT_CONTROL
+			)
+		{
+			top = y + 9;
+		}
+		else {
+			top = y;
+		}
+		right = x + KOOPAS_BBOX_WIDTH;
+
+		if (state == KOOPAS_STATE_DIE)
+			bottom = y + KOOPAS_BBOX_HEIGHT_DIE;
+		else
+			bottom = y + KOOPAS_BBOX_HEIGHT + 2;
+	}
 }
+
+//void hamNguNhuCho(vector<LPCOLLISIONEVENT> &coEventsResult)
+//{
+//	for (int i = coEventsResult.size() - 1; i >= 0; i--)
+//	{
+//		LPCOLLISIONEVENT e = coEventsResult[i];
+//
+//		if (e->obj->getTypeObject() == Type::QUESTIONBRICK)
+//		{
+//			for (int j = i - 1; j >= 0; j--)
+//			{
+//				LPCOLLISIONEVENT e2 = coEventsResult[j];
+//				if (e2->obj->getTypeObject() == Type::QUESTIONBRICK)
+//				{
+//					coEventsResult.erase(coEventsResult.begin() + j);
+//				}
+//			}
+//
+//		}
+//
+//	}
+//
+//}
 
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
-
+	
 	if (effectPoint )
 	{
 		effectPoint->UpdateOrDeleteEffect(dt, coObjects, effectPoint);
@@ -132,8 +148,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	ExecuteRevingKoopas();
 
 	// Detect Koopas in next Update to calc whether koopas fall
-	boxCalcFutureRight->UpdatePosition(x + 16, y + KOOPAS_BBOX_HEIGHT);
-	boxCalcFutureLeft->UpdatePosition(x, y + KOOPAS_BBOX_HEIGHT);
+
+
 
 	vy += MARIO_GRAVITY * dt;
 	vector<LPCOLLISIONEVENT> coEvents;
@@ -145,6 +161,28 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		CalcPotentialCollisions(coObjects, coEvents);
 	// reset untouchable timer if untouchable time has passed
 	// No collision occured, proceed normally
+	
+	if (CheckKoopasNeverFalling())
+	{
+		if (this->nx == 1 && firstTime)
+		{
+			if (!this->isGround(this->x + KOOPAS_BBOX_WIDTH + 2, this->y + KOOPAS_BBOX_HEIGHT + 3, *coObjects))
+			{
+				this->nx = -1;
+				vx = fabs(this->vx) * nx;
+			}
+		}
+		else if (this->nx == -1 && firstTime)
+		{
+			if (!this->isGround(this->x - 1, this->y + KOOPAS_BBOX_HEIGHT + 8, *coObjects))
+			{
+				this->nx = 1;
+				vx = fabs(this->vx);
+			}
+		}
+	}
+
+	
 
 	if (coEvents.size() == 0)
 	{
@@ -157,19 +195,22 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		float rdx = 0;
 		float rdy = 0;
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-
+		/*if (coEvents.size() >= 2 && nx == -1)
+		{
+			hamNguNhuCho(coEventsResult);
+		}*/
 		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
 		/*if (rdx != 0 && rdx!=dx)
 			x += nx*abs(rdx); */
 
 		// block every object first!
-		x += min_tx * dx + nx * 0.4f;
-		y += min_ty * dy + ny * 0.4f;
+		x += min_tx * dx + nx * 0.1f;
+		y += min_ty * dy + ny * 0.1f;
 
 		//if (nx != 0) vx = 0;
-		if (ny != 0) {
+		/*if (ny != 0) {
 			vy = 0;
-		}
+		}*/
 		//
 		// Collision logic with other objects
 		//
@@ -184,26 +225,24 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				}
 			}
 			if (dynamic_cast<Ground*>(e->obj))
-			{
-				if (!boxCalcFutureRight->AABBCollision(e->obj))
-				{
-					vx = -fabs(vx);
-					this->nx = -1;
-				}
-				else if (!boxCalcFutureLeft->AABBCollision(e->obj))
-				{
-					vx = fabs(vx);
-					this->nx = 1;
-				}
+			{			
 				if (e->ny < 0)
 				{
+					if (!firstTime)
+					{
+						firstTime = true;
+					}
 					if (state == KOOPAS_STATE_HAVE_WING_FLYING)
 					{	
 						vy = -0.2f;
 					}
-					else {
-						vy = 0;
+					else if (state == KOOPAS_STATE_HIT_BY_WEAPON_MARIO) {
+						SetState(KOOPAS_STATE_SHELL);
 					} 
+					else
+					{
+						vy = 0;
+					}
 				}
 			}
 			if (dynamic_cast<ColorBox*>(e->obj))
@@ -242,14 +281,18 @@ void CKoopas::AddAniForKoopasGreenToList()
 	listAnimationKoopas.clear();
 	listAnimationKoopas.push_back(KOOPAS_ANI_WALKING_RIGHT);
 	listAnimationKoopas.push_back(KOOPAS_ANI_WALKING_LEFT);
-	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_FLYING_LEFT);
-	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_FLYING_RIGHT);
-	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_WALKING_LEFT);
-	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_WALKING_RIGHT);
-	listAnimationKoopas.push_back(KOOPAS_ANI_PRE_REVIE);
-	listAnimationKoopas.push_back(KOOPAS_ANI_PRE_REVIE_2);
 	listAnimationKoopas.push_back(KOOPAS_ANI_SHELL);
 	listAnimationKoopas.push_back(KOOPAS_ANI_SHELL_MOVING);
+	listAnimationKoopas.push_back(KOOPAS_ANI_PRE_REVIE);
+	listAnimationKoopas.push_back(KOOPAS_ANI_PRE_REVIE_2);
+	listAnimationKoopas.push_back(KOOPAS_ANI_SHELL_OVERTURNED);
+	listAnimationKoopas.push_back(KOOPAS_ANI_SHELL_OVERTURNED_MOVE);
+	listAnimationKoopas.push_back(KOOPAS_ANI_SHELL_OVERTURNED_MOVE_PRE_REVIE);
+	listAnimationKoopas.push_back(KOOPAS_ANI_SHELL_OVERTURNED_MOVE_PRE_REVIE_2);
+	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_WALKING_RIGHT);
+	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_WALKING_LEFT);
+	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_FLYING_RIGHT);
+	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_FLYING_LEFT);
 }
 
 void CKoopas::AddAniForKoopasRedToList()
@@ -257,67 +300,94 @@ void CKoopas::AddAniForKoopasRedToList()
 	listAnimationKoopas.clear();
 	listAnimationKoopas.push_back(KOOPAS_RED_ANI_WALKING_RIGHT);
 	listAnimationKoopas.push_back(KOOPAS_RED_ANI_WALKING_LEFT);
-	/*listAnimationKoopas.push_back(KOOPAS_RED_ANI_HAVE_WING_FLYING_LEFT);
-	listAnimationKoopas.push_back(KOOPAS_RED_ANI_HAVE_WING_FLYING_RIGHT);
-	listAnimationKoopas.push_back(KOOPAS_RED_ANI_HAVE_WING_WALKING_LEFT);
-	listAnimationKoopas.push_back(KOOPAS_RED_ANI_HAVE_WING_WALKING_RIGHT);*/
-	listAnimationKoopas.push_back(0);
-	listAnimationKoopas.push_back(0);
-	listAnimationKoopas.push_back(0);
-	listAnimationKoopas.push_back(0);
-	// ADD SPRITE NGU NEN BI DAO THU TU
-	listAnimationKoopas.push_back(KOOPAS_RED_ANI_PRE_REVIE_2);
-	listAnimationKoopas.push_back(KOOPAS_RED_ANI_PRE_REVIE);
 	listAnimationKoopas.push_back(KOOPAS_RED_ANI_SHELL);
 	listAnimationKoopas.push_back(KOOPAS_RED_ANI_SHELL_MOVING);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_PRE_REVIE);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_PRE_REVIE_2);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_SHELL_OVERTURNED);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_SHELL_OVERTURNED_MOVE);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_SHELL_OVERTURNED_MOVE_PRE_REVIE);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_SHELL_OVERTURNED_MOVE_PRE_REVIE_2);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_HAVE_WING_WALKING_RIGHT);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_HAVE_WING_WALKING_LEFT);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_HAVE_WING_FLYING_RIGHT);
+	listAnimationKoopas.push_back(KOOPAS_RED_ANI_HAVE_WING_FLYING_LEFT);
 }
 void CKoopas::Render()
 {
-	if (state == KOOPAS_STATE_WALKING)
+	if (state == KOOPAS_STATE_HIT_BY_WEAPON_MARIO)
 	{
-		if (vx > 0) ani = listAnimationKoopas.at(0);
-		else if (vx < 0) ani = listAnimationKoopas.at(1);
+		ani = listAnimationKoopas.at(6);
+	}
+	else if (state == KOOPAS_STATE_WALKING)
+	{
+		if (nx == 1 ) ani = listAnimationKoopas.at(0);
+		else if (nx == -1) ani = listAnimationKoopas.at(1);
 	}
 	else if (state == KOOPAS_STATE_HAVE_WING_FLYING)
 	{
 		if (nx == -1)
-			ani = listAnimationKoopas.at(2);
+			ani = listAnimationKoopas.at(13);
 		else if (nx == 1)
-			ani = listAnimationKoopas.at(3);
+			ani = listAnimationKoopas.at(12);
 	}
 	else if (state == KOOPAS_STATE_HAVE_WING_WALKING)
 	{
 		if (nx == -1)
-			ani = listAnimationKoopas.at(4);
+			ani = listAnimationKoopas.at(11);
 		else if (nx == 1)
-			ani = listAnimationKoopas.at(5);
+			ani = listAnimationKoopas.at(10);
 	}
 	else if (state == KOOPAS_STATE_PRE_REVIE)
 	{
-		ani = listAnimationKoopas.at(6);
+		if (isOverturned)
+		{
+			ani = listAnimationKoopas.at(8);
+		}
+		else if (!isOverturned)
+		{
+			ani = listAnimationKoopas.at(4);
+		}
 	}
 	else if (state == KOOPAS_STATE_PRE_REVIE_2)
 	{
-		ani = listAnimationKoopas.at(7);
+		if (isOverturned)
+		{
+			ani = listAnimationKoopas.at(9);
+		}
+		else if (!isOverturned)
+		{
+			ani = listAnimationKoopas.at(5);
+		}
 	}
 	else if (state == KOOPAS_STATE_SHELL)
 	{
-		ani = listAnimationKoopas.at(8);
+		if (isOverturned)
+		{
+			ani = listAnimationKoopas.at(6);
+		}
+		else if (!isOverturned)
+		{
+			ani = listAnimationKoopas.at(2);
+		}
 	}
 	else if (state == KOOPAS_STATE_SHELL_MOVING)
 	{
-		ani = listAnimationKoopas.at(9);
+		if (isOverturned)
+		{
+			ani = listAnimationKoopas.at(7);
+		}
+		else if (!isOverturned)
+		{
+			ani = listAnimationKoopas.at(3);
+		}
 	}
 	animation_set->at(ani)->Render(x, y);
-
-	boxCalcFutureRight->Render();
-	boxCalcFutureLeft->Render();
-
 	if (effectPoint)
 	{
 		effectPoint->Render();
 	}
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void CKoopas::SetState(int state)
@@ -325,11 +395,16 @@ void CKoopas::SetState(int state)
 	CGameObject::SetState(state);
 	switch (state)
 	{
+	case KOOPAS_STATE_HIT_BY_WEAPON_MARIO:
+		vy = -KOOPAS_SHELL_JUMP_VY;
+		vx = nx*0.1f;
+		isOverturned = true;
+		break;
 	case KOOPAS_STATE_DIE:
 		y -= KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_DIE + 1;
 		vx = 0;
 		vy = -KOOPAS_ANI_SHELL_MOVING_SPEED_X;
-		ani = KOOPAS_ANI_SHELL;
+		isBoundingBox = false;
 		break;
 	case KOOPAS_STATE_SHELL:
 		EnemyNoDamage();
@@ -338,6 +413,7 @@ void CKoopas::SetState(int state)
 		CountTimeToRevive();
 		break;
 	case KOOPAS_STATE_WALKING:
+		isOverturned = false;
 		EnemyDamage();
 		isOutOfControl = false;
 		vx = nx * KOOPAS_WALKING_SPEED;

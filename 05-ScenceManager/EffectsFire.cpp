@@ -5,6 +5,7 @@ EffectsFire::EffectsFire()
 	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 	LPANIMATION_SET ani_set = animation_sets->Get(8);
 	SetAnimationSet(ani_set);
+
 }
 
 EffectsFire::~EffectsFire()

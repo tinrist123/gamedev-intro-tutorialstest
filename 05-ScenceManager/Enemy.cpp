@@ -20,6 +20,7 @@ bool Enemy::CheckOutCamera()
 
 Enemy::Enemy()
 {
+	this->category = Category::ENEMY;
 }
 
 

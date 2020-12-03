@@ -3,9 +3,15 @@
 #include <Windows.h>
 #include <d3dx9.h>
 #include <vector>
-
 #include "Sprites.h"
 #include "Animations.h"
+#include "define.h"
+#include <d3dx9.h>
+#include <algorithm>
+#include "Textures.h"
+#include "Game.h"
+#include "Sprites.h"
+#include "Utils.h"
 
 
 using namespace std;
@@ -63,6 +69,10 @@ public:
 	bool isBoundingBox = true;
 	bool isAddedEffect = false;
 	bool isDamageable = true;
+	bool isInCamera = false;
+
+	int type;
+	int category = -1;
 
 	int ani = -1;
 
@@ -86,6 +96,9 @@ public:
 	LPANIMATION_SET animation_set;
 
 public: 
+	int getTypeObject() { return type; }
+	int getCategoryObject() { return category; }
+
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
 	void SetSpeed(float vx, float vy) { this->vx = vx, this->vy = vy; }
 	void GetPosition(float &x, float &y) { x = this->x; y = this->y; }
@@ -135,5 +148,27 @@ public:
 	virtual void Render() = 0;
 	virtual void SetState(int state) { this->state = state; }
 	~CGameObject();
+
+	bool isGround(float x, float y, vector<LPGAMEOBJECT> arr)
+	{
+		for (int i = 0; i < arr.size(); i++)
+		{
+			float l, t, r, b;
+			arr[i]->GetBoundingBox(l, t, r, b);
+
+			if (arr[i]->getCategoryObject() != Category::GROUND)
+			{
+				continue;
+			}
+
+			if (y - t >= 8.0f)
+				continue;
+			else
+			{
+				if (x >= l && x <= r && y >= t && y <= b) return true;
+			}
+		}
+		return false;
+	}
 };
 

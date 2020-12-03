@@ -6,12 +6,10 @@
 #include <d3d9.h>
 #include <d3dx9.h>
 
-
 #define DIRECTINPUT_VERSION 0x0800
 #define SCREEN_WIDTH		640
 #define SCREEN_HEIGHT		480
 #include <dinput.h>
-
 #include "Scence.h"
 
 using namespace std;

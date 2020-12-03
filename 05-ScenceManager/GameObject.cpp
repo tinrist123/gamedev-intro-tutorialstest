@@ -1,15 +1,10 @@
-#include <d3dx9.h>
-#include <algorithm>
-#include "Utils.h"
-#include "Textures.h"
-#include "Game.h"
+
 #include "GameObject.h"
-#include "Sprites.h"
-#include "Coin.h"
 
 bool CGameObject::AABBCollision(LPGAMEOBJECT obj)
 {
 	
+
 	if (obj == NULL)
 		return false;
 	else

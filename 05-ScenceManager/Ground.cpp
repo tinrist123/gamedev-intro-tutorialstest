@@ -4,6 +4,7 @@ Ground::Ground(int width, int height) : CGameObject()
 {
 	this->width = width;
 	this->height = height;
+	category = Category::GROUND;
 }
 
 void Ground::Render()

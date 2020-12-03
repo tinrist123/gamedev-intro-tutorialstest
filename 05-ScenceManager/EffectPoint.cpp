@@ -3,16 +3,7 @@
 EffectPoint::~EffectPoint()
 {
 }
-void EffectPoint::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
-{
-	CGameObject::Update(dt,coObjects);
-	
-	y += dy;
-	if (checkDisApearEffect())
-	{
-		setObjDisappear();
-	}
-}
+
 void EffectPoint::Render()
 {
 	animation_set->at(0)->Render(x,y);

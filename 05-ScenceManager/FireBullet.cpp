@@ -44,6 +44,8 @@ void FireBullet::SetState(int state)
 
 FireBullet::FireBullet()
 {
+	this->type = 23;
+
 	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 	LPANIMATION_SET ani_set = animation_sets->Get(7);
 	SetAnimationSet(ani_set);

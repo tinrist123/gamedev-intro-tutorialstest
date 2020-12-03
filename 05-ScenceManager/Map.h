@@ -24,6 +24,7 @@ public:
 	~TileMap();
 	int GetWidthTileMap();
 	void Load();
+	void Update();
 	void LoadMap();
 	void Draw();
 };

@@ -5,6 +5,7 @@
 #include "Utils.h"
 CGoomba::CGoomba(int typeGoomba)
 {
+	this->type = 21;
 	this->level = typeGoomba;
 	if (this->level == PARAGOOMBA)
 	{
@@ -16,7 +17,6 @@ CGoomba::CGoomba(int typeGoomba)
 	{
 		SetState(GOOMBA_STATE_WALKING);
 	}
-	DebugOut(L"health = %d\n", health);
 
 }
 
@@ -70,6 +70,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 	vy += MARIO_GRAVITY * dt;
 	vector<LPCOLLISIONEVENT> coEvents;
+
 	vector<LPCOLLISIONEVENT> coEventsResult;
 	coEvents.clear();
 
@@ -199,6 +200,10 @@ void CGoomba::Render()
 		{
 			ani = GOOMBA_RED_ANI_WALKING_WING;
 		}
+		else if (state == GOOMBA_STATE_HIT_BY_WEAPON)
+		{
+			ani = GOOMBA_ANI_PARAGOOMBA_SUPINE;
+		}
 	}
 	else if (this->level == GOOMBA_LEVEL_BROWN)
 	{
@@ -209,7 +214,12 @@ void CGoomba::Render()
 		else  if (state == GOOMBA_STATE_DIE) {
 			ani = GOOMBA_ANI_DIE;
 		}
+		else if (state == GOOMBA_STATE_HIT_BY_WEAPON)
+		{
+			ani = GOOMBA_ANI_BROWN_GOOMBA_SUPINE;
+		}
 	}
+
 
 	animation_set->at(ani)->Render(x,y);
 
@@ -226,6 +236,10 @@ void CGoomba::SetState(int state)
 	CGameObject::SetState(state);
 	switch (state)
 	{
+		case GOOMBA_STATE_HIT_BY_WEAPON:
+			vy = -0.2;
+			isBoundingBox = false;
+			break;
 		case GOOMBA_STATE_DIE:
 			y += GOOMBA_BBOX_HEIGHT - GOOMBA_BBOX_HEIGHT_DIE + 1;
 			vx = 0;

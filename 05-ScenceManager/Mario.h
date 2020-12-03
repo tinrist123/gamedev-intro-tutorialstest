@@ -15,6 +15,9 @@
 #include "Koopas.h"
 #include "FireBullet.h"
 #include "Flower.h"
+#include "MarioTail.h"
+#include "Coin.h"
+
 //#include "Scence.h"
 
 
@@ -25,11 +28,13 @@ public:
 	int setTimeRenderingAni = 100;
 	int untouchable;
 
+
+
 	Constant* constant;
 	DWORD timeReload = 0;
 	DWORD autoReloadTime;
 	DWORD timeFlyingForTail = 0;
-
+	MarioTail* Tail = new MarioTail();
 
 	bool isCanHoldingKoopas = false;
 	bool isEnteredFirstSpaceUp = false;
@@ -54,7 +59,7 @@ public:
 	bool isRunning = false;
 
 	
-
+	bool imMovable = true;
 	bool isAttackPress = false;
 	bool isKickedKoopas = false;
 	void KickingKoopas() { isKickedKoopas = true; tDraw = GetTickCount64(); }
@@ -72,6 +77,20 @@ public:
 	bool isAttacking = false;
 	bool isJumpingAttack = false;
 
+	int DetectLevelSpeedMario();
+
+	void ReduceVelocityWhenFly() {
+
+		if (vx >= MARIO_RUNNING_MAX_SPEED && vx > MARIO_MAX_WALKING_SPEED)
+		{
+			vx -= MARIO_WALKING_DECELERATION;
+		}
+		else if (vx <= -MARIO_RUNNING_MAX_SPEED && vx < MARIO_MAX_WALKING_SPEED)
+		{
+			vx += MARIO_WALKING_DECELERATION;
+		}
+	}
+
 	void OffPreventSpamSpace()
 	{
 		isEnteredFirstSpaceUp = false;
@@ -81,6 +100,14 @@ public:
 	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* colliable_objects = NULL);
 	virtual void Render();
+
+	void MarioSetOnGround() { isOnGround = true; vy = 0; }
+
+	void setTailPos()
+	{
+		Tail->SetPosition(this->x + 24, this->y + 18);
+		Tail->nx = nx;
+	}
 
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
@@ -100,8 +127,15 @@ public:
 	void AccurateCollisionWithEnemy(LPGAMEOBJECT enemies);
 
 	void CollideWithEnemy(vector<LPENEMY> enemies);
+	void playerHittingSpecialItem(Item*& item);
 	void CollideWithItem(vector<LPITEM> items);
 	void Reset();
+
+	void MarioIsFalling() 
+	{ 
+		this->isFalling = true;
+		this->isOnGround = false;
+	}
 
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 };

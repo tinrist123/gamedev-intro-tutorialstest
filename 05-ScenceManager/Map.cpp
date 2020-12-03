@@ -32,6 +32,39 @@ void TileMap::LoadMap()
 		}
 	}
 }
+
+//void TileMap::Update()
+//{
+//	if (CGame::GetInstance()->GetCamPosX() <= 0)
+//	{
+//		firstcol = (int)CGame::GetInstance()->GetCamPosX() / tile_width;
+//	}
+//	else //Khi camera di chuyen
+//	{
+//		mapResidualX = (int)CGame::GetInstance()->GetCamPosX() / tile_width;
+//		if (mapResidualX > MAP_RESIDUALX) mapResidualX = MAP_RESIDUALX;
+//		firstcol = (int)CGame::GetInstance()->GetCamPosX() / tile_width - mapResidualX;
+//	}
+//	lastcol = firstcol + (SCREEN_WIDTH / tile_width) + mapResidualX * 2;
+//
+//
+//	//Truc Y
+//	if (CGame::GetInstance()->GetCamPosY() <= 0)
+//	{
+//		firstrow = (int)CGame::GetInstance()->GetCamPosY() / tile_height;
+//	}
+//	else //Cam Y di chuyen
+//	{
+//		mapResidualY = (int)CGame::GetInstance()->GetCamPosY() / tile_height;
+//		if (mapResidualY > MAP_RESIDUALY) mapResidualY = MAP_RESIDUALY;
+//		firstrow = (int)CGame::GetInstance()->GetCamPosY() / tile_height - mapResidualY;
+//	}
+//	lastrow = firstrow + (SCREEN_HEIGHT / tile_height) + mapResidualY * 2;
+//
+//
+//
+//}
+
 void TileMap::Load()
 {
 	DebugOut(L"[INFO] Start loading map resources from : %s \n", filePath_data);

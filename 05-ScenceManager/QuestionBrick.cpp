@@ -10,6 +10,7 @@ QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height,int I
 	this->start_x = start_x;
 	this->start_y = start_y;
 	ani = 0;
+	this->type = 03;
 }
 
 void QuestionBrick::Render()
@@ -41,8 +42,8 @@ void QuestionBrick::SetState(int state)
 	{
 	case QUESTION_BRICK_AVAILABLE:
 		vy = -QUESTION_BRICK_SPEED_X;
-		this->subHealth();
 		ani = BRICK_ANI_EMPTY;
+		this->subHealth();
 		break;
 	}
 }

@@ -8,8 +8,10 @@ class WeakBrick :
 {
 	int height;
 	int width;
+
+	bool isHaveP_Swtich = false;
 public:
-	WeakBrick(int width, int height);
+	WeakBrick(int width, int height, int);
 	virtual void Render();
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 };

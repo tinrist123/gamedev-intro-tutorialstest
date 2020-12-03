@@ -1,0 +1,40 @@
+#pragma once
+enum Type
+{
+	PORTAL = 55,
+	MARIO = 0,
+	CBRICK = 02,
+	QUESTIONBRICK = 03,
+	COLORBOX = 04,
+	PIPE = 05,
+	MARIOTAIL = 06,
+	WEAKBRICK = 07,
+
+
+	KOOPAS = 20,
+	GOOMBA = 21,
+	FLOWER = 22,
+	FIREBULLET = 23,
+
+	// ITEM
+	COIN = 40,
+	SUPER_MUSHROOM = 41,
+	SUPER_LEAF = 42,
+	P_SWITCH = 43,
+
+
+};
+
+enum Category
+{
+	PLAYER,
+	ENEMY,
+	MISC,
+	ITEM,
+	WEAPON,
+	EFFECT,
+	SCENE,
+	GROUND,
+	BRICK,
+};
+

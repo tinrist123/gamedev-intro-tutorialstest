@@ -23,18 +23,27 @@
 #include "EffectsFire.h"
 #include "Coin.h"
 #include "ListEffects.h"
+#include "EffectPoint.h"
+#include "Leaf.h"
+#include "Mushroom.h"
+#include "Grid.h"
+#include "BoardGame.h"
 class CPlayScene: public CScene
 {
 public: 
 	CMario *player;					// A play scene has to have player, right? 
+	Grid* grid;
+	
 
 	vector<LPGAMEOBJECT> objects;
-	
 	// Waiting for Grid
+	vector<LPGAMEOBJECT> ObjectsInScreen;
 	vector<LPITEM> items;
 	vector<LPENEMY> enemies;
 	vector<LPGAMEOBJECT> staticObjects;
 	vector<LPEFFECTS> effects;
+
+	BoardGame* boardGame;
 
 	void _ParseSection_TEXTURES(string line);
 	void _ParseSection_SPRITES(string line);
@@ -50,6 +59,7 @@ public:
 	virtual void Update(DWORD dt);
 	virtual void Render();
 	virtual void Unload();
+	void GetObjectGrid();
 
 	Enemy *CreateFlowerBullet(CFlower *flower);
 	void playerHittingSpecialItem(Item*& item);

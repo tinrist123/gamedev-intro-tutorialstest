@@ -4,6 +4,7 @@
 
 CFlower::CFlower(float y,int HeightPipe)
 {
+	this->type = 22;
 	this->start_y = y;
 	this->HeightPipe = HeightPipe;
 }

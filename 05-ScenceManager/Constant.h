@@ -13,7 +13,7 @@ using namespace std;
 
 #define MARIO_JUMP_SPEED_Y								0.275f
 #define MARIO_KEEP_JUMP_LIMITED							0.1f
-#define MARIO_JUMP_MAX_SPEED_Y							0.33f
+#define MARIO_JUMP_MAX_SPEED_Y							0.31f
 #define MARIO_JUMP_DEFLECT_SPEED						0.2f
 #define MARIO_GRAVITY									0.0006f
 #define MARIO_GRAVITY_KEEP_JUMP							0.0003f
@@ -237,7 +237,7 @@ using namespace std;
 #define MARIO_SMALL_BBOX_HEIGHT							15.0f
 
 
-#define MARIO_ELASTIC									0.25f
+#define MARIO_ELASTIC									0.15f
 
 //================================ANOTHER CONSTANT ZONE=================================
 #define MARIO_UNTOUCHABLE_TIME							1000
@@ -259,4 +259,5 @@ public:
 	vector<int> getAnimationMARIO_BIG_HAVE_FIRE();
 	vector<int> getAnimationMARIO_BIG();
 };
+
 

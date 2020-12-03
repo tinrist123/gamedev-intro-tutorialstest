@@ -6,6 +6,7 @@ Pipe::Pipe(int width, int height) : Ground(width, height)
 {
 	this->width = width;
 	this->height = height;
+	this->type = 05;
 }
 
 void Pipe::Render()

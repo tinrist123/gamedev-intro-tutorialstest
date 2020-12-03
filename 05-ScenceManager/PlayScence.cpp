@@ -1,7 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include "PlayScence.h"
-#include "EffectPoint.h"
+#include "P_Switch.h"
+
 
 using namespace std;
 
@@ -129,23 +130,24 @@ void CPlayScene::_ParseSection_Map(string line)
 	vector<string> tokens = split(line);
 	if (tokens.size() < 9) return;
 	int ID = atoi(tokens[0].c_str());
-	wstring file_texture = ToWSTR(tokens[1]);
-	wstring file_path = ToWSTR(tokens[2]);
-
-
-
-
-	int row_on_textures = atoi(tokens[3].c_str());
-	int col_on_textures = atoi(tokens[4].c_str());
-	int row_on_tile_map = atoi(tokens[5].c_str());
-	int col_on_tile_map = atoi(tokens[6].c_str());
-	int tile_width = atoi(tokens[7].c_str());
-	int tile_height = atoi(tokens[8].c_str());
-	//int texID = atoi(tokens[0].c_str());
-	map = new TileMap(ID, file_texture.c_str(), file_path.c_str(), row_on_textures, col_on_textures, row_on_tile_map, col_on_tile_map, tile_width, tile_height);
+	wstring filePath_texture = ToWSTR(tokens[1]);
+	wstring filePath_data = ToWSTR(tokens[2]);
+	int num_row_on_texture = atoi(tokens[3].c_str());
+	int num_col_on_textture = atoi(tokens[4].c_str());
+	int num_row_on_tilemap = atoi(tokens[5].c_str());
+	int num_col_on_tilemap = atoi(tokens[6].c_str());
+	int tileset_width = atoi(tokens[7].c_str());
+	int tileset_height = atoi(tokens[8].c_str());
+	int widthGrid = atoi(tokens[9].c_str());
+	int heightGrid = atoi(tokens[10].c_str());
+	grid = new Grid();
+	grid->Resize(widthGrid, heightGrid);
+	//grid->PushGrid(objects);
+	map = new TileMap(ID, filePath_texture.c_str(), filePath_data.c_str(), num_row_on_texture, num_col_on_textture, num_row_on_tilemap, num_col_on_tilemap, tileset_width, tileset_height);
+	boardGame = new BoardGame();
 }
 
-/*
+/*		
 	Parse a line in section [OBJECTS] 
 */
 void CPlayScene::_ParseSection_OBJECTS(string line)
@@ -162,7 +164,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 
 	int ani_set_id = atoi(tokens[3].c_str());
 
-	CAnimationSets * animation_sets = CAnimationSets::GetInstance();
+	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
 
 	CGameObject *obj = NULL;
 
@@ -174,9 +177,14 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			//DebugOut(L"[ERROR] MARIO object was created before!\n");
 			return;
 		}
-		obj = new CMario(x,y); 
-		player = (CMario*)obj;  
-
+		else
+		{
+			obj = new CMario(x,y); 
+			player = (CMario*)obj;  
+			player->SetAnimationSet(ani_set);
+			player->SetPosition(x, y);
+			return;
+		}
 		//DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: {
@@ -202,7 +210,10 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	{
 		int width = atof(tokens[4].c_str());
 		int height = atof(tokens[5].c_str());
-		obj = new WeakBrick(width, height);
+		int isHaveItem = 0;
+		if (tokens.size() == 7)
+			int isHaveItem = atof(tokens[6].c_str());
+		obj = new WeakBrick(width, height, isHaveItem);
 		break;
 	}
 	case OBJECT_TYPE_Bullet: obj = new FireBullet(); break;
@@ -253,15 +264,6 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new QuestionBrick(x,y,width, height,itemInside);
 		break;
 	}
-	case OBJECT_TYPE_Item:
-	{
-		int width = atof(tokens[4].c_str());
-		int height = atof(tokens[5].c_str());
-		int typeItem = atof(tokens[6].c_str());
-		int kindAni = atof(tokens[7].c_str());
-		obj = new Item(typeItem,kindAni, x,y);
-		break;
-	}
 	case OBJECT_TYPE_PORTAL:
 		{	
 			float r = atof(tokens[4].c_str());
@@ -276,11 +278,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	}
 
 	// General object setup
-	obj->SetPosition(x, y);
-
-	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
-
 	obj->SetAnimationSet(ani_set);
+	obj->SetPosition(x, y);
 	if (dynamic_cast<Item*>(obj))
 	{
 		items.push_back((Item*)obj);
@@ -345,29 +344,44 @@ void CPlayScene::Load()
 
 Item *CreateItemOfMario(CMario *player, QuestionBrick *object)
 {
-	
-	Item* item = NULL;
-
+	object->isCreated = true;
 	if (object->ItemInside == ITEM_COIN)
 	{
-		item = new Item(object->ItemInside, ITEM_COIN, object->x, object->y);
-		item->SetPosition(object->x, object->y);
-		item->SetState(ITEM_STATE_COIN_JUMP);
+		Coin *coin = new Coin(object->x, object->y);
+		coin->SetPosition(object->x, object->y);
+		coin->SetState(ITEM_STATE_COIN_JUMP);
+		return coin;
 	}
 	else if (object->ItemInside == SPECIAL_ITEM)
 	{
-		int kindAni = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : ITEM_ANI_LEAF;
-		item = new Item(object->ItemInside, kindAni, object->x, object->y);
-		item->SetPosition(object->x, object->y);
-		if (player->x > (item->x + 8)) item->nx = -1;
-		else if (player->x < (item->x + 8)) item->nx = 1;
-		else item->nx = 1;
-
-		item->SetState(1);
+		int kindAni = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : 2;
+		//int kindAni = 3;
+		if (kindAni == 2)
+		{
+			Leaf *leaf = new Leaf(object->x, object->y);
+			leaf->SetPosition(object->x, object->y);
+			if (player->x > (leaf->x)) leaf->nx = -1;
+			else if (player->x < (leaf->x)) leaf->nx = 1;
+			leaf->SetState(ITEM_STATE_LEAF_FALL);
+			return leaf;
+		}
+		else if (kindAni == ITEM_ANI_MUSHROOM)
+		{
+			Mushroom *mushroom = new Mushroom(object->start_x, object->start_y);
+			mushroom->SetPosition(object->x, object->y);
+			if (player->x > (mushroom->x )) mushroom->nx = -1;
+			else if (player->x < (mushroom->x )) mushroom->nx = 1;
+			mushroom->SetState(ITEM_STATE_SPECIAL_ITEM);
+			return mushroom;
+		}
+		else if (kindAni == 3)
+		{
+			P_Switch* p = new P_Switch(object->start_x, object->start_y);
+			p->SetPosition(object->x, object->y);
+			p->SetState(ITEM_STATE_SPECIAL_ITEM);
+			return p;
+		}
 	}
-	object->isCreated = true;
-
-	return item;
 }
 
 Enemy* CPlayScene::CreateFlowerBullet(CFlower* flower)
@@ -380,6 +394,7 @@ Enemy* CPlayScene::CreateFlowerBullet(CFlower* flower)
 	bullet->SetState(1);
 	return bullet;
 }
+
 
 // special item mean mushroom or leaf or more
 void CPlayScene::playerHittingSpecialItem(Item*& item)
@@ -394,7 +409,17 @@ void CPlayScene::playerHittingSpecialItem(Item*& item)
 	EffectPoint* effect = new EffectPoint();
 	effect->SetPosition(item->x, item->y);
 	effects.push_back(effect);
+}
 
+
+void CPlayScene::GetObjectGrid()
+{
+	ObjectsInScreen.clear();
+	items.clear();
+	staticObjects.clear();
+	effects.clear();
+	enemies.clear();
+	grid->GetGrid(ObjectsInScreen);
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -403,12 +428,14 @@ void CPlayScene::Update(DWORD dt)
 	// TO-DO: This is a "dirty" way, need a more organized way 
 
 	vector<LPGAMEOBJECT> coObjects;
-
 	float playerPositionX = player->x;
 	float playerPositionY = player->y;
 
+	//grid->CheckCamGrid(objects);
+	//GetObjectGrid();
 
-	for (size_t i = 1; i < objects.size(); i++)
+
+	for (size_t i = 0; i < objects.size(); i++)
 	{
 		coObjects.push_back(objects[i]);
 	}
@@ -419,10 +446,11 @@ void CPlayScene::Update(DWORD dt)
 	
 	for (size_t i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->objectDisappear())
+		/*if (objects[i]->objectDisappear())
 		{
 			objects.erase(objects.begin() + i);
-		}
+
+		}*/
 		if (dynamic_cast<Enemy*>(objects[i]))
 		{
 			player->AccurateCollisionWithEnemy(objects[i]);
@@ -460,7 +488,8 @@ void CPlayScene::Update(DWORD dt)
 			{
 				(objects[i])->isAddedEffect = true;
 				MarioBullet* marioBullet = dynamic_cast<MarioBullet*>(objects[i]);
-				EffectPoint* effect = new EffectPoint();
+				EffectsFire* effect = new EffectsFire();
+				effect->SetState(EFFECTS_DEFLECT);
 				effect->SetPosition(marioBullet->pointCollisionX, marioBullet->pointCollisionY);
 				effects.push_back(effect);
 			}
@@ -546,7 +575,7 @@ void CPlayScene::Update(DWORD dt)
 			CGoomba* goomba = dynamic_cast<CGoomba*>(objects[i]);
 			float goombaPositionX = goomba->x;
 			float goombaPositionY = goomba->y;
-			//if (goomba->level == PARAGOOMBA)
+			if (goomba->level == PARAGOOMBA)
 			{
 				goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0)?-1:1);
 				if (fabs(goombaPositionX - playerPositionX) < 250.0f 
@@ -566,26 +595,29 @@ void CPlayScene::Update(DWORD dt)
 		objects[i]->Update(dt, &coObjects);
 	}
 
+	player->Update(dt,&objects);
+
+
 	for (size_t i = 0; i < effects.size(); i++)
 	{
-		if (effects[i]->objectDisappear())
-		{
-			effects.erase(effects.begin() + i);
-			continue;
-		}
 		effects[i]->Update(dt, &coObjects);
 	}
+	
+	
 	
 	
 	if (items.size() > 0)
 	{
 		for (size_t i = 0; i < items.size(); i++)
 		{
-			if (player->AABBCollision(items[i]))
+			if (items[i]->isTouchable)
 			{
-				if (items[i]->GetState() == ITEM_STATE_SPECIAL_ITEM)
+				if (player->AABBCollision(items[i]))
 				{
-					playerHittingSpecialItem(items[i]);
+					if ((items[i]->GetState() == ITEM_STATE_SPECIAL_ITEM || items[i]->GetState() == ITEM_STATE_LEAF_FALL))
+					{
+						playerHittingSpecialItem(items[i]);
+					}				
 				}
 			}
 			if (items[i]->pointEff)
@@ -595,12 +627,10 @@ void CPlayScene::Update(DWORD dt)
 					items[i]->setObjDisappear();
 				}
 			}
-
 			items[i]->Update(dt, &coObjects);
 		}
 	}
-
-	player->CollideWithItem(items);
+	//player->CollideWithItem(items);
 
 	if (enemies.size() > 0)
 	{
@@ -611,6 +641,7 @@ void CPlayScene::Update(DWORD dt)
 	}
 	//player->CollideWithEnemy(enemies);
 
+	// remove everything
 	for (size_t i = 0; i < effects.size(); i++)
 	{
 		if (effects[i]->objectDisappear())
@@ -628,8 +659,16 @@ void CPlayScene::Update(DWORD dt)
 			continue;
 		}
 	}
+	for (size_t i = 0; i < objects.size(); i++)
+	{
+		if (objects[i]->objectDisappear())
+		{
+			objects.erase(objects.begin() + i);
+			continue;
+		}
+	}
 	
-	
+
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
 	if (player == NULL) return; 
@@ -637,26 +676,27 @@ void CPlayScene::Update(DWORD dt)
 	// Update camera to follow mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
-
 	/*CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
 	cy -= game->GetScreenHeight() / 2;*/
+	CGame::GetInstance()->cam_y = 100.0f;
 
-	if (player->x > (SCREEN_WIDTH / 4) && player->x + (SCREEN_WIDTH / 4) < map->GetWidthTileMap())
+	if (player->x > (SCREEN_WIDTH / 2) && player->x + (SCREEN_WIDTH / 2) < map->GetWidthTileMap())
 	{
-		cx = player->x - (SCREEN_WIDTH / 4);
-		CGame::GetInstance()->cam_x = cx;
-		
+		cx = player->x - (SCREEN_WIDTH / 2);
+  		CGame::GetInstance()->cam_x = cx;
 	}
+
+	//DebugOut(L"cam_x = %f\n", CGame::GetInstance()->cam_x)
+	boardGame->Update(dt, CGame::GetInstance()->cam_x, 432, player);
 }
 
 void CPlayScene::Render()
 {
-	
 	//mapScence->DrawMap();
-	map->Draw();
+	//map->Draw();
 
-	for (int i = 1; i < objects.size(); i++)
+	for (int i = 0; i < objects.size(); i++)
 	{
 		if (objects[i]->health == 0 && objects[i]->isDisappeared)
 		{
@@ -683,7 +723,8 @@ void CPlayScene::Render()
 	{
 		effects[i]->Render();
 	}
-	objects[0]->Render();
+	player->Render();
+	boardGame->Render();
 }
 
 /*
@@ -776,6 +817,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
 				return;
 
+			mario->setTailPos();
 			mario->isAttacking = true;
 			mario->SetState(MARIO_STATE_BIG_ATTACK);
 			break;
@@ -825,12 +867,12 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	
 	if (game->IsKeyDown(DIK_LSHIFT) && game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_SPACE))
 	{
-		if (mario->isOnGround)
+		if (mario->isOnGround && mario->imMovable)
 			mario->SetState(MARIO_STATE_RUNNING);
 	}
 	if (game->IsKeyDown(DIK_LSHIFT) && game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_SPACE))
 	{
-		if (mario->isOnGround)
+		if (mario->isOnGround && mario->imMovable)
 			mario->SetState(MARIO_STATE_RUNNING);
 	}
 	if(game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_LEFT))

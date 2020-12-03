@@ -5,11 +5,12 @@ ColorBox::ColorBox(int width, int height) : Ground(width, height)
 {
 	this->width = width;
 	this->height = height;
+	this->type = 04;
 }
 
 void ColorBox::Render()
 {
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void ColorBox::GetBoundingBox(float& l, float& t, float& r, float& b)
