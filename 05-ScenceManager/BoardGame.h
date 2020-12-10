@@ -9,26 +9,26 @@
 #include "BoardAddSprite.h"
 #include "PMaxSpeed.h"
 #include "Mario.h"
+#include "Timer.h"
 
-#define LIFE_TIME 300
-#define HP_SIMON_AND_BOSS	16
-#define A_MINUTE	60
-#define BOARD 351
-#define ITEM_KNIFE_SPRITE	202
-#define ITEM_BOOMERANG_SPRITE	203
-#define ITEM_AXE_SPRITE		204
-#define ITEM_HOLY_SPRITE	205
-#define ITEM_CLOCK_SPRITE	209
+#define MAX_PLAY_TIME			300
 
 class BoardGame : public BoardAddSprite
 {
 	vector<LPCARRET>  ListCarretRight;
+	vector<LPGAMEOBJECT>  listNumber;
+	vector<LPGAMEOBJECT>  DitgitQuantityCoin;
+	vector<LPGAMEOBJECT>  DitgitScores;
 	PMaxSpeed* pMaxSpeed;
+
+	CMario* mario;
+	Timer* playTime = new Timer(MAX_PLAY_TIME * CLOCKS_PER_SEC);
+	int countdown = 0;
+
+	bool pMaxSpeedStart = false;
 
 	bool isTogglePMaxSpeed = false;
 	int rangeCarret = 0;
-	int idSubWeapon;
-	int healthSimon, healthSimonLost, healthBoss, healthBossLost;
 	int posX;
 	int posY;
 	int score;
@@ -36,14 +36,19 @@ class BoardGame : public BoardAddSprite
 	int life;
 	int time;
 	void DrawBoard();
-	void DrawNumber(int x, int y, string a);
+	void DrawScores();
+	void DrawQuantityCoin(float x, float y);
+	void DrawNumber(float x, float y);
 	void DrawCarretRightSpeed();
+
+	vector<LPGAMEOBJECT> detectAndCreateListNumber(int);
+
 public:
-	void Update(DWORD dt, int camX, int camY, CMario* mario);
+	void Update(DWORD dt, int camX, int camY);
 	void Render();
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 
-	BoardGame();
+	BoardGame(CMario* player);
 	~BoardGame();
 };
 

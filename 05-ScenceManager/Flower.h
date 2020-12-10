@@ -42,7 +42,7 @@ public:
 	DWORD delayBullet = 0;
 	DWORD setInterval = 0;
 	DWORD setInterval2 = 0;
-	CFlower(float y,int);
+	CFlower(float y,float);
 	virtual void Render();
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

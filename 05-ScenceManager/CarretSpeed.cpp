@@ -1,12 +1,11 @@
 #include "CarretSpeed.h"
-
 CarretSpeed::CarretSpeed()
 {
 }
 
 void CarretSpeed::Render()
 {
-	animation_set->at(36)->Render(x,y, 255);
+	animation_set->at(37)->Render(x,y, 255);
 }
 
 void CarretSpeed::Update(float camX, float camY)
@@ -19,3 +18,4 @@ void CarretSpeed::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = t = r = b;
 }
+

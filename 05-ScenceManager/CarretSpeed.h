@@ -1,6 +1,9 @@
 #pragma once
+#pragma warning
+
 #include "BoardAddSprite.h"
-class CarretSpeed : public BoardAddSprite
+class CarretSpeed
+	: public BoardAddSprite
 {
 public:
 	CarretSpeed();
@@ -8,5 +11,4 @@ public:
 	void Update(float camX, float camY);
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 };
-
 typedef CarretSpeed * LPCARRET;

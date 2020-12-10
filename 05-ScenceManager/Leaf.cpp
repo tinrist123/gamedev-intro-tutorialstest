@@ -28,10 +28,10 @@ void Leaf::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		if (!isTouchable) this->isTouchable = true;
 		vy += Gra * dt;
-		if (vy >= 0.015)
+		if (vy >= 0.015f)
 
 		{
-			vy = 0.015;
+			vy = 0.015f;
 		}
 	}
 	else 

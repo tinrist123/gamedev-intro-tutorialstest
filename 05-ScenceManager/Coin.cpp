@@ -4,15 +4,17 @@
 
 Coin::Coin(float posX, float posY)
 {
-	this->type = 40;
+	this->type = Type::COIN;
 	this->start_x = posX;
 	this->start_y = posY;
-	this->isTouchable = true;
+	this->ani = ITEM_ANI_COIN;
 }
 
 Coin::Coin()
 {
-	this->type = 40;
+	this->isTouchable = true;
+	this->type = Type::COIN;
+	this->ani = ITEM_ANI_COIN_IDLE;
 }
 
 Coin::~Coin()
@@ -37,7 +39,7 @@ void Coin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (state != ITEM_STATE_HITTING_MARIO)
 		CalcPotentialCollisions(coObjects, coEvents);
 	// reset untouchable timer if untouchable time has passed
-	vy += GRAVITY* dt;
+	//vy += GRAVITY* dt;
 	// No collision occured, proceed normally
 
 	if (coEvents.size() == 0)
@@ -93,9 +95,9 @@ void Coin::Render()
 	}
 	else
 	{
-		animation_set->at(ITEM_ANI_COIN)->Render(x, y);
+		animation_set->at(ani)->Render(x, y);
 	}
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void Coin::GetBoundingBox(float& l, float& t, float& r, float& b)

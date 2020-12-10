@@ -5,9 +5,9 @@ using namespace std;
 #define MARIO_RUNNING_PRE_MAX_SPEED						0.15f
 #define MARIO_RUNNING_MAX_SPEED							0.2f
 
-#define MARIO_WALKING_DECELERATION						0.006875f
-#define MARIO_WALKING_ACCELEROMETER						0.002875f
-#define MARIO_WALKING_ACCELEROMETER_RUNNING				0.001875f
+#define MARIO_WALKING_DECELERATION						0.004875f
+#define MARIO_WALKING_ACCELEROMETER						0.002175f
+#define MARIO_WALKING_ACCELEROMETER_RUNNING				0.000875f
 #define MARIO_MAX_WALKING_SPEED							0.12f
 #define FRICTION										0.0056875f
 
@@ -210,7 +210,14 @@ using namespace std;
 #define MARIO_ANI_BIG_WALKING_HOLD_KOOPAS_LEFT					90
 //================================ END WALKING HOLD KOOPAS =================================
 
+#define	MARIO_ANI_BIG_WALKING_HOLD_JUMPING_KOOPAS_RIGHT						91			 
+#define	MARIO_ANI_BIG_WALKING_HOLD_JUMPING_KOOPAS_LEFT						92
 
+#define	MARIO_ANI_BIG_TAIL_WALKING_HOLD_JUMPING_KOOPAS_RIGHT				93			 
+#define	MARIO_ANI_BIG_TAIL_WALKING_HOLD_JUMPING_KOOPAS_LEFT					94			 
+
+#define	MARIO_ANI_BIG_FIRE_WALKING_HOLD_JUMPING_KOOPAS_RIGHT				95			 
+#define	MARIO_ANI_BIG_FIRE_WALKING_HOLD_JUMPING_KOOPAS_LEFT					96			 
 
 //================================MARIO LEVEL CONSTANT ZONE=================================
 #define	MARIO_LEVEL_SMALL								1
@@ -237,7 +244,7 @@ using namespace std;
 #define MARIO_SMALL_BBOX_HEIGHT							15.0f
 
 
-#define MARIO_ELASTIC									0.15f
+#define MARIO_ELASTIC									0.25f
 
 //================================ANOTHER CONSTANT ZONE=================================
 #define MARIO_UNTOUCHABLE_TIME							1000

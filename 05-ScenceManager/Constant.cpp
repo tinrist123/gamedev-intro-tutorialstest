@@ -106,6 +106,9 @@ vector<int> Constant::getAnimationMARIO_BIG_HAVE_TAIL()
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_WALKING_HOLD_KOOPAS_RIGHT);
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_WALKING_HOLD_KOOPAS_LEFT);
 
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_WALKING_HOLD_JUMPING_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_WALKING_HOLD_JUMPING_KOOPAS_LEFT);
+
 	return listAni_Mario_Big;
 }
 
@@ -145,6 +148,9 @@ vector<int> Constant::getAnimationMARIO_BIG_HAVE_FIRE()
 
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_WALKING_HOLD_KOOPAS_RIGHT);
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_WALKING_HOLD_KOOPAS_LEFT);
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_WALKING_HOLD_JUMPING_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_FIRE_WALKING_HOLD_JUMPING_KOOPAS_LEFT);
 
 
 
@@ -188,6 +194,9 @@ vector<int> Constant::getAnimationMARIO_BIG()
 
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_WALKING_HOLD_KOOPAS_RIGHT);
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_WALKING_HOLD_KOOPAS_LEFT);
+
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_WALKING_HOLD_JUMPING_KOOPAS_RIGHT);
+	listAni_Mario_Big.push_back(MARIO_ANI_BIG_WALKING_HOLD_JUMPING_KOOPAS_LEFT);
 
 	return listAni_Mario_Big;
 }

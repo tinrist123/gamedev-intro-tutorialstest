@@ -78,6 +78,8 @@ void CKoopas::GetBoundingBox(float& left, float& top, float& right, float& botto
 			state == KOOPAS_STATE_PRE_REVIE_2
 			||
 			state == KOOPAS_STATE_SHELL_OUT_CONTROL
+			||
+			state == KOOPAS_STATE_SHELL
 			)
 		{
 			top = y + 9;
@@ -120,9 +122,9 @@ void CKoopas::GetBoundingBox(float& left, float& top, float& right, float& botto
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	
-	if (effectPoint )
+	if (pointEff )
 	{
-		effectPoint->UpdateOrDeleteEffect(dt, coObjects, effectPoint);
+		pointEff->UpdateOrDeleteEffect(dt, coObjects, pointEff);
 	}
 
 	if (isOutOfControl)
@@ -383,9 +385,9 @@ void CKoopas::Render()
 		}
 	}
 	animation_set->at(ani)->Render(x, y);
-	if (effectPoint)
+	if (pointEff)
 	{
-		effectPoint->Render();
+		pointEff->Render();
 	}
 	RenderBoundingBox();
 }

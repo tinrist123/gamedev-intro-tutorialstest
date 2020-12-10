@@ -10,6 +10,7 @@ class CBrick : public Ground
 	int height;
 	int width;
 public:
+	CBrick();
 	explicit CBrick(int width,int height);
 	virtual void Render();
 	virtual void GetBoundingBox(float &l, float &t, float &r, float &b);

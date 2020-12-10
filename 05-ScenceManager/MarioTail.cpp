@@ -3,6 +3,7 @@
 #include "EffectHitTail.h"
 #include "Koopas.h"
 #include "Goomba.h"
+#include "WeakBrick.h"
 
 MarioTail::MarioTail()
 {
@@ -57,6 +58,17 @@ void MarioTail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					e->subHealth();
 
 				}
+			}
+			else if (e->getTypeObject() == Type::WEAKBRICK)
+			{
+				WeakBrick* weakbrick = dynamic_cast<WeakBrick*>(e);
+				weakbrick->SetState(WEAK_STATE_DESTROY);
+			}
+			else if (e->getTypeObject() == Type::QUESTIONBRICK)
+			{
+				QuestionBrick* questionbrick = dynamic_cast<QuestionBrick*>(e);
+				if (questionbrick->health != 0)
+					questionbrick->SetState(1);
 			}
 		}
 	}

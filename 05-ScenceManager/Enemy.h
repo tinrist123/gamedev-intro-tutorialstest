@@ -8,9 +8,10 @@ typedef Enemy* LPENEMY;
 class Enemy : public CGameObject
 {
 public:
-	EffectPoint* effectPoint;
 	int score;
 	int hp;
+
+	EffectPoint* pointEff;
 public:
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	void Render() = 0;
@@ -21,8 +22,8 @@ public:
 
 	void addPointToItem()
 	{
-		effectPoint = new EffectPoint();
-		effectPoint->SetPosition(this->x, this->y);
+		pointEff = new EffectPoint();
+		pointEff->SetPosition(this->x, this->y);
 	}
 
 	Enemy();

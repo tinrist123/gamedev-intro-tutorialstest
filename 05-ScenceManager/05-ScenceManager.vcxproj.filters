@@ -43,6 +43,12 @@
     <Filter Include="Source Files\BoardGame">
       <UniqueIdentifier>{f1f69a39-376b-4c08-b4f4-4fe1e6c7afb8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Camera">
+      <UniqueIdentifier>{b04f8a1e-006d-4755-8452-546c9fb4f3c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Ultils">
+      <UniqueIdentifier>{e5383eb9-354b-4d34-9edd-6e63d4115fa8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -61,9 +67,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Animations.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Utils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Portal.cpp">
@@ -156,9 +159,6 @@
     <ClCompile Include="EffectHitTail.cpp">
       <Filter>Source Files\Effect</Filter>
     </ClCompile>
-    <ClCompile Include="P_Switch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Grid.cpp">
       <Filter>Source Files\Grid</Filter>
     </ClCompile>
@@ -180,6 +180,24 @@
     <ClCompile Include="BoardAddSprite.cpp">
       <Filter>Source Files\BoardGame</Filter>
     </ClCompile>
+    <ClCompile Include="PieceBrick.cpp">
+      <Filter>Source Files\Effect</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>Source Files\Ultils</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Source Files\Ultils</Filter>
+    </ClCompile>
+    <ClCompile Include="P_Switch.cpp">
+      <Filter>Source Files\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="MarioWorldMap.cpp">
+      <Filter>Source Files\Mario</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Brick.h">
@@ -192,9 +210,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Goomba.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mario.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Sprites.h">
@@ -260,12 +275,6 @@
     <ClInclude Include="FireBullet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MarioBullet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MarioWeapon.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Enemy.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -279,9 +288,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EffectPoint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MarioTail.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Leaf.h">
@@ -319,6 +325,30 @@
     </ClInclude>
     <ClInclude Include="BoardAddSprite.h">
       <Filter>Source Files\BoardGame</Filter>
+    </ClInclude>
+    <ClInclude Include="PieceBrick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Source Files\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Source Files\Ultils</Filter>
+    </ClInclude>
+    <ClInclude Include="MarioWorldMap.h">
+      <Filter>Source Files\Mario</Filter>
+    </ClInclude>
+    <ClInclude Include="Mario.h">
+      <Filter>Source Files\Mario</Filter>
+    </ClInclude>
+    <ClInclude Include="MarioWeapon.h">
+      <Filter>Source Files\MarioWeapon</Filter>
+    </ClInclude>
+    <ClInclude Include="MarioTail.h">
+      <Filter>Source Files\MarioWeapon</Filter>
+    </ClInclude>
+    <ClInclude Include="MarioBullet.h">
+      <Filter>Source Files\MarioWeapon</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

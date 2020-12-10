@@ -17,7 +17,7 @@
 #include "Flower.h"
 #include "MarioTail.h"
 #include "Coin.h"
-
+#include "MarioBullet.h"
 //#include "Scence.h"
 
 
@@ -27,14 +27,15 @@ public:
 	int level = 1;
 	int setTimeRenderingAni = 100;
 	int untouchable;
-
-
+	int coinCollected = 0;
+	int scores = 1000;
 
 	Constant* constant;
 	DWORD timeReload = 0;
 	DWORD autoReloadTime;
 	DWORD timeFlyingForTail = 0;
 	MarioTail* Tail = new MarioTail();
+	MarioBullet* bullet = new MarioBullet();
 
 	bool isCanHoldingKoopas = false;
 	bool isEnteredFirstSpaceUp = false;
@@ -58,16 +59,15 @@ public:
 
 	bool isRunning = false;
 
-	
+	bool FlagTurnBack = false;
+
 	bool imMovable = true;
 	bool isAttackPress = false;
 	bool isKickedKoopas = false;
 	void KickingKoopas() { isKickedKoopas = true; tDraw = GetTickCount64(); }
 
-
+	float detectVxLevelSpeed;
 	float lastVx;
-	float lastVy = 0.07;
-	//CScene* s;
 	DWORD untouchable_start;
 
 	float start_x;			// initial position of Mario at scene
@@ -77,15 +77,20 @@ public:
 	bool isAttacking = false;
 	bool isJumpingAttack = false;
 
+
+	bool checkFlagLevelSpeedToTempLevelSpeed();
+	void setFlagLevelSpeedToTempLevelSpeed();
+
+	CMario(float x = 0.0f, float y = 0.0f);
 	int DetectLevelSpeedMario();
 
 	void ReduceVelocityWhenFly() {
 
-		if (vx >= MARIO_RUNNING_MAX_SPEED && vx > MARIO_MAX_WALKING_SPEED)
+		if (vx > MARIO_MAX_WALKING_SPEED)
 		{
 			vx -= MARIO_WALKING_DECELERATION;
 		}
-		else if (vx <= -MARIO_RUNNING_MAX_SPEED && vx < MARIO_MAX_WALKING_SPEED)
+		else if (vx < MARIO_MAX_WALKING_SPEED)
 		{
 			vx += MARIO_WALKING_DECELERATION;
 		}
@@ -97,9 +102,16 @@ public:
 		isPreventedSpamSpace = false;
 	}
 
-	CMario(float x = 0.0f, float y = 0.0f);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* colliable_objects = NULL);
 	virtual void Render();
+
+	void collisionWithStaticObj()
+	{
+		if (imMovable)
+			imMovable = false;
+		isRunning = false;
+		this->ReduceVelocityWhenFly();
+	}
 
 	void MarioSetOnGround() { isOnGround = true; vy = 0; }
 
@@ -126,15 +138,52 @@ public:
 	void MarioHitEnemy();
 	void AccurateCollisionWithEnemy(LPGAMEOBJECT enemies);
 
-	void CollideWithEnemy(vector<LPENEMY> enemies);
-	void playerHittingSpecialItem(Item*& item);
-	void CollideWithItem(vector<LPITEM> items);
+	void CollideWithEnemy(vector<LPGAMEOBJECT> enemies);
+	void playerHittingSpecialItem(LPGAMEOBJECT& item,vector<LPGAMEOBJECT>& listEffect);
+	void CollideWithItem(vector<LPGAMEOBJECT> items, vector<LPGAMEOBJECT>& listEffect);
+
+	bool checkMarioTurnBack() 
+	{
+		if (nx == 1 && vx < 0)
+		{
+			return true;
+		}
+		if (nx == -1 && vx > 0)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	void DecelerateVelocityRunning()
+	{
+		if (detectVxLevelSpeed > MARIO_MAX_WALKING_SPEED)
+		{
+			detectVxLevelSpeed -= 0.0002;
+		}
+ 		else if (detectVxLevelSpeed < -MARIO_MAX_WALKING_SPEED)
+		{
+			detectVxLevelSpeed += 0.0002;
+		}
+	}
+
 	void Reset();
 
 	void MarioIsFalling() 
 	{ 
 		this->isFalling = true;
 		this->isOnGround = false;
+	}
+
+	void increCoinCollected() { this->coinCollected++; }
+	int getCoinCollected() { return this->coinCollected; }
+	void increScores() { this->scores+=100; }
+	int getScores() {  return this->scores; }
+
+	void IncreScoreMario()
+	{
+		this->increCoinCollected();
+		this->increScores();
 	}
 
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);

@@ -1,10 +1,9 @@
 #include "Flower.h"
-#include "Utils.h"
 
 
-CFlower::CFlower(float y,int HeightPipe)
+CFlower::CFlower(float y,float HeightPipe)
 {
-	this->type = 22;
+	this->type = Type::FLOWER;
 	this->start_y = y;
 	this->HeightPipe = HeightPipe;
 }

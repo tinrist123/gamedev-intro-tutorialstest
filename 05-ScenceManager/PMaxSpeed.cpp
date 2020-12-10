@@ -6,7 +6,7 @@ PMaxSpeed::PMaxSpeed()
 
 void PMaxSpeed::Render()
 {
-	animation_set->at(37)->Render(x, y, 255);
+	animation_set->at(38)->Render(x, y, 255);
 }
 void PMaxSpeed::Update(float camX, float camY)
 {

@@ -1,6 +1,7 @@
 #pragma once
 #include "ListEffects.h"
 
+
 class EffectPoint: public ListEffects
 {
 public:
@@ -25,7 +26,5 @@ public:
 		}
 		return;
 	}
-
-
 };
 

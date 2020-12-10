@@ -1,5 +1,4 @@
 #pragma once
-
 #include <Windows.h>
 #include <d3dx9.h>
 #include <vector>
@@ -12,7 +11,6 @@
 #include "Game.h"
 #include "Sprites.h"
 #include "Utils.h"
-
 
 using namespace std;
 
@@ -70,6 +68,7 @@ public:
 	bool isAddedEffect = false;
 	bool isDamageable = true;
 	bool isInCamera = false;
+	bool isTouchable = false;
 
 	int type;
 	int category = -1;
@@ -94,11 +93,13 @@ public:
 	DWORD dt; 
 
 	LPANIMATION_SET animation_set;
-
 public: 
 	int getTypeObject() { return type; }
 	int getCategoryObject() { return category; }
 
+	float GetX() { return this->x; }
+
+	void setAnimation(int ani) { this->ani = ani; }
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
 	void SetSpeed(float vx, float vy) { this->vx = vx, this->vy = vy; }
 	void GetPosition(float &x, float &y) { x = this->x; y = this->y; }

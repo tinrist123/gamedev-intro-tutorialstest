@@ -4,8 +4,10 @@ class Number : public BoardAddSprite
 {
 public:
 	Number();
-	//virtual void Render();
+	void setPos(float posX, float posY) { this->x = posX; this->y = posY; }
+	virtual void Render();
 	//void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
+	~Number();
 };
 

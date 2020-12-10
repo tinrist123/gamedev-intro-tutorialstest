@@ -138,13 +138,13 @@ void CPlayScene::_ParseSection_Map(string line)
 	int num_col_on_tilemap = atoi(tokens[6].c_str());
 	int tileset_width = atoi(tokens[7].c_str());
 	int tileset_height = atoi(tokens[8].c_str());
-	int widthGrid = atoi(tokens[9].c_str());
-	int heightGrid = atoi(tokens[10].c_str());
+	float widthGrid = atoi(tokens[9].c_str());
+	float heightGrid = atoi(tokens[10].c_str());
 	grid = new Grid();
 	grid->Resize(widthGrid, heightGrid);
 	//grid->PushGrid(objects);
 	map = new TileMap(ID, filePath_texture.c_str(), filePath_data.c_str(), num_row_on_texture, num_col_on_textture, num_row_on_tilemap, num_col_on_tilemap, tileset_width, tileset_height);
-	boardGame = new BoardGame();
+	boardGame = new BoardGame(player);
 }
 
 /*		
@@ -183,6 +183,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			player = (CMario*)obj;  
 			player->SetAnimationSet(ani_set);
 			player->SetPosition(x, y);
+			cam = new Camera(player);
 			return;
 		}
 		//DebugOut(L"[INFO] Player object created!\n");
@@ -194,22 +195,22 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	}
 	case OBJECT_TYPE_CloudBrick:
 	{
-		int width = atof(tokens[4].c_str());
-		int height = atof(tokens[5].c_str());
+		float width = atof(tokens[4].c_str());
+		float height = atof(tokens[5].c_str());
 		obj = new CloudBrick(width, height);
 		break;
 	}
 	case OBJECT_TYPE_BRICK:
 		{
-			int width = atof(tokens[4].c_str());
-			int height = atof(tokens[5].c_str());
+			float width = atof(tokens[4].c_str());
+			float height = atof(tokens[5].c_str());
 			obj = new CBrick(width, height);
 			break;
 		}
 	case OBJECT_TYPE_WeakBrick:
 	{
-		int width = atof(tokens[4].c_str());
-		int height = atof(tokens[5].c_str());
+		float width = atof(tokens[4].c_str());
+		float height = atof(tokens[5].c_str());
 		int isHaveItem = 0;
 		if (tokens.size() == 7)
 			int isHaveItem = atof(tokens[6].c_str());
@@ -231,35 +232,35 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	}
 	case OBJECT_TYPE_Flower:
 	{
-		int HeightPipe = atof(tokens[4].c_str());
+		float HeightPipe = atof(tokens[4].c_str());
 		obj = new CFlower(y, HeightPipe);
 		break;
 	}
 	case OBJECT_TYPE_Ground: 
 	{
-		int width = atof(tokens[4].c_str());
-		int height = atof(tokens[5].c_str());
+		float width = atof(tokens[4].c_str());
+		float height = atof(tokens[5].c_str());
 		obj = new Ground(width, height);
 		break;
 	}
 	case OBJECT_TYPE_ColorBox:
 	{
-		int width = atof(tokens[4].c_str());
-		int height = atof(tokens[5].c_str());
+		float width = atof(tokens[4].c_str());
+		float height = atof(tokens[5].c_str());
 		obj = new ColorBox(width, height);
 		break;
 	}
 	case OBJECT_TYPE_Pipe:
 	{
-		int width = atof(tokens[4].c_str());
-		int height = atof(tokens[5].c_str());
+		float width = atof(tokens[4].c_str());
+		float height = atof(tokens[5].c_str());
 		obj = new Pipe(width, height);
 		break;
 	}
 	case OBJECT_TYPE_QUESTION_BRICK:
 	{
-		int width = atof(tokens[4].c_str());
-		int height = atof(tokens[5].c_str());
+		float width = atof(tokens[4].c_str());
+		float height = atof(tokens[5].c_str());
 		int itemInside = atof(tokens[6].c_str());
 		obj = new QuestionBrick(x,y,width, height,itemInside);
 		break;
@@ -280,14 +281,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	// General object setup
 	obj->SetAnimationSet(ani_set);
 	obj->SetPosition(x, y);
-	if (dynamic_cast<Item*>(obj))
-	{
-		items.push_back((Item*)obj);
-	}
-	else
-	{
-		objects.push_back(obj);
-	}
+
+	objects.push_back(obj);
 }
 
 void CPlayScene::Load()
@@ -295,7 +290,7 @@ void CPlayScene::Load()
 	//DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 
 	//mapScence = new TileMap();
-	ifstream f;
+		ifstream f;
 	f.open(sceneFilePath);
 	// current resource section flag
 	int section = SCENE_SECTION_UNKNOWN;					
@@ -354,8 +349,8 @@ Item *CreateItemOfMario(CMario *player, QuestionBrick *object)
 	}
 	else if (object->ItemInside == SPECIAL_ITEM)
 	{
-		int kindAni = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : 2;
-		//int kindAni = 3;
+		//int kindAni = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : 2;
+		int kindAni = 2;
 		if (kindAni == 2)
 		{
 			Leaf *leaf = new Leaf(object->x, object->y);
@@ -397,7 +392,7 @@ Enemy* CPlayScene::CreateFlowerBullet(CFlower* flower)
 
 
 // special item mean mushroom or leaf or more
-void CPlayScene::playerHittingSpecialItem(Item*& item)
+void CPlayScene::playerHittingSpecialItem(LPGAMEOBJECT& item)
 {
 	item->SetState(ITEM_STATE_HITTING_MARIO);
 	player->level = (player->level >= MARIO_LEVEL_BIG_TAIL) ? MARIO_LEVEL_BIG_TAIL : ++player->level;
@@ -411,14 +406,61 @@ void CPlayScene::playerHittingSpecialItem(Item*& item)
 	effects.push_back(effect);
 }
 
+bool CPlayScene::checkObjOutOfCamera(LPGAMEOBJECT obj)
+{
+	float cam_x = CGame::GetInstance()->GetCamPosX();
+	float cam_y = CGame::GetInstance()->GetCamPosY();
+	float RangeOxRight = cam_x + SCREEN_WIDTH;
+	float RangeOxLeft = cam_x;
+	float RangeOyTop = cam_y + SCREEN_HEIGHT;
+	float RangeOyBottom = cam_y;
+
+	if (obj->x > RangeOxRight
+		||
+		obj->x < RangeOxLeft
+		||
+		obj->y > RangeOyTop
+		||
+		obj->y < RangeOyBottom
+		)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void CPlayScene::removeObjOutOfCamera(LPGAMEOBJECT& obj)
+{
+	float cam_x = CGame::GetInstance()->GetCamPosX();
+	float cam_y = CGame::GetInstance()->GetCamPosY();
+	float RangeOxRight = SCREEN_WIDTH - cam_x;
+	float RangeOxLeft = player->x - cam_x;
+	float RangeOyTop = cam_y + SCREEN_HEIGHT;
+	float RangeOyBottom = cam_y;
+	if (obj->GetX() - player->x >= SCREEN_WIDTH - (player->x - CGame::GetInstance()->GetCamPosX())
+		|| player->x - obj->GetX() >= player->x - CGame::GetInstance()->GetCamPosX()
+		||
+		obj->y > RangeOyTop
+		||
+		obj->y < RangeOyBottom
+		)
+	{
+		obj->setObjDisappear();
+	}
+	
+
+}
+
 
 void CPlayScene::GetObjectGrid()
 {
 	ObjectsInScreen.clear();
 	items.clear();
 	staticObjects.clear();
-	effects.clear();
+	listCBrick.clear();
 	enemies.clear();
+	//effects.clear();
 	grid->GetGrid(ObjectsInScreen);
 }
 
@@ -431,9 +473,40 @@ void CPlayScene::Update(DWORD dt)
 	float playerPositionX = player->x;
 	float playerPositionY = player->y;
 
-	//grid->CheckCamGrid(objects);
-	//GetObjectGrid();
+	grid->CheckCamGrid(objects);
+	GetObjectGrid();
 
+
+	for (size_t i = 0; i < ObjectsInScreen.size(); i++)
+	{
+		if (ObjectsInScreen[i]->getCategoryObject() == Category::GROUND)
+		{
+			staticObjects.push_back(ObjectsInScreen[i]);
+		}
+		else if (ObjectsInScreen[i]->getCategoryObject() == Category::ENEMY)
+		{
+			enemies.push_back(ObjectsInScreen[i]);
+		}
+		else if (ObjectsInScreen[i]->getCategoryObject() == Category::ITEM)
+		{
+			if (ObjectsInScreen[i]->getTypeObject() == Type::SUPER_LEAF)
+			{
+				dynamicItems.push_back(ObjectsInScreen[i]);
+			}
+			else if (ObjectsInScreen[i]->getTypeObject() == Type::SUPER_MUSHROOM)
+			{
+				dynamicItems.push_back(ObjectsInScreen[i]);
+			}
+			else if (ObjectsInScreen[i]->getTypeObject() == Type::COIN)
+			{
+				items.push_back(ObjectsInScreen[i]);
+			}
+		}
+		else if (ObjectsInScreen[i]->getCategoryObject() == Category::BRICK)
+		{
+			listCBrick.push_back(ObjectsInScreen[i]);
+		}
+	}
 
 	for (size_t i = 0; i < objects.size(); i++)
 	{
@@ -444,20 +517,13 @@ void CPlayScene::Update(DWORD dt)
 		coObjects.push_back(items[i]);
 	}
 	
-	for (size_t i = 0; i < objects.size(); i++)
-	{
-		/*if (objects[i]->objectDisappear())
-		{
-			objects.erase(objects.begin() + i);
+	//cam->Update(dt);
 
-		}*/
-		if (dynamic_cast<Enemy*>(objects[i]))
+	for (size_t i = 0; i < enemies.size(); i++)
+	{
+		if (fabs(enemies[i]->x - playerPositionX) < 90.0f && enemies[i]->getTypeObject() == Type::FLOWER)
 		{
-			player->AccurateCollisionWithEnemy(objects[i]);
-		}
-		if (fabs(objects[i]->x - playerPositionX) < 90.0f && dynamic_cast<CFlower *>(objects[i]))
-		{
-			CFlower* flower = dynamic_cast<CFlower*>(objects[i]);
+			CFlower* flower = dynamic_cast<CFlower*>(enemies[i]);
 
 			if (flower->state == FLOWER_STATE_UP)
 			{
@@ -467,82 +533,21 @@ void CPlayScene::Update(DWORD dt)
 					if (flower->isReadyFire() && flower->delayBullet != 0)
 					{
 						flower->isWaitingShooting = false;
-						enemies.push_back(CreateFlowerBullet(flower));
+						flowerBullet.push_back(CreateFlowerBullet(flower));
 						flower->delayBullet = 0;
 					}
 					else if (flower->delayBullet == 0)
 					{
 						flower->setTimeLoadingBullet();
 					}
-					
+
 				}
 				flower->nx = (player->x - flower->x < 0) ? -1 : 1;
 				flower->ny = (player->y - flower->y < 0) ? -1 : ((player->y - flower->y > 16.0f)) ? 1 : 0;
 			}
-			
+
 		}
-		// K Update thg nao bien mat
-		if (objects[i]->health == 0 && objects[i]->isDisappeared)
-		{
-			if (dynamic_cast<MarioBullet*>(objects[i]) && !(objects[i])->isAddedEffect)
-			{
-				(objects[i])->isAddedEffect = true;
-				MarioBullet* marioBullet = dynamic_cast<MarioBullet*>(objects[i]);
-				EffectsFire* effect = new EffectsFire();
-				effect->SetState(EFFECTS_DEFLECT);
-				effect->SetPosition(marioBullet->pointCollisionX, marioBullet->pointCollisionY);
-				effects.push_back(effect);
-			}
-			continue;
-		}
-		if (objects[i]->health == 0 && dynamic_cast<QuestionBrick *>(objects[i]) && !objects[i]->isCreated)
-		{
-			QuestionBrick* questionBrick = dynamic_cast<QuestionBrick*>(objects[i]);
-			// TODO: EFFECT DISAPEAR SO COIN MUST DISAPEAR TOO, so Calculate it
-			// DONE
-			items.push_back(CreateItemOfMario(player, questionBrick));
-		}
-		if (player->isFireShoot)
-		{
-			MarioBullet* bullet = new MarioBullet();
-			CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-			LPANIMATION_SET ani_set = animation_sets->Get(7);
-
-
-			if (player->IsReloadedBullets() && player->timeReload != 0)
-			{
-				player->totalOfBulletsReadyForFiring = 2;
-				player->timeReload = 0;
-				player->resetAutoReload();
-			}
-			if (player->isReloaded() && player->autoReloadTime != 0)
-			{
-				player->totalOfBulletsReadyForFiring = 2;
-				player->timeReload = 0;
-				player->autoReloadTime = 0;
-			}
-			if (player->totalOfBulletsReadyForFiring > 0)
-			{
-				bullet->SetAnimationSet(ani_set);
-				bullet->x = player->x + 5*player->nx;
-				bullet->y = player->y;
-				bullet->nx = player->nx;
-				bullet->SetState(BULLET_STATE_NORMAL_MOVING);
-
-				player->totalOfBulletsReadyForFiring--;
-				player->setAutoReload();
-				player->isFireShoot = false;
-
-				objects.push_back(bullet);
-			}
-			if (player->totalOfBulletsReadyForFiring == 0 && player->timeReload == 0)
-			{
-				player->ReloadBullets();
-			}
-		}
-
-		// 1 Mean Koopas is Shell appearance
-		if (dynamic_cast<CKoopas*>(objects[i]) && objects[i]->isAliveObject() )
+		else if (dynamic_cast<CKoopas*>(objects[i]) && objects[i]->isAliveObject())
 		{
 			CKoopas* koopas = dynamic_cast<CKoopas*>(objects[i]);
 
@@ -556,29 +561,35 @@ void CPlayScene::Update(DWORD dt)
 			{
 				player->ChainKickKoopas(koopas, false);
 			}
-			if (player->isCanHoldingKoopas &&  koopas->isOutOfControl)
+			if (player->isCanHoldingKoopas && koopas->isOutOfControl)
 			{
+				// detect Nx to accurately hold koopasf
+				float distanceKoopasByOy = (player->level == MARIO_LEVEL_SMALL) ? 14 : 0;
+				float distanceKoopasbyOx = (player->nx == 1) ? 14 : -5;
+				if (player->level == MARIO_LEVEL_SMALL)
+				{
+					distanceKoopasbyOx = (player->nx == 1) ? 10 : -8;
+
+				}
 				// Hold koopas
-				koopas->updatePositionKoopasByPositionMario(player->x + 10 *player->nx, player->y);
+				koopas->updatePositionKoopasByPositionMario(player->x + distanceKoopasbyOx, player->y - distanceKoopasByOy);
 			}
 			else if (player->isCanHoldingKoopas && !koopas->isOutOfControl && koopas->isPlayerHolding)
 			{
 				// When koopas revive, player Cant hold it
-				player->isCanHoldingKoopas = false; 
+				player->isCanHoldingKoopas = false;
 				koopas->isPlayerHolding = false;
 			}
-		}
-
-		// HEALTH == 2 mean, goomba have wing
-		if (dynamic_cast<CGoomba*>(objects[i]) && objects[i]->health == 2)
+		} 
+		else if (dynamic_cast<CGoomba*>(objects[i]) && objects[i]->health == 2)
 		{
 			CGoomba* goomba = dynamic_cast<CGoomba*>(objects[i]);
 			float goombaPositionX = goomba->x;
 			float goombaPositionY = goomba->y;
 			if (goomba->level == PARAGOOMBA)
 			{
-				goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0)?-1:1);
-				if (fabs(goombaPositionX - playerPositionX) < 250.0f 
+				goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0) ? -1 : 1);
+				if (fabs(goombaPositionX - playerPositionX) < 250.0f
 					&& !goomba->IsBlockingChangeState
 					&& goomba->health == 2
 					)
@@ -588,60 +599,228 @@ void CPlayScene::Update(DWORD dt)
 					goomba->startTimeChangeState();
 				}
 			}
-			
+
 
 		}
-
-		objects[i]->Update(dt, &coObjects);
 	}
 
-	player->Update(dt,&objects);
+	for (size_t i = 0; i < listCBrick.size(); i++)
+	{
+		if (listCBrick[i]->health == 0 && dynamic_cast<QuestionBrick*>(listCBrick[i]) && !listCBrick[i]->isCreated)
+		{
+			QuestionBrick* questionBrick = dynamic_cast<QuestionBrick*>(listCBrick[i]);
+			// TODO: EFFECT DISAPEAR SO COIN MUST DISAPEAR TOO, so Calculate it
+			// DONE
+			dynamicItems.push_back(CreateItemOfMario(player, questionBrick));
+		}
+	}
 
+	//for (size_t i = 0; i < objects.size(); i++)
+	//{
+	//	/*if (objects[i]->objectDisappear())
+	//	{
+	//		objects.erase(objects.begin() + i);
+
+	//	}*/
+	//	if (dynamic_cast<Enemy*>(objects[i]))
+	//	{
+	//		player->AccurateCollisionWithEnemy(objects[i]);
+	//	}
+	
+	//	// K Update thg nao bien mat
+	//	if (objects[i]->health == 0 && objects[i]->isDisappeared)
+	//	{
+	//		if (dynamic_cast<MarioBullet*>(objects[i]) && !(objects[i])->isAddedEffect)
+	//		{
+	//			(objects[i])->isAddedEffect = true;
+	//			MarioBullet* marioBullet = dynamic_cast<MarioBullet*>(objects[i]);
+	//			EffectsFire* effect = new EffectsFire();
+	//			effect->SetState(EFFECTS_DEFLECT);
+	//			effect->SetPosition(marioBullet->pointCollisionX, marioBullet->pointCollisionY);
+	//			effects.push_back(effect);
+	//		}
+	//		continue;
+	//	}
+	//	if (player->isFireShoot)
+	//	{
+	//		MarioBullet* bullet = new MarioBullet();
+	//		CAnimationSets* animation_sets = CAnimationSets::GetInstance();
+	//		LPANIMATION_SET ani_set = animation_sets->Get(7);
+
+
+	//		if (player->IsReloadedBullets() && player->timeReload != 0)
+	//		{
+	//			player->totalOfBulletsReadyForFiring = 2;
+	//			player->timeReload = 0;
+	//			player->resetAutoReload();
+	//		}
+	//		if (player->isReloaded() && player->autoReloadTime != 0)
+	//		{
+	//			player->totalOfBulletsReadyForFiring = 2;
+	//			player->timeReload = 0;
+	//			player->autoReloadTime = 0;
+	//		}
+	//		if (player->totalOfBulletsReadyForFiring > 0)
+	//		{
+	//			bullet->SetAnimationSet(ani_set);
+	
+
+	//			player->totalOfBulletsReadyForFiring--;
+	//			player->setAutoReload();
+	//			player->isFireShoot = false;
+
+	//			objects.push_back(bullet);
+	//		}
+	//		if (player->totalOfBulletsReadyForFiring == 0 && player->timeReload == 0)
+	//		{
+	//			player->ReloadBullets();
+	//		}
+	//	}
+
+	//	// 1 Mean Koopas is Shell appearance
+	//	if (dynamic_cast<CKoopas*>(objects[i]) && objects[i]->isAliveObject() )
+	//	{
+	//		CKoopas* koopas = dynamic_cast<CKoopas*>(objects[i]);
+
+	//		/*if (koopas->isCreatePointEffect)
+	//		{
+	//			koopas->addPointToItem();
+	//			effects.push_back(koopas->effectPoint);
+	//		}*/
+
+	//		if (!player->isCanHoldingKoopas && koopas->isOutOfControl)
+	//		{
+	//			player->ChainKickKoopas(koopas, false);
+	//		}
+	//		if (player->isCanHoldingKoopas &&  koopas->isOutOfControl)
+	//		{
+	//			// detect Nx to accurately hold koopasf
+	//			float distanceKoopasByOy = (player->level == MARIO_LEVEL_SMALL)?14:0;
+	//			float distanceKoopasbyOx = (player->nx == 1) ? 14 : -5;
+	//			if (player->level == MARIO_LEVEL_SMALL)
+	//			{
+	//				distanceKoopasbyOx = (player->nx == 1) ? 10 : -8;
+	//				
+	//			}
+	//			// Hold koopas
+	//			koopas->updatePositionKoopasByPositionMario(player->x + distanceKoopasbyOx, player->y - distanceKoopasByOy);
+	//		}
+	//		else if (player->isCanHoldingKoopas && !koopas->isOutOfControl && koopas->isPlayerHolding)
+	//		{
+	//			// When koopas revive, player Cant hold it
+	//			player->isCanHoldingKoopas = false; 
+	//			koopas->isPlayerHolding = false;
+	//		}
+	//	}
+
+	//	// HEALTH == 2 mean, goomba have wing
+	//	if (dynamic_cast<CGoomba*>(objects[i]) && objects[i]->health == 2)
+	//	{
+	//		CGoomba* goomba = dynamic_cast<CGoomba*>(objects[i]);
+	//		float goombaPositionX = goomba->x;
+	//		float goombaPositionY = goomba->y;
+	//		if (goomba->level == PARAGOOMBA)
+	//		{
+	//			goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0)?-1:1);
+	//			if (fabs(goombaPositionX - playerPositionX) < 250.0f 
+	//				&& !goomba->IsBlockingChangeState
+	//				&& goomba->health == 2
+	//				)
+	//			{
+	//				// Become crazy goomba and it have 3 state change circle
+	//				goomba->blockingChangeState(true);
+	//				goomba->startTimeChangeState();
+	//			}
+	//		}
+	//		
+
+	//	}
+
+	//	objects[i]->Update(dt, &coObjects);
+	//}
+
+
+	
+
+	{
+		if (player->isFireShoot)
+		{
+			if (marioBullet.size() < 2)
+			{
+				player->bullet = new MarioBullet();
+				player->bullet->x = player->x + 5*player->nx;
+				player->bullet->y = player->y;
+				player->bullet->nx = player->nx;
+				player->bullet->SetState(BULLET_STATE_NORMAL_MOVING);
+				marioBullet.push_back(player->bullet);
+			}
+			player->isFireShoot = false;
+		}
+		player->Update(dt,&objects);
+	}
+
+	for (size_t i = 0; i < listCBrick.size(); i++)
+	{
+		listCBrick[i]->Update(dt, &coObjects);
+	}
+
+	for (size_t i = 0; i < marioBullet.size(); i++)
+	{
+		marioBullet[i]->Update(dt, &coObjects);
+		this->removeObjOutOfCamera(marioBullet[i]);
+	}
+	
+	for (size_t i = 0; i < flowerBullet.size(); i++)
+	{
+		flowerBullet[i]->Update(dt, &coObjects);
+	}
 
 	for (size_t i = 0; i < effects.size(); i++)
 	{
 		effects[i]->Update(dt, &coObjects);
 	}
 	
-	
-	
-	
-	if (items.size() > 0)
+	for (size_t i = 0; i < dynamicItems.size(); i++)
 	{
-		for (size_t i = 0; i < items.size(); i++)
+		if (dynamicItems[i]->getCategoryObject() == Category::ITEM)
 		{
-			if (items[i]->isTouchable)
+			Item* item = dynamic_cast<Item*>(dynamicItems[i]);
+			if (item->pointEff)
 			{
-				if (player->AABBCollision(items[i]))
+				if (item->pointEff->objectDisappear())
 				{
-					if ((items[i]->GetState() == ITEM_STATE_SPECIAL_ITEM || items[i]->GetState() == ITEM_STATE_LEAF_FALL))
-					{
-						playerHittingSpecialItem(items[i]);
-					}				
+					dynamicItems[i]->setObjDisappear();
 				}
 			}
-			if (items[i]->pointEff)
-			{
-				if (items[i]->pointEff->objectDisappear())
-				{
-					items[i]->setObjDisappear();
-				}
-			}
-			items[i]->Update(dt, &coObjects);
 		}
+		dynamicItems[i]->Update(dt, &coObjects);
 	}
-	//player->CollideWithItem(items);
+	
+	for (size_t i = 0; i < items.size(); i++)
+	{
+		items[i]->Update(dt, &coObjects);
+	}
 
-	if (enemies.size() > 0)
+	player->CollideWithItem(items, effects);
+	player->CollideWithItem(dynamicItems,effects);
+
+	for (size_t i = 0; i < enemies.size(); i++)
 	{
-		for (size_t i = 0; i < enemies.size(); i++)
-		{
-			enemies[i]->Update(dt, &coObjects);
-		}
+		// Flower Fire Mario
+		enemies[i]->Update(dt, &coObjects);
 	}
+
 	//player->CollideWithEnemy(enemies);
 
 	// remove everything
+	for (size_t i = 0; i < objects.size(); i++)
+	{
+		if (objects[i]->objectDisappear())
+		{
+			objects.erase(objects.begin() + i);
+		}
+	}
+
 	for (size_t i = 0; i < effects.size(); i++)
 	{
 		if (effects[i]->objectDisappear())
@@ -659,16 +838,39 @@ void CPlayScene::Update(DWORD dt)
 			continue;
 		}
 	}
+
+	for (size_t i = 0; i < dynamicItems.size(); i++)
+	{
+		if (dynamicItems[i]->objectDisappear())
+		{
+			dynamicItems.erase(dynamicItems.begin() + i);
+			continue;
+		}
+	}
+
 	for (size_t i = 0; i < objects.size(); i++)
 	{
 		if (objects[i]->objectDisappear())
 		{
 			objects.erase(objects.begin() + i);
-			continue;
 		}
 	}
 	
+	for (size_t i = 0; i < marioBullet.size(); i++)
+	{
+		if (marioBullet[i]->objectDisappear())
+		{
+			marioBullet.erase(marioBullet.begin() + i);
+		}
+	}
 
+	for (size_t i = 0; i < flowerBullet.size(); i++)
+	{
+		if (flowerBullet[i]->objectDisappear())
+		{
+			flowerBullet.erase(flowerBullet.begin() + i);
+		}
+	}
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
 	if (player == NULL) return; 
@@ -679,50 +881,62 @@ void CPlayScene::Update(DWORD dt)
 	/*CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
 	cy -= game->GetScreenHeight() / 2;*/
-	CGame::GetInstance()->cam_y = 100.0f;
+	CGame::GetInstance()->cam_y = 200.0f;
 
-	if (player->x > (SCREEN_WIDTH / 2) && player->x + (SCREEN_WIDTH / 2) < map->GetWidthTileMap())
+
+	if (player->x > (SCREEN_WIDTH / 4) && player->x + (SCREEN_WIDTH / 4) < map->GetWidthTileMap())
 	{
-		cx = player->x - (SCREEN_WIDTH / 2);
+		cx = player->x - (SCREEN_WIDTH / 4);
   		CGame::GetInstance()->cam_x = cx;
 	}
-
-	//DebugOut(L"cam_x = %f\n", CGame::GetInstance()->cam_x)
-	boardGame->Update(dt, CGame::GetInstance()->cam_x, 432, player);
+	float cam_y = 432;
+	boardGame->Update(dt, CGame::GetInstance()->cam_x, cam_y);
 }
 
 void CPlayScene::Render()
 {
 	//mapScence->DrawMap();
-	//map->Draw();
+	map->Draw();
+	for (size_t i = 0; i < staticObjects.size(); i++)
+	{
+		staticObjects[i]->Render();
+	}
 
-	for (int i = 0; i < objects.size(); i++)
+	for (size_t i = 0; i < items.size(); i++)
 	{
-		if (objects[i]->health == 0 && objects[i]->isDisappeared)
-		{
-			continue;
-		}
-		objects[i]->Render();
+		items[i]->Render();
+    }
+
+	for (size_t i = 0; i < enemies.size(); i++)
+	{
+ 		enemies[i]->Render();
 	}
-	if (items.size() > 0)
+
+	for (size_t i = 0; i < listCBrick.size(); i++)
 	{
-		for (size_t i = 0; i < items.size(); i++)
-		{
-			items[i]->Render();
-		}
-	}
-	if (enemies.size() > 0)
-	{
-		for (size_t i = 0; i < enemies.size(); i++)
-		{
- 			enemies[i]->Render();
-		}
+		listCBrick[i]->Render();
 	}
 
 	for (size_t i = 0; i < effects.size(); i++)
 	{
 		effects[i]->Render();
 	}
+
+	for (size_t i = 0; i < dynamicItems.size(); i++)
+	{
+		dynamicItems[i]->Render();
+	}
+
+	for (size_t i = 0; i < marioBullet.size(); i++)
+	{
+		marioBullet[i]->Render();
+	}
+
+	for (size_t i = 0; i < flowerBullet.size(); i++)
+	{
+		flowerBullet[i]->Render();
+	}
+
 	player->Render();
 	boardGame->Render();
 }
@@ -863,8 +1077,7 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
-	
-	
+
 	if (game->IsKeyDown(DIK_LSHIFT) && game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_SPACE))
 	{
 		if (mario->isOnGround && mario->imMovable)
@@ -886,7 +1099,6 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 		mario->SetState(MARIO_STATE_WALKING_LEFT);
 		if (mario->isCanHoldingKoopas) mario->nx = -1;
 		//return;
-
 	}
 	else if (game->IsKeyDown(DIK_DOWN))
 	{

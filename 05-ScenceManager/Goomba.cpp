@@ -47,9 +47,9 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 
-	if (effectPoint)
+	if (pointEff)
 	{
-		effectPoint->UpdateOrDeleteEffect(dt, coObjects, effectPoint);
+		pointEff->UpdateOrDeleteEffect(dt, coObjects, pointEff);
 	}
 
 
@@ -223,9 +223,9 @@ void CGoomba::Render()
 
 	animation_set->at(ani)->Render(x,y);
 
-	if (effectPoint)
+	if (pointEff)
 	{
-		effectPoint->Render();
+		pointEff->Render();
 	}
 
 	RenderBoundingBox();

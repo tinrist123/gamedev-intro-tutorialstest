@@ -10,7 +10,7 @@ QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height,int I
 	this->start_x = start_x;
 	this->start_y = start_y;
 	ani = 0;
-	this->type = 03;
+	this->type = Type::CBRICK;
 }
 
 void QuestionBrick::Render()
@@ -25,8 +25,12 @@ void QuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	 
 	x += dx;
 	y += dy;
+
+	DebugOut(L"y = %f\n", y);
+
 	if (y >= start_y)
 	{
+		if (y == start_y) return;
 		y = start_y;
 		vy = 0;
 	}

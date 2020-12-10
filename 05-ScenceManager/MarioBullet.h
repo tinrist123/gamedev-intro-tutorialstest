@@ -18,7 +18,7 @@ public:
 
 
 	int ny;
-
+	MarioBullet();
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void SetState(int state);
 	virtual void Render();
