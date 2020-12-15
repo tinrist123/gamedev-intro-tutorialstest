@@ -4,7 +4,6 @@
 Item::Item()
 {
 	this->category = Category::ITEM;
-
 	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 	LPANIMATION_SET ani_set = animation_sets->Get(5);
 	SetAnimationSet(ani_set);

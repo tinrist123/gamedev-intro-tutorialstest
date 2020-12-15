@@ -29,6 +29,7 @@ void TileMap::LoadMap()
 			int id_SPRITE = id + id_sprite;
 			sprites->Add(id_SPRITE, tileset_width * j, tileset_height * i, tileset_width * (j + 1), tileset_height * (i + 1), texTileMap);
 			id_sprite = id_sprite + 1;
+			DebugOut(L"id_sprite = %d\n", id_SPRITE);
 		}
 	}
 }
@@ -99,6 +100,22 @@ void TileMap::Load()
 	DebugOut(L"[INFO] Done loading map resources %s\n", filePath_data);
 }
 
+//void TileMap::Draw()
+//{
+//	int firstcol = (int)CGame::GetInstance()->GetCamPosX() / tileset_width;
+//	//int lastcol = firstcol + (SCREEN_WIDTH / tileset_width);
+//	//int lastcol = firstcol + 45;
+//	for (UINT i = 0; i < 23; i++)
+//	{
+//		for (UINT j = 0; j < 37; j++)
+//		{
+//			//float x = tileset_width * (j - firstcol) + CGame::GetInstance()->GetCamPosX() - (int)(CGame::GetInstance()->GetCamPosX()) % tileset_width;
+//			//float y = tileset_height * i;
+//;			sprites->Get(tilemap[i][j] + id)->Draw(16*j + 96, 16*i + 64);
+//			//tilemap[i][j]->Draw(x, y);
+//		}
+//	}
+//}
 void TileMap::Draw()
 {
 	int firstcol = (int)CGame::GetInstance()->GetCamPosX() / tileset_width;

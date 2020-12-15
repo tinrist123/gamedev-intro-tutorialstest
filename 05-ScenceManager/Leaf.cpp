@@ -57,7 +57,7 @@ void Leaf::GetBoundingBox(float& l, float& t, float& r, float& b)
 }
 Leaf::Leaf(float posX, float posY)
 {
-	this->type = 42;
+	this->type = Type::SUPER_LEAF;
 
 	this->start_x = posX;
 	this->start_y = posY;

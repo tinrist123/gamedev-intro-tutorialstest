@@ -270,10 +270,21 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		tDraw = 0;
 	}
 
-	/*if (!this->isGround(this->x + constant->listBBox_Mario_Big.at(0) + 3.0f, this->y + MARIO_BIG_BBOX_HEIGHT + 3, *coObjects) && !this->isGround(this->x - 1, this->y + constant->listBBox_Mario_Big.at(1) + 8, *coObjects))
+	if (level == MARIO_LEVEL_SMALL)
 	{
-		this->MarioIsFalling();
-	}*/
+		if (!this->isGround(this->x + constant->listBBox_Mario_Big.at(0) + 3.0f, this->y + MARIO_SMALL_BBOX_WIDTH + 5.0f, *coObjects)
+			&& !this->isGround(this->x - 1, this->y + MARIO_SMALL_BBOX_HEIGHT + 5.0f, *coObjects))
+			this->MarioIsFalling();
+	}
+	else if (level != MARIO_LEVEL_SMALL)
+	{
+		if (!this->isGround(this->x + constant->listBBox_Mario_Big.at(0) + 3.0f, this->y + MARIO_BIG_BBOX_HEIGHT + 5.0f, *coObjects)
+			)
+			if (!this->isGround(this->x - 1, this->y + MARIO_BIG_BBOX_HEIGHT + 5.0f, *coObjects))
+			{
+				this->MarioIsFalling();
+			}
+	}
 
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
@@ -321,6 +332,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					vy = 0;
 					isOnGround = true;
 					OffPreventSpamSpace();
+					blockJumping = false;
 				}
 			}
 			if (dynamic_cast<CGoomba *>(e->obj))
@@ -514,7 +526,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			}
 			else if (e->obj->getTypeObject() == Type::P_SWITCH)
 			{
-				P_Switch * p = dynamic_cast<P_Switch*>(e->obj);
+				P_Switch* p = dynamic_cast<P_Switch*>(e->obj);
 				if (e->ny < 0)
 				{
 					this->MarioSetOnGround();
@@ -1145,12 +1157,12 @@ void CMario::SetState(int state)
 		}
 		break;
 	case MARIO_STATE_JUMP:
-			//if (isOnGround && blockJumping == false )
-			if (isOnGround)
+			if (isOnGround && !blockJumping)
 			{
-				if (isRunning && vx >= MARIO_RUNNING_MAX_SPEED)
+				if (isRunning && fabs(vx) >= MARIO_RUNNING_MAX_SPEED)
 				{
 					vy = -MARIO_JUMP_MAX_SPEED_Y;
+					vx = MARIO_MAX_WALKING_SPEED;
 				}
 				else {
 					vy = -MARIO_JUMP_SPEED_Y;

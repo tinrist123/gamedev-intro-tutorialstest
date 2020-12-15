@@ -2,7 +2,7 @@
 #include <fstream>
 #include "PlayScence.h"
 #include "P_Switch.h"
-
+#include "MarioWorldMap.h"
 
 using namespace std;
 
@@ -142,7 +142,7 @@ void CPlayScene::_ParseSection_Map(string line)
 	float heightGrid = atoi(tokens[10].c_str());
 	grid = new Grid();
 	grid->Resize(widthGrid, heightGrid);
-	//grid->PushGrid(objects);
+	grid->PushGrid(objects);
 	map = new TileMap(ID, filePath_texture.c_str(), filePath_data.c_str(), num_row_on_texture, num_col_on_textture, num_row_on_tilemap, num_col_on_tilemap, tileset_width, tileset_height);
 	boardGame = new BoardGame(player);
 }
@@ -179,6 +179,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		}
 		else
 		{
+			//obj = new MarioWorldMap(x, y);
 			obj = new CMario(x,y); 
 			player = (CMario*)obj;  
 			player->SetAnimationSet(ani_set);
@@ -507,7 +508,6 @@ void CPlayScene::Update(DWORD dt)
 			listCBrick.push_back(ObjectsInScreen[i]);
 		}
 	}
-
 	for (size_t i = 0; i < objects.size(); i++)
 	{
 		coObjects.push_back(objects[i]);
@@ -881,22 +881,34 @@ void CPlayScene::Update(DWORD dt)
 	/*CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
 	cy -= game->GetScreenHeight() / 2;*/
-	CGame::GetInstance()->cam_y = 200.0f;
+	CGame::GetInstance()->cam_y = 240.0f;
 
+	float playerLeft = player->x + 11;
 
-	if (player->x > (SCREEN_WIDTH / 4) && player->x + (SCREEN_WIDTH / 4) < map->GetWidthTileMap())
+	if (playerLeft > (5 * SCREEN_WIDTH / 28) && playerLeft + (5 * SCREEN_WIDTH / 28) < map->GetWidthTileMap())
+	{
+		cx = playerLeft - (5 * SCREEN_WIDTH / 28);
+		CGame::GetInstance()->cam_x = cx;
+	}
+	/*if (player->x > (SCREEN_WIDTH / 4) && player->x + (SCREEN_WIDTH / 4) < map->GetWidthTileMap())
 	{
 		cx = player->x - (SCREEN_WIDTH / 4);
   		CGame::GetInstance()->cam_x = cx;
-	}
+	}*/
 	float cam_y = 432;
 	boardGame->Update(dt, CGame::GetInstance()->cam_x, cam_y);
 }
 
 void CPlayScene::Render()
 {
-	//mapScence->DrawMap();
 	map->Draw();
+
+	
+
+	if (player->type == Type::MARIO)
+	{
+
+
 	for (size_t i = 0; i < staticObjects.size(); i++)
 	{
 		staticObjects[i]->Render();
@@ -936,9 +948,11 @@ void CPlayScene::Render()
 	{
 		flowerBullet[i]->Render();
 	}
+	
+	boardGame->Render();
+	}
 
 	player->Render();
-	boardGame->Render();
 }
 
 /*
@@ -969,7 +983,7 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 	/*case (DIK_DOWN):
 		mario->SetState(MARIO_STATE_STOP_SITTING);
 		break;*/
-	case (DIK_SPACE):
+	case (DIK_S):
 		if (mario->level == MARIO_LEVEL_BIG_TAIL && !mario->isOnGround && mario->isFalling && mario->isEnteredFirstSpaceUp)
 		{
 			mario->vy = -MARIO_GRAVITY * mario->dt;
@@ -980,12 +994,18 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 		if (!mario->isPreventedSpamSpace)
 		{
 			mario->vy = mario->vy + MARIO_GRAVITY*mario->dt * 10;
+			if (mario->vy > 0 && mario->vy >= 0.1f) mario->vy = 0.1f;
 			mario->isEnteredFirstSpaceUp = true;
 			mario->isPreventedSpamSpace = true;
 		}
 		//mario->SetState(MARIO_ANI_SHORT_JUMP);
 		break;
-	case (DIK_LSHIFT):
+	case (DIK_A):
+		mario->isAttackPress = false;
+		if (mario->isCanHoldingKoopas)
+		{
+			mario->isCanHoldingKoopas = false;
+		}
 		mario->SetState(MARIO_STATE_STOP_RUNNING);
 		break;
 	case (DIK_RIGHT):
@@ -993,13 +1013,6 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 		break;
 	case(DIK_LEFT):
 		mario->SetState(MARIO_STATE_NOT_WALKING);
-		break;
-	case (DIK_Z):
-		mario->isAttackPress = false;
-		if (mario->isCanHoldingKoopas)
-		{
-			mario->isCanHoldingKoopas = false;
-		}
 		break;
 	default:
 		break;
@@ -1024,11 +1037,51 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		break;*/
 	case DIK_Z:
 		//mario->isCanHoldingKoopas = true;
-		mario->isAttackPress = true;
-		if ( mario->level == MARIO_LEVEL_BIG_TAIL )
+		/*mario->isAttackPress = true;
+		if (mario->level == MARIO_LEVEL_BIG_TAIL)
 		{
-			if(mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375)
-			|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
+			if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375)
+				|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
+				return;
+
+			mario->setTailPos();
+			mario->isAttacking = true;
+			mario->SetState(MARIO_STATE_BIG_ATTACK);
+			break;
+		}
+		else if (mario->level == MARIO_LEVEL_BIG_FIRE && mario->IsReloadedBullets() && !mario->isFireShoot)
+		{
+			if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_RIGHT)->IsRenderOver(100)
+				|| mario->animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_LEFT)->IsRenderOver(100)))
+				return;
+
+			if (!mario->isOnGround)
+			{
+				mario->isJumpingAttack = true;
+			}
+
+			mario->isAttacking = true;
+			mario->isFireShoot = true;
+			mario->SetState(MARIO_STATE_BIG_ATTACK);
+			break;
+		}
+		else {
+			mario->isAttacking = true;
+		}*/
+		mario->Reset();
+		CGame::GetInstance()->cam_x = 0;
+		break;
+	case DIK_S:
+	{
+		mario->SetState(MARIO_STATE_JUMP);
+		break;
+	}
+	case DIK_A: 
+		mario->isAttackPress = true;
+		if (mario->level == MARIO_LEVEL_BIG_TAIL)
+		{
+			if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375)
+				|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
 				return;
 
 			mario->setTailPos();
@@ -1056,15 +1109,6 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->isAttacking = true;
 		}
 		break;
-	case DIK_SPACE:
-	{
-		mario->SetState(MARIO_STATE_JUMP);
-		break;
-	}
-	case DIK_A: 
-		mario->Reset();
-		CGame::GetInstance()->cam_x = 0;
-		break;
 	default:
 		break;
 	}
@@ -1078,12 +1122,12 @@ void CPlayScenceKeyHandler::KeyState(BYTE *states)
 	// disable control key when Mario die 
 	if (mario->GetState() == MARIO_STATE_DIE) return;
 
-	if (game->IsKeyDown(DIK_LSHIFT) && game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_SPACE))
+	if (game->IsKeyDown(DIK_A) && game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_S))
 	{
 		if (mario->isOnGround && mario->imMovable)
 			mario->SetState(MARIO_STATE_RUNNING);
 	}
-	if (game->IsKeyDown(DIK_LSHIFT) && game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_SPACE))
+	if (game->IsKeyDown(DIK_A) && game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_S))
 	{
 		if (mario->isOnGround && mario->imMovable)
 			mario->SetState(MARIO_STATE_RUNNING);

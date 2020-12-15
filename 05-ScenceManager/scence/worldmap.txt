@@ -22,16 +22,16 @@
 # MARIO WALKING
 10	1	100	2	100
 11	3	100	4	100
-12	5	100	6	100
+#12	5	100	6	100
 13	7	100	8	100
 
 [ANIMATION_SETS]
 # MARIO
-100	10	11	12	13
+100	10	11	13
 [OBJECTS]
 #0 = MARIO
 # MARIO
-0	0	0	100
+0	160	160	100
 
 [TILEMAP]
-100	textures\worldMap_bank.png	textures\worldmap.txt	47	49	71	49	16	16	752	784
+99999	textures\tileworld.png	textures\worldmap.txt	24	35	24	69	16	16	752	784

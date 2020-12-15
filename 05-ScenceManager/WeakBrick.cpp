@@ -38,7 +38,7 @@ void WeakBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	int num_vanishPiece = 0;
 
-	for (LPGAMEOBJECT piece : listPiece)
+ 	for (LPGAMEOBJECT piece : listPiece)
 	{
 		piece->Update(dt, coObjects);
 		if (piece->objectDisappear())

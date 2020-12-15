@@ -2,6 +2,10 @@
 #include "Item.h"
 #include "Utils.h"
 
+QuestionBrick::QuestionBrick() : CBrick()
+{
+}
+
 QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height,int ItemInside) : CBrick(width,height)
 {
 	this->ItemInside = ItemInside;

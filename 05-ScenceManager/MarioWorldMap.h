@@ -7,7 +7,7 @@ class MarioWorldMap : public CGameObject
 	DWORD delayBullet = 0;
 	DWORD setInterval = 0;
 	DWORD setInterval2 = 0;
-	MarioWorldMap();
+	MarioWorldMap(float,float);
 	virtual void Render();
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

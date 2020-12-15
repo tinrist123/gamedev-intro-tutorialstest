@@ -1,6 +1,10 @@
 #include "ColorBox.h"
 
 
+ColorBox::ColorBox() : Ground()
+{
+}
+
 ColorBox::ColorBox(int width, int height) : Ground(width, height)
 {
 	this->width = width;
@@ -10,7 +14,7 @@ ColorBox::ColorBox(int width, int height) : Ground(width, height)
 
 void ColorBox::Render()
 {
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void ColorBox::GetBoundingBox(float& l, float& t, float& r, float& b)

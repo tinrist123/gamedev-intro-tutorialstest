@@ -26,6 +26,7 @@ public:
 	bool isTouched = false;
 
 public:
+	QuestionBrick();
 	QuestionBrick(int start_x,int start_y,int width, int height,int);
 	virtual void Render();
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);	

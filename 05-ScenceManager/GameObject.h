@@ -152,21 +152,21 @@ public:
 
 	bool isGround(float x, float y, vector<LPGAMEOBJECT> arr)
 	{
+		int count = 0;
 		for (int i = 0; i < arr.size(); i++)
 		{
 			float l, t, r, b;
 			arr[i]->GetBoundingBox(l, t, r, b);
-
-			if (arr[i]->getCategoryObject() != Category::GROUND)
-			{
+			if (y - t >= 5.0f)
 				continue;
+			if (arr[i]->getCategoryObject() == Category::GROUND
+				|| arr[i]->getCategoryObject() == Category::BRICK)
+			{
+				if (x >= l && x <= r && y >= t && y <= b)
+					return true;
 			}
-
-			if (y - t >= 8.0f)
-				continue;
-			else
-			{
-				if (x >= l && x <= r && y >= t && y <= b) return true;
+			else {
+				count++;
 			}
 		}
 		return false;

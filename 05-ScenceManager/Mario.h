@@ -86,11 +86,11 @@ public:
 
 	void ReduceVelocityWhenFly() {
 
-		if (vx > MARIO_MAX_WALKING_SPEED)
+		if (fabs(vx) > MARIO_MAX_WALKING_SPEED)
 		{
 			vx -= MARIO_WALKING_DECELERATION;
 		}
-		else if (vx < MARIO_MAX_WALKING_SPEED)
+		else if (fabs(vx) < -MARIO_MAX_WALKING_SPEED)
 		{
 			vx += MARIO_WALKING_DECELERATION;
 		}
