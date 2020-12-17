@@ -1,6 +1,10 @@
 #include "Koopas.h"
 
 
+CKoopas::CKoopas() : Enemy()
+{
+}
+
 CKoopas::CKoopas(int typeKoopas, int typeColorKoopas)
 {
 	this->type = Type::KOOPAS;

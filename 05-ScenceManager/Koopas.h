@@ -101,6 +101,7 @@ public:
 
 	vector <int> listAnimationKoopas;
 
+	CKoopas();
 	CKoopas(int typeKoopas, int typeColorKoopas);
 
 

@@ -6,6 +6,7 @@ EffectsFire::EffectsFire()
 	LPANIMATION_SET ani_set = animation_sets->Get(8);
 	SetAnimationSet(ani_set);
 
+	this->startTimeAlive();
 }
 
 EffectsFire::~EffectsFire()
@@ -15,26 +16,20 @@ EffectsFire::~EffectsFire()
 void EffectsFire::Render()
 {
 	animation_set->at(0)->Render(x, y);
+	RenderBoundingBox();
 }
 
 void EffectsFire::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
-	if (animation_set->at(0)->IsRenderOver(300))
+	if (this->checkDisApearEffect())
 	{
 		setObjDisappear();
 	}
 }
 
-void EffectsFire::SetState(int state)
-{
-	if (state == EFFECTS_DEFLECT)
-	{
-		animation_set->at(0)->StartRenderAnimation();
-	}
-}
+
 
 void EffectsFire::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	l = r;
-	t = b;
+	l = t = r = b;
 }

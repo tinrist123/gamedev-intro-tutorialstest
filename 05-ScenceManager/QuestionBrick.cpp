@@ -30,8 +30,6 @@ void QuestionBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	x += dx;
 	y += dy;
 
-	DebugOut(L"y = %f\n", y);
-
 	if (y >= start_y)
 	{
 		if (y == start_y) return;

@@ -18,6 +18,7 @@ public:
 
 	bool isHaveP_Swtich = false;
 public:
+	WeakBrick();
 	WeakBrick(int width, int height, int);
 	void SetState(int state);
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);

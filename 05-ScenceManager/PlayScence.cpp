@@ -255,7 +255,16 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	{
 		float width = atof(tokens[4].c_str());
 		float height = atof(tokens[5].c_str());
-		obj = new Pipe(width, height);
+		if (tokens.size() < 7)
+		{
+			obj = new Pipe(width, height);
+		}
+		else {
+			int isMapInside = atof(tokens[6].c_str());
+			int isInHiddenMap = atof(tokens[7].c_str());
+			int isPushMarioOut = atof(tokens[8].c_str());
+			obj = new Pipe(width, height, isMapInside == 1, isInHiddenMap == 1, isPushMarioOut == 1);
+		}
 		break;
 	}
 	case OBJECT_TYPE_QUESTION_BRICK:
@@ -283,15 +292,20 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	obj->SetAnimationSet(ani_set);
 	obj->SetPosition(x, y);
 
+	if (obj->getTypeObject() == Type::PIPE)
+	{
+		listPipe.push_back(obj);
+	}
+
 	objects.push_back(obj);
 }
 
 void CPlayScene::Load()
 {
 	//DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
-
 	//mapScence = new TileMap();
-		ifstream f;
+	
+	ifstream f;
 	f.open(sceneFilePath);
 	// current resource section flag
 	int section = SCENE_SECTION_UNKNOWN;					
@@ -411,19 +425,22 @@ bool CPlayScene::checkObjOutOfCamera(LPGAMEOBJECT obj)
 {
 	float cam_x = CGame::GetInstance()->GetCamPosX();
 	float cam_y = CGame::GetInstance()->GetCamPosY();
-	float RangeOxRight = cam_x + SCREEN_WIDTH;
-	float RangeOxLeft = cam_x;
-	float RangeOyTop = cam_y + SCREEN_HEIGHT;
-	float RangeOyBottom = cam_y;
 
-	if (obj->x > RangeOxRight
-		||
-		obj->x < RangeOxLeft
-		||
-		obj->y > RangeOyTop
-		||
-		obj->y < RangeOyBottom
-		)
+	if (obj->nx == 1)
+	{
+		// Bien ben phai
+		if (obj->x > (double)(1.0 * SCREEN_WIDTH / 3.05) - cam_x)
+			return true;
+	}
+	else if (obj->nx == -1)
+	{
+		if (obj->x < cam_x)
+		{
+			return true;
+		}
+	}
+	if (obj->y > SCREEN_HEIGHT / 1.7123
+		|| obj->y < cam_y)
 	{
 		return true;
 	}
@@ -435,24 +452,58 @@ void CPlayScene::removeObjOutOfCamera(LPGAMEOBJECT& obj)
 {
 	float cam_x = CGame::GetInstance()->GetCamPosX();
 	float cam_y = CGame::GetInstance()->GetCamPosY();
-	float RangeOxRight = SCREEN_WIDTH - cam_x;
-	float RangeOxLeft = player->x - cam_x;
-	float RangeOyTop = cam_y + SCREEN_HEIGHT;
-	float RangeOyBottom = cam_y;
-	if (obj->GetX() - player->x >= SCREEN_WIDTH - (player->x - CGame::GetInstance()->GetCamPosX())
-		|| player->x - obj->GetX() >= player->x - CGame::GetInstance()->GetCamPosX()
-		||
-		obj->y > RangeOyTop
-		||
-		obj->y < RangeOyBottom
-		)
+	if (obj->nx == 1)
+	{
+		// Bien ben phai
+		if (obj->x >  (double)(1.0*SCREEN_WIDTH / 3.05) + cam_x)
+			obj->setObjDisappear();
+	}
+	else if (obj->nx == -1)
+	{
+		if (obj->x < cam_x)
+		{
+			obj->setObjDisappear();
+		}
+	}
+	if (obj->y > SCREEN_HEIGHT / 1.7123
+		|| obj->y < cam_y)
 	{
 		obj->setObjDisappear();
 	}
-	
-
 }
 
+void CPlayScene::DarkenTheScreen()
+{
+	if (!transitionBgTime->isStarted)
+	{
+		transitionBgTime->Start();
+	}
+	LPDIRECT3DTEXTURE9 darken = CTextures::GetInstance()->Get(1);
+	RECT rect;
+
+	float l = CGame::GetInstance()->GetCamPosX();
+	float t = CGame::GetInstance()->GetCamPosY();
+
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = ceil(5 * SCREEN_WIDTH / 14);
+	rect.bottom = ceil(5 * SCREEN_HEIGHT / 14);
+
+	if (transitionBgTime->isStarted)
+	{
+		if (transitionBgTime->GetElapsedTime() > 500)
+		{
+			this->alphaTransition_opacity = 255;
+			this->isCompletedTransitionDarkScreen = true;
+		}
+		else if (transitionBgTime->GetElapsedTime() > 450) this->alphaTransition_opacity = 200;
+		else if (transitionBgTime->GetElapsedTime() > 400) this->alphaTransition_opacity = 150;
+		else if (transitionBgTime->GetElapsedTime() > 350) this->alphaTransition_opacity = 100;
+		else if (transitionBgTime->GetElapsedTime() > 300) this->alphaTransition_opacity = 50;
+	}
+
+	CGame::GetInstance()->Draw(l, t, darken, rect.left, rect.top, rect.right, rect.bottom, this->alphaTransition_opacity);
+}
 
 void CPlayScene::GetObjectGrid()
 {
@@ -461,14 +512,14 @@ void CPlayScene::GetObjectGrid()
 	staticObjects.clear();
 	listCBrick.clear();
 	enemies.clear();
-	//effects.clear();
+
 	grid->GetGrid(ObjectsInScreen);
 }
 
 void CPlayScene::Update(DWORD dt)
 {
 	// We know that Mario is the first object in the list hence we won't add him into the colliable object list
-	// TO-DO: This is a "dirty" way, need a more organized way 
+	// TO-DO: This is a "good" way, need a more organized way 
 
 	vector<LPGAMEOBJECT> coObjects;
 	float playerPositionX = player->x;
@@ -476,7 +527,6 @@ void CPlayScene::Update(DWORD dt)
 
 	grid->CheckCamGrid(objects);
 	GetObjectGrid();
-
 
 	for (size_t i = 0; i < ObjectsInScreen.size(); i++)
 	{
@@ -508,6 +558,9 @@ void CPlayScene::Update(DWORD dt)
 			listCBrick.push_back(ObjectsInScreen[i]);
 		}
 	}
+
+	//DebugOut(L"staticObjects = %d\n", staticObjects.size());
+
 	for (size_t i = 0; i < objects.size(); i++)
 	{
 		coObjects.push_back(objects[i]);
@@ -599,8 +652,6 @@ void CPlayScene::Update(DWORD dt)
 					goomba->startTimeChangeState();
 				}
 			}
-
-
 		}
 	}
 
@@ -614,134 +665,6 @@ void CPlayScene::Update(DWORD dt)
 			dynamicItems.push_back(CreateItemOfMario(player, questionBrick));
 		}
 	}
-
-	//for (size_t i = 0; i < objects.size(); i++)
-	//{
-	//	/*if (objects[i]->objectDisappear())
-	//	{
-	//		objects.erase(objects.begin() + i);
-
-	//	}*/
-	//	if (dynamic_cast<Enemy*>(objects[i]))
-	//	{
-	//		player->AccurateCollisionWithEnemy(objects[i]);
-	//	}
-	
-	//	// K Update thg nao bien mat
-	//	if (objects[i]->health == 0 && objects[i]->isDisappeared)
-	//	{
-	//		if (dynamic_cast<MarioBullet*>(objects[i]) && !(objects[i])->isAddedEffect)
-	//		{
-	//			(objects[i])->isAddedEffect = true;
-	//			MarioBullet* marioBullet = dynamic_cast<MarioBullet*>(objects[i]);
-	//			EffectsFire* effect = new EffectsFire();
-	//			effect->SetState(EFFECTS_DEFLECT);
-	//			effect->SetPosition(marioBullet->pointCollisionX, marioBullet->pointCollisionY);
-	//			effects.push_back(effect);
-	//		}
-	//		continue;
-	//	}
-	//	if (player->isFireShoot)
-	//	{
-	//		MarioBullet* bullet = new MarioBullet();
-	//		CAnimationSets* animation_sets = CAnimationSets::GetInstance();
-	//		LPANIMATION_SET ani_set = animation_sets->Get(7);
-
-
-	//		if (player->IsReloadedBullets() && player->timeReload != 0)
-	//		{
-	//			player->totalOfBulletsReadyForFiring = 2;
-	//			player->timeReload = 0;
-	//			player->resetAutoReload();
-	//		}
-	//		if (player->isReloaded() && player->autoReloadTime != 0)
-	//		{
-	//			player->totalOfBulletsReadyForFiring = 2;
-	//			player->timeReload = 0;
-	//			player->autoReloadTime = 0;
-	//		}
-	//		if (player->totalOfBulletsReadyForFiring > 0)
-	//		{
-	//			bullet->SetAnimationSet(ani_set);
-	
-
-	//			player->totalOfBulletsReadyForFiring--;
-	//			player->setAutoReload();
-	//			player->isFireShoot = false;
-
-	//			objects.push_back(bullet);
-	//		}
-	//		if (player->totalOfBulletsReadyForFiring == 0 && player->timeReload == 0)
-	//		{
-	//			player->ReloadBullets();
-	//		}
-	//	}
-
-	//	// 1 Mean Koopas is Shell appearance
-	//	if (dynamic_cast<CKoopas*>(objects[i]) && objects[i]->isAliveObject() )
-	//	{
-	//		CKoopas* koopas = dynamic_cast<CKoopas*>(objects[i]);
-
-	//		/*if (koopas->isCreatePointEffect)
-	//		{
-	//			koopas->addPointToItem();
-	//			effects.push_back(koopas->effectPoint);
-	//		}*/
-
-	//		if (!player->isCanHoldingKoopas && koopas->isOutOfControl)
-	//		{
-	//			player->ChainKickKoopas(koopas, false);
-	//		}
-	//		if (player->isCanHoldingKoopas &&  koopas->isOutOfControl)
-	//		{
-	//			// detect Nx to accurately hold koopasf
-	//			float distanceKoopasByOy = (player->level == MARIO_LEVEL_SMALL)?14:0;
-	//			float distanceKoopasbyOx = (player->nx == 1) ? 14 : -5;
-	//			if (player->level == MARIO_LEVEL_SMALL)
-	//			{
-	//				distanceKoopasbyOx = (player->nx == 1) ? 10 : -8;
-	//				
-	//			}
-	//			// Hold koopas
-	//			koopas->updatePositionKoopasByPositionMario(player->x + distanceKoopasbyOx, player->y - distanceKoopasByOy);
-	//		}
-	//		else if (player->isCanHoldingKoopas && !koopas->isOutOfControl && koopas->isPlayerHolding)
-	//		{
-	//			// When koopas revive, player Cant hold it
-	//			player->isCanHoldingKoopas = false; 
-	//			koopas->isPlayerHolding = false;
-	//		}
-	//	}
-
-	//	// HEALTH == 2 mean, goomba have wing
-	//	if (dynamic_cast<CGoomba*>(objects[i]) && objects[i]->health == 2)
-	//	{
-	//		CGoomba* goomba = dynamic_cast<CGoomba*>(objects[i]);
-	//		float goombaPositionX = goomba->x;
-	//		float goombaPositionY = goomba->y;
-	//		if (goomba->level == PARAGOOMBA)
-	//		{
-	//			goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0)?-1:1);
-	//			if (fabs(goombaPositionX - playerPositionX) < 250.0f 
-	//				&& !goomba->IsBlockingChangeState
-	//				&& goomba->health == 2
-	//				)
-	//			{
-	//				// Become crazy goomba and it have 3 state change circle
-	//				goomba->blockingChangeState(true);
-	//				goomba->startTimeChangeState();
-	//			}
-	//		}
-	//		
-
-	//	}
-
-	//	objects[i]->Update(dt, &coObjects);
-	//}
-
-
-	
-
 	{
 		if (player->isFireShoot)
 		{
@@ -767,6 +690,19 @@ void CPlayScene::Update(DWORD dt)
 	for (size_t i = 0; i < marioBullet.size(); i++)
 	{
 		marioBullet[i]->Update(dt, &coObjects);
+		if (!(marioBullet[i])->isAddedEffect 
+			&& marioBullet[i]->objectDisappear()
+			)
+		{
+			MarioBullet* Bullet = dynamic_cast<MarioBullet*>(marioBullet[i]);
+			if (Bullet->isCollision)
+			{
+				(marioBullet[i])->isAddedEffect = true;
+				EffectsFire* effect = new EffectsFire();
+				effect->SetPosition(Bullet->pointCollisionX, Bullet->pointCollisionY);
+				effects.push_back(effect);
+			}
+		}
 		this->removeObjOutOfCamera(marioBullet[i]);
 	}
 	
@@ -812,6 +748,76 @@ void CPlayScene::Update(DWORD dt)
 
 	//player->CollideWithEnemy(enemies);
 
+	
+	// isCompletedTransitionDarkScreen: Complete Dark Screen Transition
+		if (this->isCompletedTransitionDarkScreen)
+		{ 
+			if (!player->isInHiddenMap)
+			{
+				// Get position of Pipe that Mario Push Out
+				for (int i = 0; i < listPipe.size(); i++)
+				{
+					Pipe* pipe = dynamic_cast<Pipe*>(listPipe[i]);
+					if (
+						// Pipe is in HideMap
+						pipe->isInHiddenMap
+						&&
+						// Pipe can push mario out (Pipe Output)
+						pipe->isPushMarioOut
+						)
+					{
+						player->SetPosition(listPipe[i]->x, listPipe[i]->y - 16 );
+					
+						//// Turn on Light
+						this->alphaTransition_opacity = 0;
+					
+						// Set Mario is in Hidden Map
+						player->isInHiddenMap = true;
+						// disable Moving into Pipe
+						player->MarioSlideOutPipe();
+						this->isCompletedTransitionDarkScreen = false;
+
+						//Set timeover for time, to use LightenScreen
+						this->transitionBgTime->isStarted = false;
+
+						player->SetState(MARIO_STATE_IDLE);
+						break;
+					}
+				}
+			}
+			else if (player->isInHiddenMap)
+			{
+				for (int i = 0; i < listPipe.size(); i++)
+				{
+					Pipe* pipe = dynamic_cast<Pipe*>(listPipe[i]);
+					if (
+						// Pipe is in HideMap
+						!pipe->isInHiddenMap
+						&&
+						// Pipe can push mario out (Pipe Output)
+						pipe->isPushMarioOut
+						)
+					{
+						player->SetPosition(listPipe[i]->x, listPipe[i]->y);
+						player->storePosPipe_HaveHiddenMap(listPipe[i]->x, listPipe[i]->y );
+						// Turn on Light
+						this->alphaTransition_opacity = 0;
+
+						// Set Mario is in Hidden Map
+						player->isInHiddenMap = false;
+						// disable Moving into Pipe
+						//player->isMovingOutHiddenMap = false;
+						//player->MarioSlideOutPipe();
+						this->isCompletedTransitionDarkScreen = false;
+						//Set timeover for time, to use LightenScreen
+						//this->transitionBgTime->isStarted = false;
+
+						player->SetState(MARIO_STATE_IDLE);
+						break;
+					}
+				}
+			}
+		}
 	// remove everything
 	for (size_t i = 0; i < objects.size(); i++)
 	{
@@ -881,8 +887,19 @@ void CPlayScene::Update(DWORD dt)
 	/*CGame *game = CGame::GetInstance();
 	cx -= game->GetScreenWidth() / 2;
 	cy -= game->GetScreenHeight() / 2;*/
-	CGame::GetInstance()->cam_y = 240.0f;
-
+	if (player->isInHiddenMap)
+	{
+		CGame::GetInstance()->cam_y = 440.0f;
+	} 
+	else if (!player->isInHiddenMap)
+	{
+		if (player->y < 200 ) 
+			CGame::GetInstance()->cam_y = 0.0f;
+		else
+		{
+			CGame::GetInstance()->cam_y = 240.0f;
+		}
+	}
 	float playerLeft = player->x + 11;
 
 	if (playerLeft > (5 * SCREEN_WIDTH / 28) && playerLeft + (5 * SCREEN_WIDTH / 28) < map->GetWidthTileMap())
@@ -901,9 +918,8 @@ void CPlayScene::Update(DWORD dt)
 
 void CPlayScene::Render()
 {
-	map->Draw();
-
-	
+	//map->Draw();
+	player->Render();
 
 	if (player->type == Type::MARIO)
 	{
@@ -952,7 +968,28 @@ void CPlayScene::Render()
 	boardGame->Render();
 	}
 
-	player->Render();
+	if (!this->isCompletedTransitionDarkScreen && player->CheckMarioSlideIntoPipe())
+	{
+		// When Mario is moving into Pipe
+		if (!player->isInHiddenMap)
+		{
+			// Catch Event That position of Mario greater than position of Pipe when move in
+			if (player->y > player->posY_OfPipe_HaveHiddenMap)
+			{
+				DarkenTheScreen();
+			}
+		}
+		else if (player->isInHiddenMap)
+		{
+			// Catch Event that position of Mario less than position of Pipe when move out
+			if (player->y + 7.0f < player->posY_OfPipe_HaveHiddenMap)
+			{
+				DarkenTheScreen();
+			}
+		}
+
+	}
+
 }
 
 /*
@@ -965,7 +1002,6 @@ void CPlayScene::Unload()
 
 	objects.clear();
 	player = NULL;
-
 	//DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
 }
 
@@ -991,7 +1027,7 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 			break;
 		}
 		//if (!isOnGround && !isFalling)
-		if (!mario->isPreventedSpamSpace)
+		if (!mario->isPreventedSpamSpace && !mario->CheckMarioSlideIntoPipe())
 		{
 			mario->vy = mario->vy + MARIO_GRAVITY*mario->dt * 10;
 			if (mario->vy > 0 && mario->vy >= 0.1f) mario->vy = 0.1f;
@@ -1069,7 +1105,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			mario->isAttacking = true;
 		}*/
 		mario->Reset();
-		CGame::GetInstance()->cam_x = 0;
+		//CGame::GetInstance()->cam_x = 0;
 		break;
 	case DIK_S:
 	{
@@ -1108,6 +1144,9 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 		else {
 			mario->isAttacking = true;
 		}
+		break;
+	case DIK_DOWN :
+		mario->isDownPressed = true;
 		break;
 	default:
 		break;

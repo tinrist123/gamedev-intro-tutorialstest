@@ -33,6 +33,8 @@ using namespace std;
 #define MARIO_STATE_RUNNING								700
 #define MARIO_STATE_STOP_RUNNING						701
 #define MARIO_STATE_BIG_ATTACK							800
+#define MARIO_STATE_IN_HIDDEN							900
+#define MARIO_STATE_AUTO_GO								1000
 
 // 66
 
@@ -218,6 +220,15 @@ using namespace std;
 
 #define	MARIO_ANI_BIG_FIRE_WALKING_HOLD_JUMPING_KOOPAS_RIGHT				95			 
 #define	MARIO_ANI_BIG_FIRE_WALKING_HOLD_JUMPING_KOOPAS_LEFT					96			 
+
+//================================ MARIO ANIMATION GETINTO HIDDEN CAMERA =================================
+#define	MARIO_ANI_BIG_WALKING_HOLD_JUMPING_KOOPAS_RIGHT						97	
+
+#define	MARIO_ANI_BIG_WALKING_HOLD_JUMPING_KOOPAS_RIGHT						98			 
+
+#define	MARIO_ANI_BIG_TAIL_WALKING_HOLD_JUMPING_KOOPAS_RIGHT				99			 
+
+#define	MARIO_ANI_BIG_FIRE_WALKING_HOLD_JUMPING_KOOPAS_RIGHT				100			 
 
 //================================MARIO LEVEL CONSTANT ZONE=================================
 #define	MARIO_LEVEL_SMALL								1

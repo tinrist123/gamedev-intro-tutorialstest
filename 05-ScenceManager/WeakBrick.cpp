@@ -2,11 +2,15 @@
 
 
 
+WeakBrick::WeakBrick() : CBrick()
+{
+
+}
+
 WeakBrick::WeakBrick(int width, int height, int isHaveItem = 0) : CBrick::CBrick(width, height)
 {
 	this->width = width;
 	this->height = height;
-
 	this->isHaveP_Swtich = (isHaveItem == 1);
 	this->type = Type::WEAKBRICK;
 }

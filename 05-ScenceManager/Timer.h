@@ -6,6 +6,8 @@ class Timer
 {
 	ULONGLONG startTime, limitedTime;
 public:
+	bool isStarted = false;
+public:
 	Timer(ULONGLONG limitedTime);
 
 	void Start();

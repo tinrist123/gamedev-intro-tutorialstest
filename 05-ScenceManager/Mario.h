@@ -1,13 +1,13 @@
 #pragma once
 #include "GameObject.h"
+#include <assert.h>
+#include <algorithm>
 #include "Constant.h"
 #include "Goomba.h"
 #include "QuestionBrick.h"
 #include "Ground.h"
 #include "Item.h"
 #include "Portal.h"
-#include <algorithm>
-#include <assert.h>
 #include "ColorBox.h"
 #include "Game.h"
 #include "Utils.h"
@@ -64,7 +64,29 @@ public:
 	bool imMovable = true;
 	bool isAttackPress = false;
 	bool isKickedKoopas = false;
+
+
 	void KickingKoopas() { isKickedKoopas = true; tDraw = GetTickCount64(); }
+
+
+	// Press DIK_DOWN on Pipe 
+	bool isDownPressed = false;
+	
+	// Process Mario Get into Pipe
+	bool isSlidingInPipe = false;
+
+	void MarioSlideIntoPipe() { this->isSlidingInPipe = true; }
+	void MarioSlideOutPipe() { this->isSlidingInPipe = false; }
+	bool CheckMarioSlideIntoPipe() { return this->isSlidingInPipe; }
+	
+	// Mario is In Hidden Map
+	bool isInHiddenMap = false;
+	bool isInPipe = false;
+	// Store position of Pipe that Mario get into
+	float posX_OfPipe_HaveHiddenMap;
+	float posY_OfPipe_HaveHiddenMap;
+	void storePosPipe_HaveHiddenMap(float posX, float posY);
+
 
 	float detectVxLevelSpeed;
 	float lastVx;
@@ -132,7 +154,7 @@ public:
 	bool isReloaded() { return GetTickCount64() - autoReloadTime > 500; }
 
 	void SetTimeFlyingForTail() { timeFlyingForTail = GetTickCount64(); }
-	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 2000;	}
+	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 4500;	}
 	void ChainKickKoopas(CKoopas* &koopas,bool isElastic);
 
 	void MarioHitEnemy();

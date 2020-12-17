@@ -8,9 +8,8 @@ class EffectsFire :
 public:
 	EffectsFire();
 	~EffectsFire();
-	void Render();
+	virtual void Render();
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
-	virtual void SetState(int state);
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 };
 

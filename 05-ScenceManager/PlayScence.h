@@ -28,7 +28,7 @@
 #include "Grid.h"
 #include "BoardGame.h"
 #include "Camera.h"
-
+#include "Timer.h"
 
 class CPlayScene: public CScene
 {
@@ -48,8 +48,15 @@ public:
 	vector<LPGAMEOBJECT> effects;
 	vector<LPGAMEOBJECT> flowerBullet;
 	vector<LPGAMEOBJECT> marioBullet;
+	vector<LPGAMEOBJECT> listPipe;
 
 	BoardGame* boardGame;
+
+	Timer* transitionBgTime = new Timer(0);
+	bool isCompletedTransitionDarkScreen = false;
+	bool isCompletedTransitionLightScreen = false;
+
+
 
 	void _ParseSection_TEXTURES(string line);
 	void _ParseSection_SPRITES(string line);
@@ -68,11 +75,18 @@ public:
 	void GetObjectGrid();
 
 	Enemy *CreateFlowerBullet(CFlower *flower);
+
 	void playerHittingSpecialItem(LPGAMEOBJECT& item);
+	
 	bool checkObjOutOfCamera(LPGAMEOBJECT obj);
 	void removeObjOutOfCamera(LPGAMEOBJECT& obj);
 
-
+	// Opacity for Dark Screen
+	int alphaTransition_opacity = 0;
+	// Render Dark Screen
+	void DarkenTheScreen();
+	void LightenTheScreen();
+	
 	TileMap* map;
 	CMario * GetPlayer() { return player; } 
 

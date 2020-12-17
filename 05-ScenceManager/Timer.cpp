@@ -9,6 +9,7 @@ Timer::Timer(ULONGLONG limitedTime)
 void Timer::Start()
 {
 	startTime = GetTickCount64();
+	this->isStarted = true;
 }
 
 void Timer::Stop()

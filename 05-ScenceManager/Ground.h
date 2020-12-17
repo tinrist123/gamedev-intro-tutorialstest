@@ -6,6 +6,7 @@
 
 class Ground : public CGameObject
 {
+public:
 	int height;
 	int width;
 public:

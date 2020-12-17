@@ -87,6 +87,12 @@ int  CMario::DetectLevelSpeedMario()
 	return 0;
 }
 
+void CMario::storePosPipe_HaveHiddenMap(float posX, float posY)
+{
+	this->posX_OfPipe_HaveHiddenMap = posX;
+	this->posY_OfPipe_HaveHiddenMap = posY;
+}
+
 bool CMario::checkFlagLevelSpeedToTempLevelSpeed()
 {
 	return FlagTurnBack;
@@ -101,7 +107,7 @@ void CMario::setFlagLevelSpeedToTempLevelSpeed()
 CMario::CMario(float x, float y) : CGameObject()
 {
 	//level = MARIO_LEVEL_BIG;
-	level = 2;
+	level = 4;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
 	constant = new Constant(level);
@@ -171,14 +177,26 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	this->dt = dt;
 	dx = vx * dt;
 	dy = vy * dt;
-
 	if (level == MARIO_LEVEL_BIG_TAIL && isAttacking)
 	{
 		setTailPos();
 		Tail->Update(dt, coObjects);
 	}
+	
 
-	vy += MARIO_GRAVITY * dt;
+
+	if (!this->CheckMarioSlideIntoPipe())
+	{
+		vy += MARIO_GRAVITY * dt;
+	}
+
+	if (this->CheckMarioSlideIntoPipe() && !this->isInHiddenMap && vy < 0)
+	{
+		DebugOut(L"vy = %f\n", this->vy);
+		if (y + 28.0f < posY_OfPipe_HaveHiddenMap)
+			this->MarioSlideOutPipe();
+	}
+
 	lastVx = vx;
 
 	if (vy > 0)
@@ -272,20 +290,19 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	if (level == MARIO_LEVEL_SMALL)
 	{
-		if (!this->isGround(this->x + constant->listBBox_Mario_Big.at(0) + 3.0f, this->y + MARIO_SMALL_BBOX_WIDTH + 5.0f, *coObjects)
+		if (!this->isGround(this->x + constant->listBBox_Mario_Big.at(0) + 3.0f , this->y + MARIO_SMALL_BBOX_WIDTH + 5.0f, *coObjects)
 			&& !this->isGround(this->x - 1, this->y + MARIO_SMALL_BBOX_HEIGHT + 5.0f, *coObjects))
 			this->MarioIsFalling();
 	}
 	else if (level != MARIO_LEVEL_SMALL)
 	{
-		if (!this->isGround(this->x + constant->listBBox_Mario_Big.at(0) + 3.0f, this->y + MARIO_BIG_BBOX_HEIGHT + 5.0f, *coObjects)
+		if (!this->isGround(this->x + constant->listBBox_Mario_Big.at(0) - 6.0f, this->y + MARIO_BIG_BBOX_HEIGHT + 5.0f, *coObjects)
 			)
 			if (!this->isGround(this->x - 1, this->y + MARIO_BIG_BBOX_HEIGHT + 5.0f, *coObjects))
 			{
 				this->MarioIsFalling();
 			}
 	}
-
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
 	{
@@ -394,10 +411,31 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			}
 			else if (dynamic_cast<Pipe*>(e->obj))
 			{
+				Pipe* pipe = dynamic_cast<Pipe*>(e->obj);
+
 				if (e->ny < 0)
 				{
-					vy = 0;
-					isOnGround = true;
+					if (pipe->isHaveHiddenMap && this->isDownPressed)
+					{
+						vy = 0.01f;
+						y += dy*2;
+						this->MarioSlideIntoPipe();
+						storePosPipe_HaveHiddenMap(pipe->x, pipe->y);
+						DebugOut(L"Test\n");
+					}
+				}
+				else if (e->ny > 0)
+				{
+					if (pipe->isInHiddenMap
+						&&
+						!pipe->isPushMarioOut
+						)
+					{
+						vy = -0.02f;
+						y += dy;
+						this->MarioSlideIntoPipe();
+						storePosPipe_HaveHiddenMap(pipe->x, pipe->y);
+					}
 				}
 				else if (e->nx != 0)
 				{
@@ -969,7 +1007,7 @@ void CMario::Render()
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 	
-	animation_set->at(ani)->Render(x, y, alpha);
+	animation_set->at(100)->Render(x, y, alpha);
 
 	if (isAttacking && level == MARIO_LEVEL_BIG_TAIL)
 	{
@@ -987,6 +1025,8 @@ void CMario::SetState(int state)
 	/*case MARIO_STATE_STOP_SITTING:
 		onSitting = false;
 		break;*/
+	case MARIO_STATE_AUTO_GO:
+		break;
 	case MARIO_STATE_BIG_ATTACK:
 		if (level == MARIO_LEVEL_BIG_TAIL)
 		{

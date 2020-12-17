@@ -16,6 +16,7 @@ public:
 	int pointCollisionX;
 	int pointCollisionY;
 
+	bool isCollision = false;
 
 	int ny;
 	MarioBullet();
@@ -25,6 +26,7 @@ public:
 	
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 
-	void SetUpAddingEffectCollision();
+	void BulletCollision() { this->isCollision = true; }
+	void DisapearBullet();
 };
 

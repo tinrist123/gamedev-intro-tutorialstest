@@ -29,18 +29,14 @@ void MarioBullet::GetBoundingBox(float& l, float& t, float& r, float& b)
 		r = x + BULLET_BBOX;
 		b = y + BULLET_BBOX;
 	}
-
 }
 
-void MarioBullet::SetUpAddingEffectCollision()
+void MarioBullet::DisapearBullet()
 {
-	this->subHealth();
-
 	pointCollisionX = x;
 	pointCollisionY = y;
 
-	isBoundingBox = false;
-	isDisappeared = true;
+	this->setObjDisappear();
 }
 
 void MarioBullet::SetState(int state)
@@ -76,7 +72,6 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 
 	CGameObject::Update(dt, coObjects);
-
 
 
 	vector<LPCOLLISIONEVENT> coEvents;
@@ -143,7 +138,8 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				if (e->nx != 0)
 				{
-					SetUpAddingEffectCollision();
+					this->BulletCollision();
+					DisapearBullet();
 				}
 				else if (e->ny < 0)
 				{
@@ -154,14 +150,16 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				if (e->nx != 0)
 				{
-					SetUpAddingEffectCollision();
+					this->BulletCollision();
+					DisapearBullet();
 				}
 			}
 			else if (dynamic_cast<CFlower *>(e->obj))
 			{
 				if (e->ny != 0 || e->nx != 0)
 				{
-					SetUpAddingEffectCollision();
+					this->BulletCollision();
+					DisapearBullet();
 				}
 			}
 		}
