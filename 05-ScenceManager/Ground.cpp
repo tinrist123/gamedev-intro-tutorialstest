@@ -14,7 +14,7 @@ Ground::Ground(int width, int height) : CGameObject()
 
 void Ground::Render()
 {
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void Ground::GetBoundingBox(float& l, float& t, float& r, float& b)

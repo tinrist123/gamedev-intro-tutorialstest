@@ -107,7 +107,7 @@ void CMario::setFlagLevelSpeedToTempLevelSpeed()
 CMario::CMario(float x, float y) : CGameObject()
 {
 	//level = MARIO_LEVEL_BIG;
-	level = 4;
+	level = 2;
 	untouchable = 0;
 	SetState(MARIO_STATE_IDLE);
 	constant = new Constant(level);
@@ -115,7 +115,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	start_y = y; 
 	this->x = x; 
 	this->y = y; 
-	this->type = 0;
+	this->type = Type::MARIO;
 }
 
 
@@ -183,8 +183,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		Tail->Update(dt, coObjects);
 	}
 	
-
-
 	if (!this->CheckMarioSlideIntoPipe())
 	{
 		vy += MARIO_GRAVITY * dt;
@@ -192,8 +190,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 	if (this->CheckMarioSlideIntoPipe() && !this->isInHiddenMap && vy < 0)
 	{
-		DebugOut(L"vy = %f\n", this->vy);
-		if (y + 28.0f < posY_OfPipe_HaveHiddenMap)
+		if (y + 29.0f < posY_OfPipe_HaveHiddenMap)
 			this->MarioSlideOutPipe();
 	}
 
@@ -321,8 +318,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 			//x += nx*abs(rdx); 
 
 		// block every object first!
-		x += min_tx * dx + nx * 0.4f;	
-		y += min_ty * dy + ny * 0.5f;
+		x += min_tx * dx + nx * 0.2f;
+		y += min_ty * dy + ny * 0.2f;
 
 		if (nx != 0)
 		{
@@ -421,7 +418,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						y += dy*2;
 						this->MarioSlideIntoPipe();
 						storePosPipe_HaveHiddenMap(pipe->x, pipe->y);
-						DebugOut(L"Test\n");
 					}
 				}
 				else if (e->ny > 0)
@@ -761,6 +757,11 @@ int CalcRenderForMARIO_BIG(CMario *mario,vector<int> listAnimationForResMario )
 			mario->ani = (mario->nx == 1) ? listAnimationForResMario.at(22) : listAnimationForResMario.at(23);
 		}
 	}
+	if (mario->isSlidingInPipe)
+	{
+		mario->ani = listAnimationForResMario.at(24);
+	}
+	
 	return mario->ani;
 }
 
@@ -892,8 +893,6 @@ void CMario::Render()
 
 			//	}
 			//}
-
-
 		//}
 		/*if (onSitting == false)
 		{
@@ -908,7 +907,7 @@ void CMario::Render()
 		}*/
 		Constant *constant = new Constant(level);
 		ani = CalcRenderForMARIO_BIG(this,constant->listAni_Mario_Big);
-		if (!isCanHoldingKoopas)
+		if (!isCanHoldingKoopas && this->GetState() != MARIO_STATE_AUTO_GO)
 		{
 			if (fabs(vx) >= MARIO_RUNNING_MAX_SPEED && !isOnGround && isFalling)
 			{
@@ -927,7 +926,7 @@ void CMario::Render()
 	{
 		constant->changeLevelMario(level);
 		ani = CalcRenderForMARIO_BIG(this,constant->listAni_Mario_Big);
-		if (!isCanHoldingKoopas)
+		if (!isCanHoldingKoopas && this->GetState() != MARIO_STATE_AUTO_GO)
 		{
 			if (isAttacking)
 			{
@@ -959,7 +958,7 @@ void CMario::Render()
 	{
 		constant->changeLevelMario(level);
 		ani = CalcRenderForMARIO_BIG(this, constant->listAni_Mario_Big);
-		if (!isCanHoldingKoopas)
+		if (!isCanHoldingKoopas && this->GetState() != MARIO_STATE_AUTO_GO)
 		{
 			if (isAttacking)
 			{
@@ -1007,7 +1006,7 @@ void CMario::Render()
 	int alpha = 255;
 	if (untouchable) alpha = 128;
 	
-	animation_set->at(100)->Render(x, y, alpha);
+	animation_set->at(ani)->Render(x, y, alpha);
 
 	if (isAttacking && level == MARIO_LEVEL_BIG_TAIL)
 	{

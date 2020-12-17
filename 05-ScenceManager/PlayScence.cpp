@@ -472,6 +472,41 @@ void CPlayScene::removeObjOutOfCamera(LPGAMEOBJECT& obj)
 	}
 }
 
+void CPlayScene::LightenTheScreen()
+{
+	if (!transitionBgTime->isStarted)
+	{
+		transitionBgTime->Start();
+	}
+	LPDIRECT3DTEXTURE9 darken = CTextures::GetInstance()->Get(1);
+	RECT rect;
+
+	float l = CGame::GetInstance()->GetCamPosX();
+	float t = CGame::GetInstance()->GetCamPosY();
+
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = ceil(5 * SCREEN_WIDTH / 14);
+	rect.bottom = ceil(5 * SCREEN_HEIGHT / 14);
+
+	if (transitionBgTime->isStarted)
+	{
+		if (transitionBgTime->GetElapsedTime() > 450)
+		{
+			this->alphaTransition_opacity = 0;
+			this->isTransition_For_LightScreen = false;
+			transitionBgTime->isStarted = false;
+			//this->isCompletedTransition = true;
+		}
+		else if (transitionBgTime->GetElapsedTime() > 400)
+			this->alphaTransition_opacity = 100;
+		else if (transitionBgTime->GetElapsedTime() > 350) this->alphaTransition_opacity = 150;
+		else if (transitionBgTime->GetElapsedTime() > 300) this->alphaTransition_opacity = 200;
+		else if (transitionBgTime->GetElapsedTime() > 250) this->alphaTransition_opacity = 255;
+	}
+
+	CGame::GetInstance()->Draw(l, t, darken, rect.left, rect.top, rect.right, rect.bottom, this->alphaTransition_opacity);
+}
 void CPlayScene::DarkenTheScreen()
 {
 	if (!transitionBgTime->isStarted)
@@ -494,16 +529,22 @@ void CPlayScene::DarkenTheScreen()
 		if (transitionBgTime->GetElapsedTime() > 500)
 		{
 			this->alphaTransition_opacity = 255;
-			this->isCompletedTransitionDarkScreen = true;
+			this->isCompletedTransition = true;
 		}
-		else if (transitionBgTime->GetElapsedTime() > 450) this->alphaTransition_opacity = 200;
-		else if (transitionBgTime->GetElapsedTime() > 400) this->alphaTransition_opacity = 150;
-		else if (transitionBgTime->GetElapsedTime() > 350) this->alphaTransition_opacity = 100;
-		else if (transitionBgTime->GetElapsedTime() > 300) this->alphaTransition_opacity = 50;
+		else if (transitionBgTime->GetElapsedTime() > 450) 
+			this->alphaTransition_opacity = 200;
+		else if (transitionBgTime->GetElapsedTime() > 400) 
+			this->alphaTransition_opacity = 150;
+		else if (transitionBgTime->GetElapsedTime() > 350) 
+			this->alphaTransition_opacity = 100;
+		else if (transitionBgTime->GetElapsedTime() > 300)
+			this->alphaTransition_opacity = 50;
 	}
 
 	CGame::GetInstance()->Draw(l, t, darken, rect.left, rect.top, rect.right, rect.bottom, this->alphaTransition_opacity);
 }
+
+
 
 void CPlayScene::GetObjectGrid()
 {
@@ -559,97 +600,94 @@ void CPlayScene::Update(DWORD dt)
 		}
 	}
 
-	//DebugOut(L"staticObjects = %d\n", staticObjects.size());
-
-	for (size_t i = 0; i < objects.size(); i++)
+	for (size_t i = 0; i < ObjectsInScreen.size(); i++)
 	{
-		coObjects.push_back(objects[i]);
+		coObjects.push_back(ObjectsInScreen[i]);
 	}
-	for (size_t i = 0; i < items.size(); i++)
-	{
-		coObjects.push_back(items[i]);
-	}
-	
 	//cam->Update(dt);
+
 
 	for (size_t i = 0; i < enemies.size(); i++)
 	{
-		if (fabs(enemies[i]->x - playerPositionX) < 90.0f && enemies[i]->getTypeObject() == Type::FLOWER)
+		if (checkObjOutOfCamera(enemies[i]))
 		{
-			CFlower* flower = dynamic_cast<CFlower*>(enemies[i]);
-
-			if (flower->state == FLOWER_STATE_UP)
+			if (fabs(enemies[i]->x - playerPositionX) < 90.0f && enemies[i]->getTypeObject() == Type::FLOWER)
 			{
-				if (flower->isWaitingShooting && flower->y == 336.0f)
+				CFlower* flower = dynamic_cast<CFlower*>(enemies[i]);
+
+				if (flower->state == FLOWER_STATE_UP)
 				{
-					flower->isShooting = true;
-					if (flower->isReadyFire() && flower->delayBullet != 0)
+					if (flower->isWaitingShooting && flower->y == 336.0f)
 					{
-						flower->isWaitingShooting = false;
-						flowerBullet.push_back(CreateFlowerBullet(flower));
-						flower->delayBullet = 0;
+						flower->isShooting = true;
+						if (flower->isReadyFire() && flower->delayBullet != 0)
+						{
+							flower->isWaitingShooting = false;
+							flowerBullet.push_back(CreateFlowerBullet(flower));
+							flower->delayBullet = 0;
+						}
+						else if (flower->delayBullet == 0)
+						{
+							flower->setTimeLoadingBullet();
+						}
+
 					}
-					else if (flower->delayBullet == 0)
+					flower->nx = (player->x - flower->x < 0) ? -1 : 1;
+					flower->ny = (player->y - flower->y < 0) ? -1 : ((player->y - flower->y > 16.0f)) ? 1 : 0;
+				}
+
+			}
+			else if (dynamic_cast<CKoopas*>(objects[i]) && objects[i]->isAliveObject())
+			{
+				CKoopas* koopas = dynamic_cast<CKoopas*>(objects[i]);
+
+				/*if (koopas->isCreatePointEffect)
+				{
+					koopas->addPointToItem();
+					effects.push_back(koopas->effectPoint);
+				}*/
+
+				if (!player->isCanHoldingKoopas && koopas->isOutOfControl)
+				{
+					player->ChainKickKoopas(koopas, false);
+				}
+				if (player->isCanHoldingKoopas && koopas->isOutOfControl)
+				{
+					// detect Nx to accurately hold koopasf
+					float distanceKoopasByOy = (player->level == MARIO_LEVEL_SMALL) ? 14 : 0;
+					float distanceKoopasbyOx = (player->nx == 1) ? 14 : -5;
+					if (player->level == MARIO_LEVEL_SMALL)
 					{
-						flower->setTimeLoadingBullet();
+						distanceKoopasbyOx = (player->nx == 1) ? 10 : -8;
+
 					}
-
+					// Hold koopas
+					koopas->updatePositionKoopasByPositionMario(player->x + distanceKoopasbyOx, player->y - distanceKoopasByOy);
 				}
-				flower->nx = (player->x - flower->x < 0) ? -1 : 1;
-				flower->ny = (player->y - flower->y < 0) ? -1 : ((player->y - flower->y > 16.0f)) ? 1 : 0;
-			}
-
-		}
-		else if (dynamic_cast<CKoopas*>(objects[i]) && objects[i]->isAliveObject())
-		{
-			CKoopas* koopas = dynamic_cast<CKoopas*>(objects[i]);
-
-			/*if (koopas->isCreatePointEffect)
-			{
-				koopas->addPointToItem();
-				effects.push_back(koopas->effectPoint);
-			}*/
-
-			if (!player->isCanHoldingKoopas && koopas->isOutOfControl)
-			{
-				player->ChainKickKoopas(koopas, false);
-			}
-			if (player->isCanHoldingKoopas && koopas->isOutOfControl)
-			{
-				// detect Nx to accurately hold koopasf
-				float distanceKoopasByOy = (player->level == MARIO_LEVEL_SMALL) ? 14 : 0;
-				float distanceKoopasbyOx = (player->nx == 1) ? 14 : -5;
-				if (player->level == MARIO_LEVEL_SMALL)
+				else if (player->isCanHoldingKoopas && !koopas->isOutOfControl && koopas->isPlayerHolding)
 				{
-					distanceKoopasbyOx = (player->nx == 1) ? 10 : -8;
-
+					// When koopas revive, player Cant hold it
+					player->isCanHoldingKoopas = false;
+					koopas->isPlayerHolding = false;
 				}
-				// Hold koopas
-				koopas->updatePositionKoopasByPositionMario(player->x + distanceKoopasbyOx, player->y - distanceKoopasByOy);
 			}
-			else if (player->isCanHoldingKoopas && !koopas->isOutOfControl && koopas->isPlayerHolding)
+			else if (dynamic_cast<CGoomba*>(objects[i]) && objects[i]->health == 2)
 			{
-				// When koopas revive, player Cant hold it
-				player->isCanHoldingKoopas = false;
-				koopas->isPlayerHolding = false;
-			}
-		} 
-		else if (dynamic_cast<CGoomba*>(objects[i]) && objects[i]->health == 2)
-		{
-			CGoomba* goomba = dynamic_cast<CGoomba*>(objects[i]);
-			float goombaPositionX = goomba->x;
-			float goombaPositionY = goomba->y;
-			if (goomba->level == PARAGOOMBA)
-			{
-				goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0) ? -1 : 1);
-				if (fabs(goombaPositionX - playerPositionX) < 250.0f
-					&& !goomba->IsBlockingChangeState
-					&& goomba->health == 2
-					)
+				CGoomba* goomba = dynamic_cast<CGoomba*>(objects[i]);
+				float goombaPositionX = goomba->x;
+				float goombaPositionY = goomba->y;
+				if (goomba->level == PARAGOOMBA)
 				{
-					// Become crazy goomba and it have 3 state change circle
-					goomba->blockingChangeState(true);
-					goomba->startTimeChangeState();
+					goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0) ? -1 : 1);
+					if (fabs(goombaPositionX - playerPositionX) < 250.0f
+						&& !goomba->IsBlockingChangeState
+						&& goomba->health == 2
+						)
+					{
+						// Become crazy goomba and it have 3 state change circle
+						goomba->blockingChangeState(true);
+						goomba->startTimeChangeState();
+					}
 				}
 			}
 		}
@@ -665,6 +703,7 @@ void CPlayScene::Update(DWORD dt)
 			dynamicItems.push_back(CreateItemOfMario(player, questionBrick));
 		}
 	}
+
 	{
 		if (player->isFireShoot)
 		{
@@ -679,7 +718,7 @@ void CPlayScene::Update(DWORD dt)
 			}
 			player->isFireShoot = false;
 		}
-		player->Update(dt,&objects);
+		player->Update(dt,&coObjects);
 	}
 
 	for (size_t i = 0; i < listCBrick.size(); i++)
@@ -749,8 +788,8 @@ void CPlayScene::Update(DWORD dt)
 	//player->CollideWithEnemy(enemies);
 
 	
-	// isCompletedTransitionDarkScreen: Complete Dark Screen Transition
-		if (this->isCompletedTransitionDarkScreen)
+	// isCompletedTransition: Complete Dark Screen Transition
+		if (this->isCompletedTransition)
 		{ 
 			if (!player->isInHiddenMap)
 			{
@@ -768,14 +807,15 @@ void CPlayScene::Update(DWORD dt)
 					{
 						player->SetPosition(listPipe[i]->x, listPipe[i]->y - 16 );
 					
-						//// Turn on Light
-						this->alphaTransition_opacity = 0;
+						//// Turn on Light with transition
+						this->isTransition_For_LightScreen = true;
 					
 						// Set Mario is in Hidden Map
 						player->isInHiddenMap = true;
+
 						// disable Moving into Pipe
 						player->MarioSlideOutPipe();
-						this->isCompletedTransitionDarkScreen = false;
+						this->isCompletedTransition = false;
 
 						//Set timeover for time, to use LightenScreen
 						this->transitionBgTime->isStarted = false;
@@ -801,16 +841,18 @@ void CPlayScene::Update(DWORD dt)
 						player->SetPosition(listPipe[i]->x, listPipe[i]->y);
 						player->storePosPipe_HaveHiddenMap(listPipe[i]->x, listPipe[i]->y );
 						// Turn on Light
-						this->alphaTransition_opacity = 0;
+						this->isTransition_For_LightScreen = true;
 
 						// Set Mario is in Hidden Map
 						player->isInHiddenMap = false;
-						// disable Moving into Pipe
-						//player->isMovingOutHiddenMap = false;
+						
+						// This line comment because I want Mario push out slowly Pipe
 						//player->MarioSlideOutPipe();
-						this->isCompletedTransitionDarkScreen = false;
+						
+						this->isCompletedTransition = false;
+
 						//Set timeover for time, to use LightenScreen
-						//this->transitionBgTime->isStarted = false;
+						this->transitionBgTime->isStarted = false;
 
 						player->SetState(MARIO_STATE_IDLE);
 						break;
@@ -818,6 +860,8 @@ void CPlayScene::Update(DWORD dt)
 				}
 			}
 		}
+
+
 	// remove everything
 	for (size_t i = 0; i < objects.size(); i++)
 	{
@@ -918,7 +962,7 @@ void CPlayScene::Update(DWORD dt)
 
 void CPlayScene::Render()
 {
-	//map->Draw();
+	map->Draw();
 	player->Render();
 
 	if (player->type == Type::MARIO)
@@ -968,7 +1012,7 @@ void CPlayScene::Render()
 	boardGame->Render();
 	}
 
-	if (!this->isCompletedTransitionDarkScreen && player->CheckMarioSlideIntoPipe())
+	if (!this->isCompletedTransition && player->CheckMarioSlideIntoPipe())
 	{
 		// When Mario is moving into Pipe
 		if (!player->isInHiddenMap)
@@ -987,7 +1031,10 @@ void CPlayScene::Render()
 				DarkenTheScreen();
 			}
 		}
-
+	}
+	if (this->isTransition_For_LightScreen)
+	{
+		LightenTheScreen();
 	}
 
 }

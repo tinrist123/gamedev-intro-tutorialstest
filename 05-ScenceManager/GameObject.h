@@ -158,8 +158,8 @@ public:
 		{
 			float l, t, r, b;
 			arr[i]->GetBoundingBox(l, t, r, b);
-			if (y - t >= 5.0f)
-				continue;
+			/*if (y - t >= 5.0f)
+				continue;*/
 			if (arr[i]->getCategoryObject() == Category::GROUND
 				|| arr[i]->getCategoryObject() == Category::BRICK)
 			{

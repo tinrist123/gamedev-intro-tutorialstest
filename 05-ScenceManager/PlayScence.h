@@ -45,6 +45,8 @@ public:
 	vector<LPGAMEOBJECT> enemies;
 	vector<LPGAMEOBJECT> staticObjects;
 	vector<LPGAMEOBJECT> listCBrick;
+
+
 	vector<LPGAMEOBJECT> effects;
 	vector<LPGAMEOBJECT> flowerBullet;
 	vector<LPGAMEOBJECT> marioBullet;
@@ -53,7 +55,7 @@ public:
 	BoardGame* boardGame;
 
 	Timer* transitionBgTime = new Timer(0);
-	bool isCompletedTransitionDarkScreen = false;
+	bool isCompletedTransition = false;
 	bool isCompletedTransitionLightScreen = false;
 
 
@@ -83,6 +85,8 @@ public:
 
 	// Opacity for Dark Screen
 	int alphaTransition_opacity = 0;
+	
+	bool isTransition_For_LightScreen = false;
 	// Render Dark Screen
 	void DarkenTheScreen();
 	void LightenTheScreen();
