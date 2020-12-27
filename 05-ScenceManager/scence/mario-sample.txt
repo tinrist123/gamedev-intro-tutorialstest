@@ -1,8 +1,8 @@
 [SETTINGS]
-start	2
+start	4
 #scene list
 [SCENES]
 1	scence\\scene1.txt
 2	scence\\scene2.txt
 3	scence\\scene-test.txt
-4	scence\\worldmap.txt
+4	scence\\worldmap.txt	1

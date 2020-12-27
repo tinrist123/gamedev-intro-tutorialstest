@@ -27,4 +27,5 @@ public:
 	void Update();
 	void LoadMap();
 	void Draw();
+	void DrawSelectionMap();
 };

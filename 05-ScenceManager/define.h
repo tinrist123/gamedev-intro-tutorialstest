@@ -10,7 +10,7 @@ enum Type
 	PIPE = 05,
 	MARIOTAIL = 06,
 	WEAKBRICK = 07,
-
+	MARIOBULLET = 8,
 
 	KOOPAS = 20,
 	GOOMBA = 21,
@@ -22,8 +22,10 @@ enum Type
 	SUPER_MUSHROOM = 41,
 	SUPER_LEAF = 42,
 	P_SWITCH = 43,
+	RANDOMITEM = 44,
 
 
+	PORTALSTOP = 70,
 };
 
 enum Category
@@ -37,5 +39,6 @@ enum Category
 	SCENE,
 	GROUND,
 	BRICK,
+	MAPOBJECT,
 };
 

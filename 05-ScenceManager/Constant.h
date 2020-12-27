@@ -20,6 +20,7 @@ using namespace std;
 #define MARIO_DIE_DEFLECT_SPEED							0.1f
 
 #define MARIO_STATE_IDLE								0
+#define MARIO_STATE_BLOCK_STATE_END_GAME				1
 #define MARIO_STATE_WALKING_RIGHT						100
 #define MARIO_STATE_WALKING_LEFT						200
 #define MARIO_STATE_JUMP								300
@@ -35,7 +36,16 @@ using namespace std;
 #define MARIO_STATE_BIG_ATTACK							800
 #define MARIO_STATE_IN_HIDDEN							900
 #define MARIO_STATE_AUTO_GO								1000
+#define MARIO_STATE_BIG_TAIL_JUMP_HIGHER				1100
 
+///////////////////========================= MARIO IN SELECTION WORLD
+#define MARIO_SELECTION_MAP_STATE_MOVE_RIGHT		2000
+#define MARIO_SELECTION_MAP_STATE_MOVE_LEFT			2100
+#define MARIO_SELECTION_MAP_STATE_MOVE_BOTTOM		2200
+#define MARIO_SELECTION_MAP_STATE_MOVE_TOP			2300
+
+#define MARIO_SELECTION_MAP_MOVE_SPEED				0.1f
+#define MARIO_SELECTION_MAP_DISTANCE_BEETWEN_OBJ	54.0f
 // 66
 
 //================================IDLE CONSTANT ZONE=================================
@@ -228,7 +238,15 @@ using namespace std;
 
 #define	MARIO_ANI_BIG_TAIL_GET_INTO_HIDDEN_MAP								99			 
 
-#define	MARIO_ANI_BIG_GET_INTO_HIDDEN_MAP								100			 
+#define	MARIO_ANI_BIG_GET_INTO_HIDDEN_MAP									100
+//================================ MARIO ANIMATION GETINTO HIDDEN CAMERA =================================
+#define	MARIO_ANI_SMALL_WALKING_IN_SELECTION_WOLRD							101
+
+#define	MARIO_ANI_BIG_WALKING_IN_SELECTION_WOLRD							102
+
+#define	MARIO_ANI_BIG_HAVE_TAIL_WALKING_IN_SELECTION_WOLRD					103		 
+
+#define	MARIO_ANI_BIF_FIRE_WALKING_IN_SELECTION_WOLRD						104		
 
 //================================MARIO LEVEL CONSTANT ZONE=================================
 #define	MARIO_LEVEL_SMALL								1
@@ -242,17 +260,16 @@ using namespace std;
 #define MARIO_TAIL_WIDTH								4.0f
 
 
-#define MARIO_BIG_BBOX_WIDTH							23.0f
-#define MARIO_BIG_BBOX_HEIGHT							28.0f
+#define MARIO_BIG_BBOX_WIDTH							15.0f
+#define MARIO_BIG_BBOX_HEIGHT							26.0f
 
-#define MARIO_BIG_TAIL_BBOX_WIDTH						23.0f
-#define MARIO_BIG_TAIL_BBOX_HEIGHT						27.0f
+#define MARIO_BIG_TAIL_BBOX_WIDTH						16.0f
+#define MARIO_BIG_TAIL_BBOX_HEIGHT						28.0f
 
 #define MARIO_BIG_BBOX_SITTING_HEIGHT					14.0f
 #define MARIO_BIG_TAIL_BBOX_SITTING_HEIGHT				20.0f
 
-#define MARIO_SMALL_BBOX_WIDTH							13.0f
-#define MARIO_SMALL_BBOX_HEIGHT							15.0f
+#define MARIO_SMALL_BBOX								15.0f
 
 
 #define MARIO_ELASTIC									0.25f
@@ -260,6 +277,25 @@ using namespace std;
 //================================ANOTHER CONSTANT ZONE=================================
 #define MARIO_UNTOUCHABLE_TIME							1000
 #define KOOPAS_MAX_HEALTH								2
+
+
+
+//BBOX OTHER
+#define MARIO_BIG_BBOX_LEFT	5
+#define MARIO_BIG_BBOX_WIDTH_RIGHT	20
+#define MARIO_SIT_BBOX	8
+#define MARIO_BIG_SIT_BBOX_HEIGHT	18
+#define MARIO_RACCOON_BBOX_HEIGHT	27
+#define MARIO_RACCOON_BBOX_WIDTH	15
+#define MARIO_RACCOON_BBOX_SIT	9
+#define MARIO_RACCOON_SIT_BBOX_HEIGHT	18
+#define MARIO_RACCOON_BBOX_WIDTH_RIGHT	15
+#define MARIO_RACCOON_BBOX_LEFT	7
+#define MARIO_RACCOON_BBOX_WIDTH_RIGHT	15
+#define MARIO_FIRE_BBOX_WIDTH	15
+#define MARIO_FIRE_BBOX_HEIGHT	26
+#define MARIO_FIRE_SIT_BBOX_HEIGHT	18
+
 #pragma once
 class Constant
 {

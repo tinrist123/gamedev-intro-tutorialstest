@@ -10,6 +10,7 @@ P_Switch::P_Switch(float posX, float posY)
 
 P_Switch::P_Switch()
 {
+	this->type = Type::P_SWITCH;
 }
 
 P_Switch::~P_Switch()

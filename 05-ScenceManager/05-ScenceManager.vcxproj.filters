@@ -49,6 +49,9 @@
     <Filter Include="Source Files\Ultils">
       <UniqueIdentifier>{e5383eb9-354b-4d34-9edd-6e63d4115fa8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\WorldSelection">
+      <UniqueIdentifier>{7dfe7102-09eb-4935-bea2-60d7585c6274}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -195,8 +198,20 @@
     <ClCompile Include="P_Switch.cpp">
       <Filter>Source Files\Item</Filter>
     </ClCompile>
-    <ClCompile Include="MarioWorldMap.cpp">
-      <Filter>Source Files\Mario</Filter>
+    <ClCompile Include="CellSelection.cpp">
+      <Filter>Source Files\WorldSelection</Filter>
+    </ClCompile>
+    <ClCompile Include="ShakeTree.cpp">
+      <Filter>Source Files\WorldSelection</Filter>
+    </ClCompile>
+    <ClCompile Include="PortalStop.cpp">
+      <Filter>Source Files\WorldSelection</Filter>
+    </ClCompile>
+    <ClCompile Include="PiranhaFlower.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="RandomItem.cpp">
+      <Filter>Source Files\Item</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -335,9 +350,6 @@
     <ClInclude Include="Timer.h">
       <Filter>Source Files\Ultils</Filter>
     </ClInclude>
-    <ClInclude Include="MarioWorldMap.h">
-      <Filter>Source Files\Mario</Filter>
-    </ClInclude>
     <ClInclude Include="Mario.h">
       <Filter>Source Files\Mario</Filter>
     </ClInclude>
@@ -349,6 +361,21 @@
     </ClInclude>
     <ClInclude Include="MarioBullet.h">
       <Filter>Source Files\MarioWeapon</Filter>
+    </ClInclude>
+    <ClInclude Include="CellSelection.h">
+      <Filter>Source Files\WorldSelection</Filter>
+    </ClInclude>
+    <ClInclude Include="ShakeTree.h">
+      <Filter>Source Files\WorldSelection</Filter>
+    </ClInclude>
+    <ClInclude Include="PortalStop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PiranhaFlower.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RandomItem.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

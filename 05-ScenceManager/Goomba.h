@@ -73,6 +73,6 @@ public:
 	virtual void Render();
 
 public: 	
-	CGoomba(int);
+	CGoomba(float,float, int);
 	virtual void SetState(int state);
 };

@@ -112,6 +112,7 @@ vector<int> Constant::getAnimationMARIO_BIG_HAVE_TAIL()
 
 	listAni_Mario_Big.push_back(MARIO_ANI_BIG_TAIL_GET_INTO_HIDDEN_MAP);
 
+
 	return listAni_Mario_Big;
 }
 

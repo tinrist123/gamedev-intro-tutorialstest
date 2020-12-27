@@ -5,6 +5,7 @@
 #include "Pipe.h"
 #include "MarioWeapon.h"
 #include "QuestionBrick.h"
+#include "EffectHitTail.h"
 
 #define KOOPAS_WALKING_SPEED 0.05f;
 
@@ -102,13 +103,14 @@ public:
 	vector <int> listAnimationKoopas;
 
 	CKoopas();
-	CKoopas(int typeKoopas, int typeColorKoopas);
+	CKoopas(float start_x,float start_y,int typeKoopas, int typeColorKoopas);
 
 
 	void autoLoadAni();
 
 	void AddAniForKoopasGreenToList();
 
+	void CollideWithEnemies(vector<LPGAMEOBJECT>* enemies, vector<LPGAMEOBJECT>* listEffect);
 	void setKoopasWasHeldByPlayer() { isPlayerHolding = true; }
 	void ExecuteRevingKoopas();
 	bool CheckTimeKoopasPreReive() { return GetTickCount64() - revivalTime > 3800 && revivalTime != 0; }

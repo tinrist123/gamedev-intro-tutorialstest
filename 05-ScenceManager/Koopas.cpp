@@ -1,13 +1,19 @@
 #include "Koopas.h"
+#include "Goomba.h"
+#include "WeakBrick.h"
 
 
 CKoopas::CKoopas() : Enemy()
 {
 }
 
-CKoopas::CKoopas(int typeKoopas, int typeColorKoopas)
+CKoopas::CKoopas(float start_x,float start_y,int typeKoopas, int typeColorKoopas)
 {
+	this->start_x = start_x;
+	this->start_y = start_y;
+
 	this->type = Type::KOOPAS;
+
 	this->TypeKoopas = typeKoopas;
 	this->TypeColorKoopas = typeColorKoopas;
 	nx = 1;
@@ -100,29 +106,6 @@ void CKoopas::GetBoundingBox(float& left, float& top, float& right, float& botto
 	}
 }
 
-//void hamNguNhuCho(vector<LPCOLLISIONEVENT> &coEventsResult)
-//{
-//	for (int i = coEventsResult.size() - 1; i >= 0; i--)
-//	{
-//		LPCOLLISIONEVENT e = coEventsResult[i];
-//
-//		if (e->obj->getTypeObject() == Type::QUESTIONBRICK)
-//		{
-//			for (int j = i - 1; j >= 0; j--)
-//			{
-//				LPCOLLISIONEVENT e2 = coEventsResult[j];
-//				if (e2->obj->getTypeObject() == Type::QUESTIONBRICK)
-//				{
-//					coEventsResult.erase(coEventsResult.begin() + j);
-//				}
-//			}
-//
-//		}
-//
-//	}
-//
-//}
-
 void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 {
 	
@@ -144,7 +127,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 
 
 	// KOOPAS REVIVE
-	if (state == KOOPAS_STATE_SHELL || state == KOOPAS_STATE_SHELL_OUT_CONTROL)
+	if (state == KOOPAS_STATE_SHELL || state == KOOPAS_STATE_SHELL_OUT_CONTROL 
+		)
 	{
 		if (CheckTimeKoopasPreReive())
 		{
@@ -168,7 +152,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	// reset untouchable timer if untouchable time has passed
 	// No collision occured, proceed normally
 	
-	if (CheckKoopasNeverFalling())
+	if (CheckKoopasNeverFalling() && this->TypeColorKoopas == KOOPAS_RED_TYPE)
 	{
 		if (this->nx == 1 && firstTime)
 		{
@@ -201,10 +185,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		float rdx = 0;
 		float rdy = 0;
 		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-		/*if (coEvents.size() >= 2 && nx == -1)
-		{
-			hamNguNhuCho(coEventsResult);
-		}*/
 		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
 		/*if (rdx != 0 && rdx!=dx)
 			x += nx*abs(rdx); */
@@ -212,24 +192,21 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		// block every object first!
 		x += min_tx * dx + nx * 0.1f;
 		y += min_ty * dy + ny * 0.1f;
-
-		//if (nx != 0) vx = 0;
-		/*if (ny != 0) {
+		
+		if (nx != 0)
+		{
+			this->nx = -this->nx;
+			this->vx = fabs(vx) * this->nx;
+		}
+		if (ny != 0) {
 			vy = 0;
-		}*/
+		}
 		//
 		// Collision logic with other objects
 		//
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
-			if (dynamic_cast<MarioWeapon*>(e->obj))
-			{
-				if (e->nx != 0 || e->ny != 0)
-				{
-					DebugOut(L"Hitting Bullet\n");
-				}
-			}
 			if (dynamic_cast<Ground*>(e->obj))
 			{			
 				if (e->ny < 0)
@@ -262,19 +239,29 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					vy = 0;
 				}
 			}
-			else if (dynamic_cast<Pipe*>(e->obj))
-			{
-				if (e->nx != 0)
-				{
-					vx = -vx;
-					this->nx = -this->nx;
-				}
-			}
 			else if (dynamic_cast<QuestionBrick *>(e->obj))
 			{
 				if (e->ny != 0)
 				{
 					vy = 0;
+				}
+			}
+			else if (e->obj->getTypeObject() == Type::WEAKBRICK)
+			{
+				if (this->GetState() == KOOPAS_STATE_SHELL_MOVING)
+				{
+					WeakBrick* weakbrick = dynamic_cast<WeakBrick*>(e->obj);
+					
+					if (weakbrick->isHaveP_Swtich)
+					{
+						weakbrick->SetState(WEAK_STATE_EMPTY_ANI);
+					}
+					else
+					{
+						weakbrick->SetState(WEAK_STATE_DESTROY);
+					}
+					this->nx = -this->nx;
+					this->vx = this->vx * this->nx;
 				}
 			}
 		}
@@ -299,6 +286,43 @@ void CKoopas::AddAniForKoopasGreenToList()
 	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_WALKING_LEFT);
 	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_FLYING_RIGHT);
 	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_FLYING_LEFT);
+}
+
+void CKoopas::CollideWithEnemies(vector<LPGAMEOBJECT>* enemies, vector<LPGAMEOBJECT>* listEffect)
+{
+	for (size_t i = 0; i < enemies->size(); i++)
+	{
+		if (this->AABBCollision(enemies->at(i)))
+		{
+			EffectPoint* effectPoint = new EffectPoint();
+			if (enemies->at(i)->getTypeObject() == Type::GOOMBA)
+			{
+				enemies->at(i)->SetState(GOOMBA_STATE_HIT_BY_WEAPON);
+			}
+			else if (enemies->at(i)->getTypeObject() == Type::FLOWER)
+			{
+				enemies->at(i)->setObjDisappear();
+			}
+			else if (enemies->at(i)->getTypeObject() == Type::KOOPAS )
+			{
+				CKoopas* koopas = dynamic_cast<CKoopas*>(enemies->at(i));
+				if (this == koopas) continue;
+				if (this->GetState() == KOOPAS_STATE_SHELL_MOVING)
+				{
+					this->health++;
+
+					koopas->SetState(KOOPAS_STATE_HIT_BY_WEAPON_MARIO);
+					koopas->SetNoCollision();
+				}
+			}
+			EffectHitTail* effect = new EffectHitTail();
+			effect->SetPosition(this->x, this->y);
+			effectPoint->SetPosition(this->x, this->y);
+			listEffect->push_back(effect);
+			listEffect->push_back(effectPoint);
+		}
+	}
+	
 }
 
 void CKoopas::AddAniForKoopasRedToList()
@@ -405,7 +429,7 @@ void CKoopas::SetState(int state)
 		vy = -KOOPAS_SHELL_JUMP_VY;
 		vx = nx*0.1f;
 		isOverturned = true;
-		break;
+		break; 
 	case KOOPAS_STATE_DIE:
 		y -= KOOPAS_BBOX_HEIGHT - KOOPAS_BBOX_HEIGHT_DIE + 1;
 		vx = 0;
@@ -422,12 +446,12 @@ void CKoopas::SetState(int state)
 		isOverturned = false;
 		EnemyDamage();
 		isOutOfControl = false;
-		vx = nx * KOOPAS_WALKING_SPEED;
+		vx = nx * KOOPAS_WALKING_SPEED
 		break;
 	case KOOPAS_STATE_SHELL_MOVING:
 		EnemyDamage();
 		isOutOfControl = false;
-		vx = KOOPAS_ANI_WALKING_RIGHT_SPEED_X *nx;
+		vx = KOOPAS_ANI_WALKING_RIGHT_SPEED_X *nx *2;
 		break;
 	case KOOPAS_STATE_HAVE_WING_WALKING:
 		vx = KOOPAS_ANI_WALKING_RIGHT_SPEED_X *nx;

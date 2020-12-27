@@ -66,6 +66,8 @@ MarioBullet::MarioBullet()
 	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 	LPANIMATION_SET ani_set = animation_sets->Get(7);
 	this->SetAnimationSet(ani_set);
+
+	this->type = Type::MARIOBULLET;
 }
 
 void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

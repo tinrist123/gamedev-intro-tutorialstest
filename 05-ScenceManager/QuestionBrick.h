@@ -18,6 +18,7 @@ public:
 	int height;
 	int width;
 
+	int ani = 0;
 	int state;
 
 	int start_x;

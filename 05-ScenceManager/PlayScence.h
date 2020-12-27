@@ -30,6 +30,7 @@
 #include "Camera.h"
 #include "Timer.h"
 
+
 class CPlayScene: public CScene
 {
 public: 
@@ -37,7 +38,11 @@ public:
 	Grid* grid;
 	Camera* cam;
 	
+	
+
 	vector<LPGAMEOBJECT> objects;
+	vector<LPGAMEOBJECT> mapObjects;
+	vector<LPGAMEOBJECT> listPortalStop;
 	// Waiting for Grid
 	vector<LPGAMEOBJECT> ObjectsInScreen;
 	vector<LPGAMEOBJECT> items;
@@ -46,18 +51,22 @@ public:
 	vector<LPGAMEOBJECT> staticObjects;
 	vector<LPGAMEOBJECT> listCBrick;
 
-
 	vector<LPGAMEOBJECT> effects;
 	vector<LPGAMEOBJECT> flowerBullet;
 	vector<LPGAMEOBJECT> marioBullet;
 	vector<LPGAMEOBJECT> listPipe;
 
+	CPortal* Portal;
+
 	BoardGame* boardGame;
+
+
+	Timer* transitionGetIntoWorldMap = new Timer(0);
+	int indexScaleBackground = 0;
 
 	Timer* transitionBgTime = new Timer(0);
 	bool isCompletedTransition = false;
 	bool isCompletedTransitionLightScreen = false;
-
 
 
 	void _ParseSection_TEXTURES(string line);
@@ -68,7 +77,7 @@ public:
 	void _ParseSection_Map(string line);
 	
 public: 
-	CPlayScene(int id, LPCWSTR filePath);
+	CPlayScene(int id, LPCWSTR filePath, bool isWorldSeletion);
 
 	virtual void Load();
 	virtual void Update(DWORD dt);
@@ -76,6 +85,9 @@ public:
 	virtual void Unload();
 	void GetObjectGrid();
 
+
+	Item* CreateItemOfMario(QuestionBrick* object);
+	Item* CreateP_Switch(LPGAMEOBJECT object);
 	Enemy *CreateFlowerBullet(CFlower *flower);
 
 	void playerHittingSpecialItem(LPGAMEOBJECT& item);
@@ -83,14 +95,25 @@ public:
 	bool checkObjOutOfCamera(LPGAMEOBJECT obj);
 	void removeObjOutOfCamera(LPGAMEOBJECT& obj);
 
+	bool checkOrdinateOutOfCamera(float x, float y);
+
 	// Opacity for Dark Screen
-	int alphaTransition_opacity = 0;
+	int alphaTransition_opacity = 255;
 	
 	bool isTransition_For_LightScreen = false;
 	// Render Dark Screen
 	void DarkenTheScreen();
 	void LightenTheScreen();
 	
+
+	bool isTransitionScaleBg = false;
+	void TransitionDarkScreen(int quantityW,int quantityH,int posX, int posY);
+	
+	// Detect Scale Background to have beatiful Transition
+	void DetectScaleDarkScreenTransition(int timeCountDown);
+
+	void Alter_Opacity_AlphaForBackground_Screen_By_Time(bool);
+
 	TileMap* map;
 	CMario * GetPlayer() { return player; } 
 

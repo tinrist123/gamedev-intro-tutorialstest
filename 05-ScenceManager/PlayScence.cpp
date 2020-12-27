@@ -2,12 +2,13 @@
 #include <fstream>
 #include "PlayScence.h"
 #include "P_Switch.h"
-#include "MarioWorldMap.h"
+#include "ShakeTree.h"
+#include "PortalStop.h"
+#include "RandomItem.h"
 
 using namespace std;
 
-CPlayScene::CPlayScene(int id, LPCWSTR filePath):
-	CScene(id, filePath)
+CPlayScene::CPlayScene(int id, LPCWSTR filePath,bool isWorldSeletion) : CScene(id, filePath, isWorldSeletion)
 {
 	key_handler = new CPlayScenceKeyHandler(this);
 }
@@ -16,7 +17,6 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 	Load scene resources from scene file (textures, sprites, animations and objects)
 	See scene1.txt, scene2.txt for detail format specification
 */
-
 #define SCENE_SECTION_UNKNOWN			-1
 #define SCENE_SECTION_TEXTURES			2
 #define SCENE_SECTION_SPRITES			3
@@ -39,6 +39,12 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath):
 #define OBJECT_TYPE_Item				11
 #define OBJECT_TYPE_Bullet				12
 #define OBJECT_TYPE_COIN				16
+#define OBJECT_TYPE_ITEM_END_GAME		17
+
+// =============WORLD SELECTION ELEMENT
+#define OBJECT_TYPE_SHAKE_TREE			20
+#define OBJECT_TYPE_PORT_STOP			21
+
 
 #define OBJECT_TYPE_PORTAL				50
 
@@ -88,7 +94,6 @@ void CPlayScene::_ParseSection_ANIMATIONS(string line)
 
 	if (tokens.size() < 3) return; // skip invalid lines - an animation must at least has 1 frame and 1 frame time
 
-	DebugOut(L"--> %s\n",ToWSTR(line).c_str());
 
 	LPANIMATION ani = new CAnimation();
 
@@ -172,16 +177,14 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	switch (object_type)
 	{
 	case OBJECT_TYPE_MARIO:
-		if (player!=NULL) 
+		//if (player!=NULL) 
+		//{
+		//	//DebugOut(L"[ERROR] MARIO object was created before!\n");
+		//	return;
+		//}
+		//else
 		{
-			//DebugOut(L"[ERROR] MARIO object was created before!\n");
-			return;
-		}
-		else
-		{
-			//obj = new MarioWorldMap(x, y);
-			obj = new CMario(x,y); 
-			player = (CMario*)obj;  
+			player = CMario::GetInstance();
 			player->SetAnimationSet(ani_set);
 			player->SetPosition(x, y);
 			cam = new Camera(player);
@@ -191,7 +194,30 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		break;
 	case OBJECT_TYPE_GOOMBA: {
 		int typeGoomba = atof(tokens[4].c_str());
-		obj = new CGoomba(typeGoomba); 
+		obj = new CGoomba(x,y,typeGoomba); 
+		break;
+	}
+	case OBJECT_TYPE_ITEM_END_GAME:
+	{
+		obj = new RandomItem(x,y);
+		break;
+	}
+	case OBJECT_TYPE_PORT_STOP:
+	{
+		float w = atof(tokens[4].c_str());
+		float h = atof(tokens[5].c_str());
+
+		float l = atof(tokens[6].c_str());
+		float t = atof(tokens[7].c_str());
+		float r = atof(tokens[8].c_str());
+		float b = atof(tokens[9].c_str());
+
+		obj = new PortalStop(w,h,l,t,r,b);
+		break;
+	}
+	case OBJECT_TYPE_SHAKE_TREE:
+	{
+		obj = new ShakeTree();
 		break;
 	}
 	case OBJECT_TYPE_CloudBrick:
@@ -214,7 +240,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		float height = atof(tokens[5].c_str());
 		int isHaveItem = 0;
 		if (tokens.size() == 7)
-			int isHaveItem = atof(tokens[6].c_str());
+			isHaveItem = atof(tokens[6].c_str());
 		obj = new WeakBrick(width, height, isHaveItem);
 		break;
 	}
@@ -228,13 +254,14 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	{
 		int typeKoopas = atof(tokens[4].c_str());
 		int typeColorKoopas = atof(tokens[5].c_str());
-		obj = new CKoopas(typeKoopas, typeColorKoopas);
+		obj = new CKoopas(x,y,typeKoopas, typeColorKoopas);
 		break;
 	}
 	case OBJECT_TYPE_Flower:
 	{
-		float HeightPipe = atof(tokens[4].c_str());
-		obj = new CFlower(y, HeightPipe);
+		int HeightPipe = atof(tokens[4].c_str());
+		int typeFlower = atof(tokens[5].c_str());
+		obj = new CFlower(x,y, HeightPipe,typeFlower);
 		break;
 	}
 	case OBJECT_TYPE_Ground: 
@@ -277,10 +304,16 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	}
 	case OBJECT_TYPE_PORTAL:
 		{	
-			float r = atof(tokens[4].c_str());
-			float b = atof(tokens[5].c_str());
-			int scene_id = atoi(tokens[6].c_str());
-			obj = new CPortal(x, y, r, b, scene_id);
+			int quantityW = atof(tokens[3].c_str());
+			int quantityH = atof(tokens[4].c_str());
+			int scene_id = atoi(tokens[5].c_str());
+			obj = new CPortal(quantityW,quantityH, scene_id);
+			if (player->isInWorldSelectionMap)
+			{
+				obj->SetAnimationSet(ani_set);
+				obj->SetPosition(x, y);
+				listPortalStop.push_back(obj);
+			}
 		}
 		break;
 	default:
@@ -296,8 +329,22 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	{
 		listPipe.push_back(obj);
 	}
-
-	objects.push_back(obj);
+	else if (obj->getTypeObject() == Type::PORTAL)
+	{
+		Portal = (CPortal *)obj;
+	}
+	if (obj->getCategoryObject() == Category::MAPOBJECT)
+	{
+		//mapObjects.push_back(obj);
+		if (obj->getTypeObject() == Type::PORTALSTOP)
+		{
+			listPortalStop.push_back(obj);
+		}
+	}
+	else if (!player->isInWorldSelectionMap)
+	{
+		objects.push_back(obj);
+	}
 }
 
 void CPlayScene::Load()
@@ -348,11 +395,16 @@ void CPlayScene::Load()
 
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
+	/*player->Reset();
+	playerSelectionMap->isRendered = true;
+	playerSelectionMap->Reset();
+	player->isRendered = false;*/
+
 	//DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
 }
 
 
-Item *CreateItemOfMario(CMario *player, QuestionBrick *object)
+Item* CPlayScene::CreateItemOfMario(QuestionBrick* object)
 {
 	object->isCreated = true;
 	if (object->ItemInside == ITEM_COIN)
@@ -364,8 +416,8 @@ Item *CreateItemOfMario(CMario *player, QuestionBrick *object)
 	}
 	else if (object->ItemInside == SPECIAL_ITEM)
 	{
-		//int kindAni = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : 2;
-		int kindAni = 2;
+		int kindAni = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : 2;
+		//int kindAni = 2;
 		if (kindAni == 2)
 		{
 			Leaf *leaf = new Leaf(object->x, object->y);
@@ -393,6 +445,19 @@ Item *CreateItemOfMario(CMario *player, QuestionBrick *object)
 		}
 	}
 }
+
+Item* CPlayScene::CreateP_Switch(LPGAMEOBJECT object)
+{
+	{
+		P_Switch* p_switch= new P_Switch(object->x, object->y);
+		p_switch->SetPosition(object->x, object->y);
+		if (player->x > (p_switch->x)) p_switch->nx = -1;
+		else if (player->x < (p_switch->x)) p_switch->nx = 1;
+		p_switch->SetState(ITEM_STATE_SPECIAL_ITEM);
+		return p_switch;
+	}
+}
+
 
 Enemy* CPlayScene::CreateFlowerBullet(CFlower* flower)
 {
@@ -425,25 +490,23 @@ bool CPlayScene::checkObjOutOfCamera(LPGAMEOBJECT obj)
 {
 	float cam_x = CGame::GetInstance()->GetCamPosX();
 	float cam_y = CGame::GetInstance()->GetCamPosY();
-
-	if (obj->nx == 1)
+		
 	{
-		// Bien ben phai
-		if (obj->x > (double)(1.0 * SCREEN_WIDTH / 3.05) - cam_x)
+		if (obj->x > (double)(1.0 * CGame::GetInstance()->GetScreenWidth()) + cam_x)
 			return true;
 	}
-	else if (obj->nx == -1)
 	{
-		if (obj->x < cam_x)
+		if (obj->x < cam_x - BBOX_BIT)
 		{
 			return true;
 		}
 	}
-	if (obj->y > SCREEN_HEIGHT / 1.7123
+
+	/*if (obj->y > CGame::GetInstance()->GetScreenHeight()
 		|| obj->y < cam_y)
 	{
 		return true;
-	}
+	}*/
 
 	return false;
 }
@@ -452,32 +515,48 @@ void CPlayScene::removeObjOutOfCamera(LPGAMEOBJECT& obj)
 {
 	float cam_x = CGame::GetInstance()->GetCamPosX();
 	float cam_y = CGame::GetInstance()->GetCamPosY();
-	if (obj->nx == 1)
 	{
-		// Bien ben phai
-		if (obj->x >  (double)(1.0*SCREEN_WIDTH / 3.05) + cam_x)
+		if (obj->x >  (double)(1.0* CGame::GetInstance()->GetScreenWidth()) + cam_x)
 			obj->setObjDisappear();
 	}
-	else if (obj->nx == -1)
 	{
-		if (obj->x < cam_x)
+		if (obj->x < cam_x - BBOX_BIT)
 		{
 			obj->setObjDisappear();
 		}
 	}
-	if (obj->y > SCREEN_HEIGHT / 1.7123
+	/*if (obj->y > CGame::GetInstance()->GetScreenHeight()
 		|| obj->y < cam_y)
 	{
 		obj->setObjDisappear();
+	}*/
+}
+
+bool CPlayScene::checkOrdinateOutOfCamera(float x, float y)
+{
+	float cam_x = CGame::GetInstance()->GetCamPosX();
+	float cam_y = CGame::GetInstance()->GetCamPosY();
+
+	
+	if (x > (double)(1.0 * CGame::GetInstance()->GetScreenWidth()) + cam_x)
+		return true;
+	if (x < cam_x - BBOX_BIT)
+	{
+		return true;
 	}
+
+	/*if (y > CGame::GetInstance()->GetScreenHeight()
+		|| y < cam_y)
+	{
+		return true;
+	}*/
+
+	return false;
 }
 
 void CPlayScene::LightenTheScreen()
 {
-	if (!transitionBgTime->isStarted)
-	{
-		transitionBgTime->Start();
-	}
+	
 	LPDIRECT3DTEXTURE9 darken = CTextures::GetInstance()->Get(1);
 	RECT rect;
 
@@ -486,33 +565,97 @@ void CPlayScene::LightenTheScreen()
 
 	rect.left = 0;
 	rect.top = 0;
-	rect.right = ceil(5 * SCREEN_WIDTH / 14);
-	rect.bottom = ceil(5 * SCREEN_HEIGHT / 14);
-
-	if (transitionBgTime->isStarted)
-	{
-		if (transitionBgTime->GetElapsedTime() > 450)
-		{
-			this->alphaTransition_opacity = 0;
-			this->isTransition_For_LightScreen = false;
-			transitionBgTime->isStarted = false;
-			//this->isCompletedTransition = true;
-		}
-		else if (transitionBgTime->GetElapsedTime() > 400)
-			this->alphaTransition_opacity = 100;
-		else if (transitionBgTime->GetElapsedTime() > 350) this->alphaTransition_opacity = 150;
-		else if (transitionBgTime->GetElapsedTime() > 300) this->alphaTransition_opacity = 200;
-		else if (transitionBgTime->GetElapsedTime() > 250) this->alphaTransition_opacity = 255;
-	}
-
+	rect.right = ceil(CGame::GetInstance()->GetScreenWidth());
+	rect.bottom = ceil(CGame::GetInstance()->GetScreenHeight());
+	
 	CGame::GetInstance()->Draw(l, t, darken, rect.left, rect.top, rect.right, rect.bottom, this->alphaTransition_opacity);
+}
+void CPlayScene::TransitionDarkScreen(int quantityW, int quantityH, int posX, int posY)
+{
+	LPDIRECT3DTEXTURE9 darken = CTextures::GetInstance()->Get(1);
+	RECT rect;
+
+	float l = CGame::GetInstance()->GetCamPosX() + posX;
+	float t = CGame::GetInstance()->GetCamPosY() + posY;
+
+	rect.left = 0;
+	rect.top = 0;
+	rect.right = ceil(quantityW * BBOX_BIT);
+	rect.bottom = ceil(quantityH * 16 );
+
+	CGame::GetInstance()->Draw(l, t, darken, rect.left, rect.top, rect.right, rect.bottom, 255);
+
+
+}
+void CPlayScene::DetectScaleDarkScreenTransition(int timeCountDown)
+{
+	if (this->transitionGetIntoWorldMap->isStarted == false)
+	{
+		this->transitionGetIntoWorldMap->Start();
+	}
+	if (transitionGetIntoWorldMap->GetElapsedTime() > timeCountDown)
+	{
+		this->indexScaleBackground++;
+		this->transitionGetIntoWorldMap->Start();
+	}
+	int middlePointScreen = CGame::GetInstance()->GetScreenHeight() / 32 + 2;
+	if (this->indexScaleBackground >= middlePointScreen)
+	{
+		this->isTransitionScaleBg = false;
+		player->isInWorldSelectionMap = false;
+		//player->CompleteSwitchedScreen();
+		CGame::GetInstance()->SwitchScene(player->scenceId);
+	}
+}
+void CPlayScene::Alter_Opacity_AlphaForBackground_Screen_By_Time(bool isDark)
+{
+	if (isDark)
+	{
+		if (!transitionBgTime->isStarted)
+		{
+			transitionBgTime->Start();
+		}
+		if (transitionBgTime->isStarted && transitionBgTime != 0)
+		{
+			if (transitionBgTime->GetElapsedTime() > 600)
+			{
+				this->alphaTransition_opacity = 255;
+				this->isCompletedTransition = true;
+			}
+			else if (transitionBgTime->GetElapsedTime() > 550)
+				this->alphaTransition_opacity = 200;
+			else if (transitionBgTime->GetElapsedTime() > 500)
+				this->alphaTransition_opacity = 150;
+			else if (transitionBgTime->GetElapsedTime() > 450)
+				this->alphaTransition_opacity = 100;
+			else if (transitionBgTime->GetElapsedTime() > 400)
+				this->alphaTransition_opacity = 50;
+		}
+	}
+	else if (!isDark)
+	{
+		if (!transitionBgTime->isStarted)
+		{
+			transitionBgTime->Start();
+		}
+		if (transitionBgTime->isStarted && transitionBgTime != 0)
+		{
+			if (transitionBgTime->GetElapsedTime() > 500)
+			{
+				this->alphaTransition_opacity = 0;
+				this->isTransition_For_LightScreen = false;
+				transitionBgTime->isStarted = false;
+			}
+			else if (transitionBgTime->GetElapsedTime() > 400)
+				this->alphaTransition_opacity = 100;
+			else if (transitionBgTime->GetElapsedTime() > 350) this->alphaTransition_opacity = 150;
+			else if (transitionBgTime->GetElapsedTime() > 300) this->alphaTransition_opacity = 200;
+			else if (transitionBgTime->GetElapsedTime() > 250) this->alphaTransition_opacity = 255;
+		}
+	}
 }
 void CPlayScene::DarkenTheScreen()
 {
-	if (!transitionBgTime->isStarted)
-	{
-		transitionBgTime->Start();
-	}
 	LPDIRECT3DTEXTURE9 darken = CTextures::GetInstance()->Get(1);
 	RECT rect;
 
@@ -521,25 +664,10 @@ void CPlayScene::DarkenTheScreen()
 
 	rect.left = 0;
 	rect.top = 0;
-	rect.right = ceil(5 * SCREEN_WIDTH / 14);
-	rect.bottom = ceil(5 * SCREEN_HEIGHT / 14);
+	rect.right = ceil(CGame::GetInstance()->GetScreenWidth());
+	rect.bottom = ceil(CGame::GetInstance()->GetScreenHeight());
 
-	if (transitionBgTime->isStarted)
-	{
-		if (transitionBgTime->GetElapsedTime() > 500)
-		{
-			this->alphaTransition_opacity = 255;
-			this->isCompletedTransition = true;
-		}
-		else if (transitionBgTime->GetElapsedTime() > 450) 
-			this->alphaTransition_opacity = 200;
-		else if (transitionBgTime->GetElapsedTime() > 400) 
-			this->alphaTransition_opacity = 150;
-		else if (transitionBgTime->GetElapsedTime() > 350) 
-			this->alphaTransition_opacity = 100;
-		else if (transitionBgTime->GetElapsedTime() > 300)
-			this->alphaTransition_opacity = 50;
-	}
+	
 
 	CGame::GetInstance()->Draw(l, t, darken, rect.left, rect.top, rect.right, rect.bottom, this->alphaTransition_opacity);
 }
@@ -563,6 +691,7 @@ void CPlayScene::Update(DWORD dt)
 	// TO-DO: This is a "good" way, need a more organized way 
 
 	vector<LPGAMEOBJECT> coObjects;
+
 	float playerPositionX = player->x;
 	float playerPositionY = player->y;
 
@@ -581,22 +710,12 @@ void CPlayScene::Update(DWORD dt)
 		}
 		else if (ObjectsInScreen[i]->getCategoryObject() == Category::ITEM)
 		{
-			if (ObjectsInScreen[i]->getTypeObject() == Type::SUPER_LEAF)
-			{
-				dynamicItems.push_back(ObjectsInScreen[i]);
-			}
-			else if (ObjectsInScreen[i]->getTypeObject() == Type::SUPER_MUSHROOM)
-			{
-				dynamicItems.push_back(ObjectsInScreen[i]);
-			}
-			else if (ObjectsInScreen[i]->getTypeObject() == Type::COIN)
-			{
-				items.push_back(ObjectsInScreen[i]);
-			}
+			items.push_back(ObjectsInScreen[i]);
 		}
 		else if (ObjectsInScreen[i]->getCategoryObject() == Category::BRICK)
 		{
 			listCBrick.push_back(ObjectsInScreen[i]);
+			staticObjects.push_back(ObjectsInScreen[i]);
 		}
 	}
 
@@ -604,94 +723,9 @@ void CPlayScene::Update(DWORD dt)
 	{
 		coObjects.push_back(ObjectsInScreen[i]);
 	}
+
+
 	//cam->Update(dt);
-
-
-	for (size_t i = 0; i < enemies.size(); i++)
-	{
-		if (checkObjOutOfCamera(enemies[i]))
-		{
-			if (fabs(enemies[i]->x - playerPositionX) < 90.0f && enemies[i]->getTypeObject() == Type::FLOWER)
-			{
-				CFlower* flower = dynamic_cast<CFlower*>(enemies[i]);
-
-				if (flower->state == FLOWER_STATE_UP)
-				{
-					if (flower->isWaitingShooting && flower->y == 336.0f)
-					{
-						flower->isShooting = true;
-						if (flower->isReadyFire() && flower->delayBullet != 0)
-						{
-							flower->isWaitingShooting = false;
-							flowerBullet.push_back(CreateFlowerBullet(flower));
-							flower->delayBullet = 0;
-						}
-						else if (flower->delayBullet == 0)
-						{
-							flower->setTimeLoadingBullet();
-						}
-
-					}
-					flower->nx = (player->x - flower->x < 0) ? -1 : 1;
-					flower->ny = (player->y - flower->y < 0) ? -1 : ((player->y - flower->y > 16.0f)) ? 1 : 0;
-				}
-
-			}
-			else if (dynamic_cast<CKoopas*>(objects[i]) && objects[i]->isAliveObject())
-			{
-				CKoopas* koopas = dynamic_cast<CKoopas*>(objects[i]);
-
-				/*if (koopas->isCreatePointEffect)
-				{
-					koopas->addPointToItem();
-					effects.push_back(koopas->effectPoint);
-				}*/
-
-				if (!player->isCanHoldingKoopas && koopas->isOutOfControl)
-				{
-					player->ChainKickKoopas(koopas, false);
-				}
-				if (player->isCanHoldingKoopas && koopas->isOutOfControl)
-				{
-					// detect Nx to accurately hold koopasf
-					float distanceKoopasByOy = (player->level == MARIO_LEVEL_SMALL) ? 14 : 0;
-					float distanceKoopasbyOx = (player->nx == 1) ? 14 : -5;
-					if (player->level == MARIO_LEVEL_SMALL)
-					{
-						distanceKoopasbyOx = (player->nx == 1) ? 10 : -8;
-
-					}
-					// Hold koopas
-					koopas->updatePositionKoopasByPositionMario(player->x + distanceKoopasbyOx, player->y - distanceKoopasByOy);
-				}
-				else if (player->isCanHoldingKoopas && !koopas->isOutOfControl && koopas->isPlayerHolding)
-				{
-					// When koopas revive, player Cant hold it
-					player->isCanHoldingKoopas = false;
-					koopas->isPlayerHolding = false;
-				}
-			}
-			else if (dynamic_cast<CGoomba*>(objects[i]) && objects[i]->health == 2)
-			{
-				CGoomba* goomba = dynamic_cast<CGoomba*>(objects[i]);
-				float goombaPositionX = goomba->x;
-				float goombaPositionY = goomba->y;
-				if (goomba->level == PARAGOOMBA)
-				{
-					goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0) ? -1 : 1);
-					if (fabs(goombaPositionX - playerPositionX) < 250.0f
-						&& !goomba->IsBlockingChangeState
-						&& goomba->health == 2
-						)
-					{
-						// Become crazy goomba and it have 3 state change circle
-						goomba->blockingChangeState(true);
-						goomba->startTimeChangeState();
-					}
-				}
-			}
-		}
-	}
 
 	for (size_t i = 0; i < listCBrick.size(); i++)
 	{
@@ -700,7 +734,20 @@ void CPlayScene::Update(DWORD dt)
 			QuestionBrick* questionBrick = dynamic_cast<QuestionBrick*>(listCBrick[i]);
 			// TODO: EFFECT DISAPEAR SO COIN MUST DISAPEAR TOO, so Calculate it
 			// DONE
-			dynamicItems.push_back(CreateItemOfMario(player, questionBrick));
+			dynamicItems.push_back(CreateItemOfMario(questionBrick));
+		}
+		else if (listCBrick[i]->health == 0 
+			&& listCBrick[i]->getTypeObject() == Type::WEAKBRICK 
+			&& !listCBrick[i]->isCreated)
+		{
+			WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(listCBrick[i]);
+
+			if (weakBrick->isHaveP_Swtich)
+			{
+				weakBrick->isCreated = true;
+				dynamicItems.push_back(CreateP_Switch(weakBrick));
+			}
+				
 		}
 	}
 
@@ -710,7 +757,7 @@ void CPlayScene::Update(DWORD dt)
 			if (marioBullet.size() < 2)
 			{
 				player->bullet = new MarioBullet();
-				player->bullet->x = player->x + 5*player->nx;
+				player->bullet->x = player->x + 5 * player->nx;
 				player->bullet->y = player->y;
 				player->bullet->nx = player->nx;
 				player->bullet->SetState(BULLET_STATE_NORMAL_MOVING);
@@ -718,18 +765,40 @@ void CPlayScene::Update(DWORD dt)
 			}
 			player->isFireShoot = false;
 		}
-		player->Update(dt,&coObjects);
+		if (player->isInWorldSelectionMap)
+		{
+			player->Update(dt, &coObjects,&dynamicItems,&enemies,&listPortalStop);
+			if (player->isSwitchedScreen)
+			{
+				this->isTransitionScaleBg = true;
+			}
+		}
+		else
+		{
+			if (player->isSwitchedScreen)
+			{
+				this->isTransition_For_LightScreen = true;
+				player->CompleteSwitchedScreen();
+			}
+			player->Update(dt, &staticObjects, &dynamicItems, &enemies);
+		}
 	}
 
 	for (size_t i = 0; i < listCBrick.size(); i++)
 	{
 		listCBrick[i]->Update(dt, &coObjects);
+		if (listCBrick[i]->isAddedEffect && listCBrick[i]->getTypeObject() == Type::WEAKBRICK)
+		{
+			WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(listCBrick[i]);
+			effects.insert(effects.end(),{ weakBrick->listPiece[0],weakBrick->listPiece[1],weakBrick->listPiece[2],weakBrick->listPiece[3] });
+			weakBrick->setObjDisappear();
+		}
 	}
 
 	for (size_t i = 0; i < marioBullet.size(); i++)
 	{
 		marioBullet[i]->Update(dt, &coObjects);
-		if (!(marioBullet[i])->isAddedEffect 
+		if (!(marioBullet[i])->isAddedEffect
 			&& marioBullet[i]->objectDisappear()
 			)
 		{
@@ -744,7 +813,7 @@ void CPlayScene::Update(DWORD dt)
 		}
 		this->removeObjOutOfCamera(marioBullet[i]);
 	}
-	
+
 	for (size_t i = 0; i < flowerBullet.size(); i++)
 	{
 		flowerBullet[i]->Update(dt, &coObjects);
@@ -754,7 +823,7 @@ void CPlayScene::Update(DWORD dt)
 	{
 		effects[i]->Update(dt, &coObjects);
 	}
-	
+
 	for (size_t i = 0; i < dynamicItems.size(); i++)
 	{
 		if (dynamicItems[i]->getCategoryObject() == Category::ITEM)
@@ -770,97 +839,122 @@ void CPlayScene::Update(DWORD dt)
 		}
 		dynamicItems[i]->Update(dt, &coObjects);
 	}
-	
+
 	for (size_t i = 0; i < items.size(); i++)
 	{
 		items[i]->Update(dt, &coObjects);
 	}
 
 	player->CollideWithItem(items, effects);
-	player->CollideWithItem(dynamicItems,effects);
+	player->CollideWithItem(dynamicItems, effects);
 
 	for (size_t i = 0; i < enemies.size(); i++)
 	{
-		// Flower Fire Mario
-		enemies[i]->Update(dt, &coObjects);
-	}
-
-	//player->CollideWithEnemy(enemies);
-
-	
-	// isCompletedTransition: Complete Dark Screen Transition
-		if (this->isCompletedTransition)
-		{ 
-			if (!player->isInHiddenMap)
+		if (fabs(enemies[i]->x - playerPositionX) < 90.0f && enemies[i]->getTypeObject() == Type::FLOWER)
+		{
+			CFlower* flower = dynamic_cast<CFlower*>(enemies[i]);
+			
+			if (flower->state == FLOWER_STATE_UP)
 			{
-				// Get position of Pipe that Mario Push Out
-				for (int i = 0; i < listPipe.size(); i++)
+				if (flower->isWaitingShooting && flower->y == 336.0f)
 				{
-					Pipe* pipe = dynamic_cast<Pipe*>(listPipe[i]);
-					if (
-						// Pipe is in HideMap
-						pipe->isInHiddenMap
-						&&
-						// Pipe can push mario out (Pipe Output)
-						pipe->isPushMarioOut
-						)
+					flower->isShooting = true;
+					if (flower->isReadyFire() && flower->delayBullet != 0)
 					{
-						player->SetPosition(listPipe[i]->x, listPipe[i]->y - 16 );
-					
-						//// Turn on Light with transition
-						this->isTransition_For_LightScreen = true;
-					
-						// Set Mario is in Hidden Map
-						player->isInHiddenMap = true;
-
-						// disable Moving into Pipe
-						player->MarioSlideOutPipe();
-						this->isCompletedTransition = false;
-
-						//Set timeover for time, to use LightenScreen
-						this->transitionBgTime->isStarted = false;
-
-						player->SetState(MARIO_STATE_IDLE);
-						break;
+						flower->isWaitingShooting = false;
+						if (!flower->typeFlower == FLOWER_TYPE_GREEN_FLOWER_FIRE
+							||
+							!flower->typeFlower == FLOWER_TYPE_PIRANHA_FLOWER_FIRE
+							)
+						{
+							flowerBullet.push_back(CreateFlowerBullet(flower));
+						}
+						flower->delayBullet = 0;
 					}
+					else if (flower->delayBullet == 0)
+					{
+						flower->setTimeLoadingBullet();
+					}
+
 				}
+				flower->nx = (player->x - flower->x < 0) ? -1 : 1;
+				flower->ny = (player->y - flower->y < 0) ? -1 : ((player->y - flower->y > 16.0f)) ? 1 : 0;
 			}
-			else if (player->isInHiddenMap)
+
+		}
+		else if (objects[i]->getTypeObject() == Type::KOOPAS && objects[i]->isAliveObject())
+		{
+			CKoopas* koopas = dynamic_cast<CKoopas*>(objects[i]);
+			if (!player->isCanHoldingKoopas && koopas->isOutOfControl)
 			{
-				for (int i = 0; i < listPipe.size(); i++)
+				player->ChainKickKoopas(koopas, false);
+			}
+			if (player->isCanHoldingKoopas && koopas->isOutOfControl)
+			{
+				// detect Nx to accurately hold koopasf
+				float distanceKoopasByOy = (player->level == MARIO_LEVEL_SMALL) ? 14 : 0;
+				float distanceKoopasbyOx = (player->nx == 1) ? 18 : -5;
+				if (player->level == MARIO_LEVEL_SMALL)
 				{
-					Pipe* pipe = dynamic_cast<Pipe*>(listPipe[i]);
-					if (
-						// Pipe is in HideMap
-						!pipe->isInHiddenMap
-						&&
-						// Pipe can push mario out (Pipe Output)
-						pipe->isPushMarioOut
-						)
-					{
-						player->SetPosition(listPipe[i]->x, listPipe[i]->y);
-						player->storePosPipe_HaveHiddenMap(listPipe[i]->x, listPipe[i]->y );
-						// Turn on Light
-						this->isTransition_For_LightScreen = true;
+					distanceKoopasbyOx = (player->nx == 1) ? 10 : -8;
 
-						// Set Mario is in Hidden Map
-						player->isInHiddenMap = false;
-						
-						// This line comment because I want Mario push out slowly Pipe
-						//player->MarioSlideOutPipe();
-						
-						this->isCompletedTransition = false;
-
-						//Set timeover for time, to use LightenScreen
-						this->transitionBgTime->isStarted = false;
-
-						player->SetState(MARIO_STATE_IDLE);
-						break;
-					}
+				}
+				// Hold koopas
+				koopas->updatePositionKoopasByPositionMario(player->x + distanceKoopasbyOx, player->y - distanceKoopasByOy);
+			}
+			else if (player->isCanHoldingKoopas && !koopas->isOutOfControl && koopas->isPlayerHolding)
+			{
+				// When koopas revive, player Cant hold it
+				player->isCanHoldingKoopas = false;
+				koopas->isPlayerHolding = false;
+			}
+		}
+		else if (objects[i]->getTypeObject() == Type::GOOMBA && objects[i]->health == 2)
+		{
+			CGoomba* goomba = dynamic_cast<CGoomba*>(objects[i]);
+			float goombaPositionX = goomba->x;
+			float goombaPositionY = goomba->y;
+			if (goomba->level == PARAGOOMBA)
+			{
+				goomba->followPlayerByNx(((goombaPositionX - playerPositionX) > 0) ? -1 : 1);
+				if (fabs(goombaPositionX - playerPositionX) < 250.0f
+					&& !goomba->IsBlockingChangeState
+					&& goomba->health == 2
+					)
+				{
+					// Become crazy goomba and it have 3 state change circle
+					goomba->blockingChangeState(true);
+					goomba->startTimeChangeState();
 				}
 			}
 		}
+		else if (objects[i]->getTypeObject() == Type::KOOPAS && objects[i]->GetState() == KOOPAS_STATE_SHELL_MOVING)
+		{
+			CKoopas* koopas = dynamic_cast<CKoopas*>(objects[i]);
+			koopas->CollideWithEnemies(&enemies,&effects);
+		}
 
+		if (enemies[i]->isReCreated)
+		{
+			enemies[i]->SetPosition(enemies[i]->start_x, enemies[i]->start_y);
+			enemies[i]->isReCreated = false;
+		}
+		if (checkObjOutOfCamera(enemies[i]))
+		{
+			enemies[i]->DisableObj_OutCamera();
+		}
+		if (enemies[i]->Check_DisableObj_ByOutCamera())
+		{
+			if (checkOrdinateOutOfCamera(enemies[i]->start_x, enemies[i]->start_y))
+			{
+				enemies[i]->EnableObj_InCamera();
+				enemies[i]->isReCreated = true;
+			}
+		}
+		enemies[i]->Update(dt, &staticObjects);
+	}
+
+	//player->CollideWithEnemy(enemies);
 
 	// remove everything
 	for (size_t i = 0; i < objects.size(); i++)
@@ -898,14 +992,6 @@ void CPlayScene::Update(DWORD dt)
 		}
 	}
 
-	for (size_t i = 0; i < objects.size(); i++)
-	{
-		if (objects[i]->objectDisappear())
-		{
-			objects.erase(objects.begin() + i);
-		}
-	}
-	
 	for (size_t i = 0; i < marioBullet.size(); i++)
 	{
 		if (marioBullet[i]->objectDisappear())
@@ -922,9 +1008,103 @@ void CPlayScene::Update(DWORD dt)
 		}
 	}
 
-	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
-	if (player == NULL) return; 
+	// isCompletedTransition: Complete Dark Screen Transition
+	if (this->isCompletedTransition && player->CheckMarioSlideIntoPipe())
+	{
+		if (!player->isInHiddenMap)
+		{
+			// Get position of Pipe that Mario Push Out
+			for (int i = 0; i < listPipe.size(); i++)
+			{
+				Pipe* pipe = dynamic_cast<Pipe*>(listPipe[i]);
+				if (
+					// Pipe is in HideMap
+					pipe->isInHiddenMap
+					&&
+					// Pipe can push mario out (Pipe Output)
+					pipe->isPushMarioOut
+					)
+				{
+					player->SetPosition(listPipe[i]->x, listPipe[i]->y - 28);
 
+					//// Turn on Light with transition
+					this->isTransition_For_LightScreen = true;
+
+					// Set Mario is in Hidden Map
+					player->isInHiddenMap = true;
+
+					// disable Moving into Pipe
+					player->MarioSlideOutPipe();
+					this->isCompletedTransition = false;
+
+					//Set timeover for time, to use LightenScreen
+					this->transitionBgTime->isStarted = false;
+
+					player->SetState(MARIO_STATE_IDLE);
+					break;
+				}
+			}
+		}
+		else if (player->isInHiddenMap)
+		{
+			for (int i = 0; i < listPipe.size(); i++)
+			{
+				Pipe* pipe = dynamic_cast<Pipe*>(listPipe[i]);
+				if (
+					// Pipe is in HideMap
+					!pipe->isInHiddenMap
+					&&
+					// Pipe can push mario out (Pipe Output)
+					pipe->isPushMarioOut
+					)
+				{
+					player->SetPosition(listPipe[i]->x, listPipe[i]->y);
+					player->storePosPipe_HaveHiddenMap(listPipe[i]->x, listPipe[i]->y);
+					// Turn on Light
+					this->isTransition_For_LightScreen = true;
+
+					// Set Mario is in Hidden Map
+					player->isInHiddenMap = false;
+
+					// This line comment because I want Mario push out slowly Pipe
+					//player->MarioSlideOutPipe();
+
+					this->isCompletedTransition = false;
+
+					//Set timeover for time, to use LightenScreen
+					this->transitionBgTime->isStarted = false;
+
+					player->SetState(MARIO_STATE_IDLE);
+					break;
+				}
+			}
+		}
+	}
+
+	if (!this->isCompletedTransition && player->CheckMarioSlideIntoPipe())
+	{
+		if (!player->isInHiddenMap)
+		{
+			// Catch Event That position of Mario greater than position of Pipe when move in
+			if (player->y > player->posY_OfPipe_HaveHiddenMap)
+			{
+				Alter_Opacity_AlphaForBackground_Screen_By_Time(true);
+			}
+		}
+		else if (player->isInHiddenMap)
+		{
+			// Catch Event that position of Mario less than position of Pipe when move out
+			if (player->y + 7.0f < player->posY_OfPipe_HaveHiddenMap)
+			{
+				Alter_Opacity_AlphaForBackground_Screen_By_Time(true);
+			}
+		}
+			
+	}
+	if (this->isTransition_For_LightScreen)
+	{
+		Alter_Opacity_AlphaForBackground_Screen_By_Time(false);
+	}
 	// Update camera to follow mario
 	float cx, cy;
 	player->GetPosition(cx, cy);
@@ -934,56 +1114,76 @@ void CPlayScene::Update(DWORD dt)
 	if (player->isInHiddenMap)
 	{
 		CGame::GetInstance()->cam_y = 440.0f;
-	} 
+	}
 	else if (!player->isInHiddenMap)
 	{
-		if (player->y < 200 ) 
+		if (player->y < 200)
 			CGame::GetInstance()->cam_y = 0.0f;
 		else
 		{
-			CGame::GetInstance()->cam_y = 240.0f;
+			CGame::GetInstance()->cam_y = 200.0f;
 		}
 	}
-	float playerLeft = player->x + 11;
+	float playerLeft = player->x;
 
-	if (playerLeft > (5 * SCREEN_WIDTH / 28) && playerLeft + (5 * SCREEN_WIDTH / 28) < map->GetWidthTileMap())
+	if (playerLeft > (SCREEN_WIDTH / 4) && playerLeft + (SCREEN_WIDTH / 4) < map->GetWidthTileMap())
 	{
-		cx = playerLeft - (5 * SCREEN_WIDTH / 28);
+		cx = playerLeft - (SCREEN_WIDTH / 4);
 		CGame::GetInstance()->cam_x = cx;
 	}
-	/*if (player->x > (SCREEN_WIDTH / 4) && player->x + (SCREEN_WIDTH / 4) < map->GetWidthTileMap())
+
+	boardGame->Update(dt, CGame::GetInstance()->cam_x, CGame::GetInstance()->cam_y + 232);
+	
+	if (isTransitionScaleBg)
 	{
-		cx = player->x - (SCREEN_WIDTH / 4);
-  		CGame::GetInstance()->cam_x = cx;
-	}*/
-	float cam_y = 432;
-	boardGame->Update(dt, CGame::GetInstance()->cam_x, cam_y);
+		DetectScaleDarkScreenTransition(100);
+	}
+	
+	
+
+	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
+	if (player == NULL ) return; 
+
+	
 }
 
 void CPlayScene::Render()
 {
 	map->Draw();
-	player->Render();
-
-	if (player->type == Type::MARIO)
+	
+	for (size_t i = 0; i < mapObjects.size(); i++)
 	{
+		mapObjects[i]->Render();
+	}
 
+	for (size_t i = 0; i < listPortalStop.size(); i++)
+	{
+		listPortalStop[i]->Render();
+	}
+	if (player->isInWorldSelectionMap)
+	{
+		for (size_t i = 0; i < objects.size(); i++)
+		{
+			objects[i]->Render();
+		}
+	}
+			
+	for (size_t i = 0; i < items.size(); i++)
+	{
+		items[i]->Render();
+	}
 
+	for (size_t i = 0; i < enemies.size(); i++)
+	{
+		if (enemies[i]->isRendered)
+		{
+ 			enemies[i]->Render();
+		}
+	}
 	for (size_t i = 0; i < staticObjects.size(); i++)
 	{
 		staticObjects[i]->Render();
 	}
-
-	for (size_t i = 0; i < items.size(); i++)
-	{
-		items[i]->Render();
-    }
-
-	for (size_t i = 0; i < enemies.size(); i++)
-	{
- 		enemies[i]->Render();
-	}
-
 	for (size_t i = 0; i < listCBrick.size(); i++)
 	{
 		listCBrick[i]->Render();
@@ -1008,33 +1208,39 @@ void CPlayScene::Render()
 	{
 		flowerBullet[i]->Render();
 	}
-	
-	boardGame->Render();
-	}
+		
+	player->Render();
 
 	if (!this->isCompletedTransition && player->CheckMarioSlideIntoPipe())
 	{
-		// When Mario is moving into Pipe
-		if (!player->isInHiddenMap)
+		if (player->y > player->posY_OfPipe_HaveHiddenMap)
 		{
-			// Catch Event That position of Mario greater than position of Pipe when move in
-			if (player->y > player->posY_OfPipe_HaveHiddenMap)
-			{
-				DarkenTheScreen();
-			}
+			DarkenTheScreen();
 		}
-		else if (player->isInHiddenMap)
+		if (player->y + 7.0f < player->posY_OfPipe_HaveHiddenMap)
 		{
-			// Catch Event that position of Mario less than position of Pipe when move out
-			if (player->y + 7.0f < player->posY_OfPipe_HaveHiddenMap)
-			{
-				DarkenTheScreen();
-			}
+			DarkenTheScreen();
 		}
 	}
+
+	/// <summary>
+	///  LightScreen first Game and Out of Pipe
+	/// </summary>
 	if (this->isTransition_For_LightScreen)
 	{
 		LightenTheScreen();
+	}
+
+	
+
+	boardGame->Render();
+	
+	if (isTransitionScaleBg)
+	{
+		TransitionDarkScreen(24, 1 * indexScaleBackground, 0, 0);
+		TransitionDarkScreen(1 * indexScaleBackground, 14, 0, 0);
+		TransitionDarkScreen(24, -1 * indexScaleBackground, 0, 15 * 16);
+		TransitionDarkScreen(-1 * indexScaleBackground, 14, 24 * 16, 0);
 	}
 
 }
@@ -1046,9 +1252,8 @@ void CPlayScene::Unload()
 {
 	for (int i = 0; i < objects.size(); i++)
 		delete objects[i];
-
 	objects.clear();
-	player = NULL;
+	//player = NULL;
 	//DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
 }
 
@@ -1058,182 +1263,207 @@ void CPlayScenceKeyHandler::OnKeyUp(int KeyCode)
 {
 	CMario* mario = ((CPlayScene*)scence)->GetPlayer();
 
-	if (mario->GetState() == MARIO_STATE_DIE) return;
-	
-
-	switch (KeyCode)
+	if (!scence->isWorldSeletion)
 	{
-	/*case (DIK_DOWN):
-		mario->SetState(MARIO_STATE_STOP_SITTING);
-		break;*/
-	case (DIK_S):
-		if (mario->level == MARIO_LEVEL_BIG_TAIL && !mario->isOnGround && mario->isFalling && mario->isEnteredFirstSpaceUp)
+		if (mario->GetState() == MARIO_STATE_DIE
+			||
+			mario->GetState() == MARIO_STATE_BLOCK_STATE_END_GAME
+			) return;
+		
+		switch (KeyCode)
 		{
-			mario->vy = -MARIO_GRAVITY * mario->dt;
-			mario->SetState(MARIO_STATE_BIG_TAIL_KEEP_JUMP);
+			/*case (DIK_DOWN):
+				mario->SetState(MARIO_STATE_STOP_SITTING);
+				break;*/
+		case (DIK_S):
+
+				if (mario->level == MARIO_LEVEL_BIG_TAIL && !mario->isOnGround && mario->isFalling && mario->isEnteredFirstSpaceUp)
+				{
+					mario->vy = -MARIO_GRAVITY * mario->dt;
+					mario->SetState(MARIO_STATE_BIG_TAIL_KEEP_JUMP);
+					break;
+				}
+				//if (!isOnGround && !isFalling)
+				if (!mario->isPreventedSpamSpace && !mario->CheckMarioSlideIntoPipe())
+				{
+					mario->vy = mario->vy + MARIO_GRAVITY * mario->dt * 10;
+					if (mario->vy > 0 && mario->vy >= 0.1f) mario->vy = 0.1f;
+					mario->isEnteredFirstSpaceUp = true;
+					mario->isPreventedSpamSpace = true;
+				}
+			break;
+		case (DIK_A):
+			mario->isAttackPress = false;
+			if (mario->isCanHoldingKoopas)
+			{
+				mario->isCanHoldingKoopas = false;
+			}
+			mario->SetState(MARIO_STATE_STOP_RUNNING);
+			break;
+		case (DIK_RIGHT):
+			mario->SetState(MARIO_STATE_NOT_WALKING);
+			break;
+		case(DIK_LEFT):
+			mario->SetState(MARIO_STATE_NOT_WALKING);
+			break;
+		default:
 			break;
 		}
-		//if (!isOnGround && !isFalling)
-		if (!mario->isPreventedSpamSpace && !mario->CheckMarioSlideIntoPipe())
+	}
+	else if (scence->isWorldSeletion) {
+		if (KeyCode)
 		{
-			mario->vy = mario->vy + MARIO_GRAVITY*mario->dt * 10;
-			if (mario->vy > 0 && mario->vy >= 0.1f) mario->vy = 0.1f;
-			mario->isEnteredFirstSpaceUp = true;
-			mario->isPreventedSpamSpace = true;
+			if (KeyCode == DIK_S)
+			{
+				mario->isCanGetIntoWorldMap = false;
+			}
 		}
-		//mario->SetState(MARIO_ANI_SHORT_JUMP);
-		break;
-	case (DIK_A):
-		mario->isAttackPress = false;
-		if (mario->isCanHoldingKoopas)
-		{
-			mario->isCanHoldingKoopas = false;
-		}
-		mario->SetState(MARIO_STATE_STOP_RUNNING);
-		break;
-	case (DIK_RIGHT):
-		mario->SetState(MARIO_STATE_NOT_WALKING);
-		break;
-	case(DIK_LEFT):
-		mario->SetState(MARIO_STATE_NOT_WALKING);
-		break;
-	default:
-		break;
+		
 	}
 }
 
 void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 {
+		
+	CMario* mario = ((CPlayScene*)scence)->GetPlayer();
+	if (scence->isWorldSeletion)
+	{
+		if (KeyCode)
+		{
+			if (mario->isWalking) 
+				return;
 
-	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
+			if (KeyCode == DIK_RIGHT)
+			{
+				if (!mario->isMovedToRight) return;
+				mario->SetState(MARIO_SELECTION_MAP_STATE_MOVE_RIGHT);
+			}
+			else if (KeyCode == DIK_LEFT)
+			{
+				if (!mario->isMovedToLeft) return;
+				mario->SetState(MARIO_SELECTION_MAP_STATE_MOVE_LEFT);
 
-	if (mario->GetState() == MARIO_STATE_DIE) return;
+			}
+			else if (KeyCode == DIK_DOWN)
+			{
+				if (!mario->isMovedToBottom) return;
+				mario->SetState(MARIO_SELECTION_MAP_STATE_MOVE_BOTTOM);
+
+			}
+			else if (KeyCode == DIK_UP)
+			{
+				if (!mario->isMovedToTop) return;
+				mario->SetState(MARIO_SELECTION_MAP_STATE_MOVE_TOP);
+			}
+			else if (KeyCode == DIK_S)
+			{
+				mario->isCanGetIntoWorldMap = true;
+			}
+		}
+	}
+	else if (!scence->isWorldSeletion)
+	{
+		if (mario->GetState() == MARIO_STATE_DIE
+			||
+			mario->GetState() == MARIO_STATE_BLOCK_STATE_END_GAME
+			||
+			mario->CheckMarioSlideIntoPipe()
+			) return;
+
+		switch (KeyCode)
+		{
+		case DIK_Z:
+			mario->Reset();
+			break;
+		case DIK_S:
+		{
+			mario->SetState(MARIO_STATE_JUMP);
+			break;
+		}
+		case DIK_A:
+			mario->isAttackPress = true;
+			if (mario->level == MARIO_LEVEL_BIG_TAIL)
+			{
+				if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375)
+					|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
+					return;
+				mario->setTailPos();
+				mario->isAttacking = true;
+				mario->SetState(MARIO_STATE_BIG_ATTACK);
+				break;
+			}
+			else if (mario->level == MARIO_LEVEL_BIG_FIRE && !mario->isFireShoot)
+			{
+				if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_RIGHT)->IsRenderOver(100)
+					|| mario->animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_LEFT)->IsRenderOver(100)))
+					return;
+
+				if (!mario->isOnGround)
+				{
+					mario->isJumpingAttack = true;
+				}
+
+				mario->isAttacking = true;
+				mario->isFireShoot = true;
+				mario->SetState(MARIO_STATE_BIG_ATTACK);
+				break;
+			}
+			else {
+				mario->isAttacking = true;
+			}
+			break;
+		case DIK_DOWN:
+			mario->isDownPressed = true;
+			break;
+		default:
+			break;
+		}
+	}
 	
-
-	switch (KeyCode)
-	{
-	/*case DIK_SPACE:
-		if (mario->level == MARIO_LEVEL_BIG_TAIL)
-		{
-			mario->SetState(MARIO_STATE_BIG_TAIL_KEEP_JUMP);
-		}
-		break;*/
-	case DIK_Z:
-		//mario->isCanHoldingKoopas = true;
-		/*mario->isAttackPress = true;
-		if (mario->level == MARIO_LEVEL_BIG_TAIL)
-		{
-			if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375)
-				|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
-				return;
-
-			mario->setTailPos();
-			mario->isAttacking = true;
-			mario->SetState(MARIO_STATE_BIG_ATTACK);
-			break;
-		}
-		else if (mario->level == MARIO_LEVEL_BIG_FIRE && mario->IsReloadedBullets() && !mario->isFireShoot)
-		{
-			if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_RIGHT)->IsRenderOver(100)
-				|| mario->animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_LEFT)->IsRenderOver(100)))
-				return;
-
-			if (!mario->isOnGround)
-			{
-				mario->isJumpingAttack = true;
-			}
-
-			mario->isAttacking = true;
-			mario->isFireShoot = true;
-			mario->SetState(MARIO_STATE_BIG_ATTACK);
-			break;
-		}
-		else {
-			mario->isAttacking = true;
-		}*/
-		mario->Reset();
-		//CGame::GetInstance()->cam_x = 0;
-		break;
-	case DIK_S:
-	{
-		mario->SetState(MARIO_STATE_JUMP);
-		break;
-	}
-	case DIK_A: 
-		mario->isAttackPress = true;
-		if (mario->level == MARIO_LEVEL_BIG_TAIL)
-		{
-			if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375)
-				|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
-				return;
-
-			mario->setTailPos();
-			mario->isAttacking = true;
-			mario->SetState(MARIO_STATE_BIG_ATTACK);
-			break;
-		}
-		else if (mario->level == MARIO_LEVEL_BIG_FIRE && mario->IsReloadedBullets() && !mario->isFireShoot)
-		{
-			if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_RIGHT)->IsRenderOver(100)
-				|| mario->animation_set->at(MARIO_ANI_BIG_FIRE_ATTACKING_LEFT)->IsRenderOver(100)))
-				return;
-
-			if (!mario->isOnGround)
-			{
-				mario->isJumpingAttack = true;
-			}
-
-			mario->isAttacking = true;
-			mario->isFireShoot = true;
-			mario->SetState(MARIO_STATE_BIG_ATTACK);
-			break;
-		}
-		else {
-			mario->isAttacking = true;
-		}
-		break;
-	case DIK_DOWN :
-		mario->isDownPressed = true;
-		break;
-	default:
-		break;
-	}
 }
 
 void CPlayScenceKeyHandler::KeyState(BYTE *states)
 {
-	CGame *game = CGame::GetInstance();
-	CMario *mario = ((CPlayScene*)scence)->GetPlayer();
-	
-	// disable control key when Mario die 
-	if (mario->GetState() == MARIO_STATE_DIE) return;
+	CGame* game = CGame::GetInstance();
+	CMario* mario = ((CPlayScene*)scence)->GetPlayer();
 
-	if (game->IsKeyDown(DIK_A) && game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_S))
+	if (!scence->isWorldSeletion)
 	{
-		if (mario->isOnGround && mario->imMovable)
-			mario->SetState(MARIO_STATE_RUNNING);
+		// disable control key when Mario die 
+		if (mario->GetState() == MARIO_STATE_DIE
+			||
+			mario->GetState() == MARIO_STATE_BLOCK_STATE_END_GAME
+			||
+			mario->CheckMarioSlideIntoPipe()
+			) return;
+
+		if (game->IsKeyDown(DIK_A) && game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_S))
+		{
+			if (mario->isOnGround && mario->imMovable)
+				mario->SetState(MARIO_STATE_RUNNING);
+		}
+		if (game->IsKeyDown(DIK_A) && game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_S))
+		{
+			if (mario->isOnGround && mario->imMovable)
+				mario->SetState(MARIO_STATE_RUNNING);
+		}
+		if (game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_LEFT))
+		{
+			mario->SetState(MARIO_STATE_WALKING_RIGHT);
+			if (mario->isCanHoldingKoopas) mario->nx = 1;
+		}
+		else if (game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_RIGHT))
+		{
+			mario->SetState(MARIO_STATE_WALKING_LEFT);
+			if (mario->isCanHoldingKoopas) mario->nx = -1;
+		}
+		else if (game->IsKeyDown(DIK_DOWN))
+		{
+			mario->SetState(MARIO_STATE_SITTING);
+		}
+		else
+			mario->SetState(MARIO_STATE_IDLE);
 	}
-	if (game->IsKeyDown(DIK_A) && game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_S))
-	{
-		if (mario->isOnGround && mario->imMovable)
-			mario->SetState(MARIO_STATE_RUNNING);
-	}
-	if(game->IsKeyDown(DIK_RIGHT) && !game->IsKeyDown(DIK_LEFT))
-	{
-		mario->SetState(MARIO_STATE_WALKING_RIGHT);
-		if (mario->isCanHoldingKoopas) mario->nx = 1;
-		//return;
-	}
-	else if (game->IsKeyDown(DIK_LEFT) && !game->IsKeyDown(DIK_RIGHT))
-	{
-		mario->SetState(MARIO_STATE_WALKING_LEFT);
-		if (mario->isCanHoldingKoopas) mario->nx = -1;
-		//return;
-	}
-	else if (game->IsKeyDown(DIK_DOWN))
-	{
-		mario->SetState(MARIO_STATE_SITTING);
-	}
-	else
-		mario->SetState(MARIO_STATE_IDLE);
+
+	
 }

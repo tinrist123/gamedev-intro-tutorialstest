@@ -24,18 +24,37 @@
 class CMario : public CGameObject
 {
 public:
+	static CMario* __instance;
+	bool isSwitchedScreen = false;
+
+	/// <summary>
+	///  World Selection Variables
+	bool isInWorldSelectionMap = true;
+	int lastPortalStopIndex = -1;
+	bool isMovedToLeft = true;
+	bool isMovedToTop = true;
+	bool isMovedToRight = true;
+	bool isMovedToBottom = true;
+	bool isCanGetIntoWorldMap = false;
+	/// </summary>
+	
 	int level = 1;
 	int setTimeRenderingAni = 100;
 	int untouchable;
 	int coinCollected = 0;
 	int scores = 1000;
 
+
+	int scenceId = 0;
+
+	void StoreScenceId(int id) { scenceId = id; }
+
 	Constant* constant;
-	DWORD timeReload = 0;
-	DWORD autoReloadTime;
 	DWORD timeFlyingForTail = 0;
 	MarioTail* Tail = new MarioTail();
 	MarioBullet* bullet = new MarioBullet();
+
+
 
 	bool isCanHoldingKoopas = false;
 	bool isEnteredFirstSpaceUp = false;
@@ -65,8 +84,15 @@ public:
 	bool isAttackPress = false;
 	bool isKickedKoopas = false;
 
+	bool isTurboFlying = false;
 
 	void KickingKoopas() { isKickedKoopas = true; tDraw = GetTickCount64(); }
+
+
+
+	// Turn on SwitchScreen
+	void SwitchScreen();
+	void CompleteSwitchedScreen();
 
 
 	// Press DIK_DOWN on Pipe 
@@ -95,10 +121,11 @@ public:
 	float start_x;			// initial position of Mario at scene
 	float start_y;
 public:
+	static CMario* GetInstance();
+
 	DWORD tDraw = 0;
 	bool isAttacking = false;
 	bool isJumpingAttack = false;
-
 
 	bool checkFlagLevelSpeedToTempLevelSpeed();
 	void setFlagLevelSpeedToTempLevelSpeed();
@@ -117,14 +144,13 @@ public:
 			vx += MARIO_WALKING_DECELERATION;
 		}
 	}
-
 	void OffPreventSpamSpace()
 	{
 		isEnteredFirstSpaceUp = false;
 		isPreventedSpamSpace = false;
 	}
 
-	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* colliable_objects = NULL);
+	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJECT>* dynamic_item , vector<LPGAMEOBJECT>* enemies, vector<LPGAMEOBJECT>* listPortalStop = NULL);
 	virtual void Render();
 
 	void collisionWithStaticObj()
@@ -132,7 +158,7 @@ public:
 		if (imMovable)
 			imMovable = false;
 		isRunning = false;
-		this->ReduceVelocityWhenFly();
+		//this->ReduceVelocityWhenFly();
 	}
 
 	void MarioSetOnGround() { isOnGround = true; vy = 0; }
@@ -146,15 +172,9 @@ public:
 	void SetState(int state);
 	void SetLevel(int l) { level = l; }
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
-	void ReloadBullets() { timeReload = GetTickCount64(); }
-	bool IsReloadedBullets() { return GetTickCount64() - timeReload > 500; }
-
-	void setAutoReload() { autoReloadTime = GetTickCount64(); }
-	void resetAutoReload() { autoReloadTime = 0; }
-	bool isReloaded() { return GetTickCount64() - autoReloadTime > 500; }
 
 	void SetTimeFlyingForTail() { timeFlyingForTail = GetTickCount64(); }
-	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 4500;	}
+	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 3500;	}
 	void ChainKickKoopas(CKoopas* &koopas,bool isElastic);
 
 	void MarioHitEnemy();

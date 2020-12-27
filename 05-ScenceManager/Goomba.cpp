@@ -3,9 +3,12 @@
 #include "ColorBox.h"
 #include "Pipe.h"
 #include "Utils.h"
-CGoomba::CGoomba(int typeGoomba)
+CGoomba::CGoomba(float x ,float y,int typeGoomba)
 {
-	this->type = 21;
+	this->start_x = x;
+	this->start_y = y;
+
+	this->type = Type::GOOMBA;
 	this->level = typeGoomba;
 	if (this->level == PARAGOOMBA)
 	{

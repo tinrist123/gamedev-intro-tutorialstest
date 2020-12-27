@@ -4,6 +4,7 @@
 
 QuestionBrick::QuestionBrick() : CBrick()
 {
+	this->type = Type::QUESTIONBRICK;
 }
 
 QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height,int ItemInside) : CBrick(width,height)
@@ -13,8 +14,7 @@ QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height,int I
 	this->height = height;
 	this->start_x = start_x;
 	this->start_y = start_y;
-	ani = 0;
-	this->type = Type::CBRICK;
+	this->type = Type::QUESTIONBRICK;
 }
 
 void QuestionBrick::Render()

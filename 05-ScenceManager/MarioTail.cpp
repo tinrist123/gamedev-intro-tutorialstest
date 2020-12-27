@@ -10,6 +10,16 @@ MarioTail::MarioTail()
 	this->type = 06;
 }
 
+void MarioTail::TurnOffDamageable()
+{
+	this->isDamageable = false;
+}
+
+void MarioTail::TurnOnDamageable()
+{
+	this->isDamageable = true;
+}
+
 void MarioTail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
 	for (LPGAMEOBJECT effect : listEffect)
@@ -21,57 +31,67 @@ void MarioTail::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	for (LPGAMEOBJECT effect : listEffect)
 		effect->Update(dt, coObjects);
 
-	for (UINT i = 0; i < coObjects->size(); i++)
-	{
-		LPGAMEOBJECT e = coObjects->at(i);
-		if (this->AABBCollision(e))
-		{
-			if (e->category == Category::ENEMY)
-			{
-				if (e->getTypeObject() == Type::KOOPAS)
-				{
-					CKoopas* koopas = dynamic_cast<CKoopas*>(e);
-					CreateEffect();
-					if (koopas->GetState() == KOOPAS_STATE_WALKING)
-					{
-						e->subHealth();
-						koopas->addPointToItem();
-					}
-					//KOOPAS_HIT_BY_WEAPON_MARIO = 11
-					e->nx = (this->x - e->x < 0)?1:-1;
-					e->SetState(KOOPAS_STATE_HIT_BY_WEAPON_MARIO);
-				}
-				else if (e->getTypeObject() == Type::GOOMBA)
-				{
-					CGoomba* goomba = dynamic_cast<CGoomba*>(e);
-					CreateEffect();
-					if (goomba->GetState() == GOOMBA_STATE_WALKING 
-						|| goomba->GetState() == GOOMBA_STATE_WALKING_WITH_WING
-						|| goomba->GetState() == GOOMBA_STATE_PRE_JUMPING
-						|| goomba->GetState() == GOOMBA_STATE_JUMPING
-						)
-					{
-						goomba->addPointToItem();
-					}
-					e->nx = (this->x - e->x < 0) ? 1 : -1;
-					e->SetState(GOOMBA_STATE_HIT_BY_WEAPON);
-					e->subHealth();
+	if (this->isDamageable)
 
+		for (UINT i = 0; i < coObjects->size(); i++)
+		{
+			this->isDamageable = false;
+			LPGAMEOBJECT e = coObjects->at(i);
+			if (this->AABBCollision(e))
+			{
+				if (e->category == Category::ENEMY)
+				{
+					if (e->getTypeObject() == Type::KOOPAS)
+					{
+						CKoopas* koopas = dynamic_cast<CKoopas*>(e);
+						CreateEffect();
+						if (koopas->GetState() == KOOPAS_STATE_WALKING)
+						{
+							e->subHealth();
+							koopas->addPointToItem();
+						}
+						//KOOPAS_HIT_BY_WEAPON_MARIO = 11
+						e->nx = (this->x - e->x < 0)?1:-1;
+						e->SetState(KOOPAS_STATE_HIT_BY_WEAPON_MARIO);
+					}
+					else if (e->getTypeObject() == Type::GOOMBA)
+					{
+						CGoomba* goomba = dynamic_cast<CGoomba*>(e);
+						CreateEffect();
+						if (goomba->GetState() == GOOMBA_STATE_WALKING 
+							|| goomba->GetState() == GOOMBA_STATE_WALKING_WITH_WING
+							|| goomba->GetState() == GOOMBA_STATE_PRE_JUMPING
+							|| goomba->GetState() == GOOMBA_STATE_JUMPING
+							)
+						{
+							goomba->addPointToItem();
+						}
+						e->nx = (this->x - e->x < 0) ? 1 : -1;
+						e->SetState(GOOMBA_STATE_HIT_BY_WEAPON);
+						e->subHealth();
+
+					}
 				}
-			}
-			else if (e->getTypeObject() == Type::WEAKBRICK)
-			{
-				WeakBrick* weakbrick = dynamic_cast<WeakBrick*>(e);
-				weakbrick->SetState(WEAK_STATE_DESTROY);
-			}
-			else if (e->getTypeObject() == Type::QUESTIONBRICK)
-			{
-				QuestionBrick* questionbrick = dynamic_cast<QuestionBrick*>(e);
-				if (questionbrick->health != 0)
-					questionbrick->SetState(1);
+				else if (e->getTypeObject() == Type::WEAKBRICK)
+				{
+					WeakBrick* weakbrick = dynamic_cast<WeakBrick*>(e);
+					if (weakbrick->isHaveP_Swtich)
+					{
+						weakbrick->SetState(WEAK_STATE_EMPTY_ANI);
+					}
+					else
+					{
+						weakbrick->SetState(WEAK_STATE_DESTROY);
+					}
+				}
+				else if (e->getTypeObject() == Type::QUESTIONBRICK)
+				{
+					QuestionBrick* questionbrick = dynamic_cast<QuestionBrick*>(e);
+					if (questionbrick->health != 0)
+						questionbrick->SetState(1);
+				}
 			}
 		}
-	}
 
 }
 

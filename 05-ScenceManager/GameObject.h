@@ -67,8 +67,8 @@ public:
 	bool isBoundingBox = true;
 	bool isAddedEffect = false;
 	bool isDamageable = true;
-	bool isInCamera = false;
 	bool isTouchable = false;
+	bool isInCamera;
 
 	int type;
 	int category = -1;
@@ -80,6 +80,9 @@ public:
 
 	float dx;	// dx = vx*dt
 	float dy;	// dy = vy*dt
+
+	float start_x;
+	float start_y;
 
 	float vx;
 	float vy;
@@ -118,12 +121,43 @@ public:
 		return health == 0 && isDisappeared && !isBoundingBox;
 	}
 
+	void SetNoCollision()
+	{
+		this->isBoundingBox = false;
+		this->health = 0;
+	}
+
 	void setObjDisappear()
 	{
 		health = 0;
 		isDisappeared = true;
 		isBoundingBox = false;
 	}
+
+	bool isDisableObj_ByCamera = false;
+	bool isRendered = true;
+	bool isReCreated = false;
+
+	void EnableObj_InCamera()
+	{
+		this->isDisableObj_ByCamera = false;
+		isRendered = true;
+		isBoundingBox = true;
+	}
+
+	// this obj get out of camera So disable it
+	void DisableObj_OutCamera()
+	{
+		isDisableObj_ByCamera = true;
+		isRendered = false;
+		isBoundingBox = false;
+	}
+	// Check Obj is turn off or on
+	bool Check_DisableObj_ByOutCamera()
+	{
+		return isDisableObj_ByCamera;
+	}
+
 
 	void RenderBoundingBox();
 

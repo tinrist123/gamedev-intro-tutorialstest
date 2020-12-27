@@ -65,7 +65,9 @@ void CGame::Init(HWND hWnd)
 */
 void CGame::Draw(float x, float y, LPDIRECT3DTEXTURE9 texture, int left, int top, int right, int bottom, int alpha)
 {
-	D3DXVECTOR3 p(floor(x - cam_x), floor(y - cam_y), 0);
+	int a = this->GetScreenWidth();
+	int b =this->GetScreenHeight();
+	D3DXVECTOR3 p(round(x - cam_x), round(y - cam_y), 0);
 	RECT r; 
 	r.left = left;
 	r.top = top;
@@ -337,8 +339,12 @@ void CGame::_ParseSection_SCENES(string line)
 	if (tokens.size() < 2) return;
 	int id = atoi(tokens[0].c_str());
 	LPCWSTR path = ToLPCWSTR(tokens[1]);
-
-	LPSCENE scene = new CPlayScene(id, path);
+	int typeMap = 0;
+	if (tokens.size() > 2)
+	{
+		typeMap = atoi(tokens[2].c_str());
+	}
+	LPSCENE scene = new CPlayScene(id, path, typeMap == 1);
 	scenes[id] = scene;
 }
 
@@ -393,6 +399,7 @@ void CGame::SwitchScene(int scene_id)
 
 	current_scene = scene_id;
 	LPSCENE s = scenes[scene_id];
+	
 	CGame::GetInstance()->SetKeyHandler(s->GetKeyEventHandler());
-	s->Load();	
+	s->Load();
 }
