@@ -127,6 +127,14 @@ void CGameObject::FilterCollision(
 }
 
 
+void CGameObject::ResetStart()
+{
+	this->nx = start_nx;
+	this->SetState(this->start_state);
+	this->x = this->start_x;
+	this->y = this->start_y;
+}
+
 void CGameObject::RenderBoundingBox()
 {
 	D3DXVECTOR3 p(x, y, 0);

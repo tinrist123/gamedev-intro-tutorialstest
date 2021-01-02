@@ -11,23 +11,33 @@ CKoopas::CKoopas(float start_x,float start_y,int typeKoopas, int typeColorKoopas
 {
 	this->start_x = start_x;
 	this->start_y = start_y;
+	this->start_nx = -1;
+
 
 	this->type = Type::KOOPAS;
 
 	this->TypeKoopas = typeKoopas;
 	this->TypeColorKoopas = typeColorKoopas;
-	nx = 1;
+	nx = -1;
+
+	
+
 	autoLoadAni();
 	switch (this->TypeKoopas)
 	{
 	case KOOPAS_TYPE_HAVE_WING:
+		this->start_state = KOOPAS_STATE_HAVE_WING_FLYING;
 		SetState(KOOPAS_STATE_HAVE_WING_FLYING);
 		health++;
 		break;
 	case KOOPAS_TYPE_NORMAL:
+		this->start_state = KOOPAS_STATE_WALKING;
+
 		SetState(KOOPAS_STATE_WALKING);
 		break;
 	case KOOPAS_TYPE_HAVE_WING_WALKING:
+		this->start_state = KOOPAS_STATE_HAVE_WING_WALKING;
+
 		SetState(KOOPAS_STATE_HAVE_WING_WALKING);
 		health++;
 		break;
@@ -156,7 +166,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	{
 		if (this->nx == 1 && firstTime)
 		{
-			if (!this->isGround(this->x + KOOPAS_BBOX_WIDTH + 2, this->y + KOOPAS_BBOX_HEIGHT + 3, *coObjects))
+			if (!this->isGround(this->x + KOOPAS_BBOX_WIDTH - 4, this->y + KOOPAS_BBOX_HEIGHT + 3, *coObjects))
 			{
 				this->nx = -1;
 				vx = fabs(this->vx) * nx;
@@ -164,7 +174,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		}
 		else if (this->nx == -1 && firstTime)
 		{
-			if (!this->isGround(this->x - 1, this->y + KOOPAS_BBOX_HEIGHT + 8, *coObjects))
+			if (!this->isGround(this->x - 1, this->y + KOOPAS_BBOX_HEIGHT + 5, *coObjects))
 			{
 				this->nx = 1;
 				vx = fabs(this->vx);
@@ -193,11 +203,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		x += min_tx * dx + nx * 0.1f;
 		y += min_ty * dy + ny * 0.1f;
 		
-		if (nx != 0)
-		{
-			this->nx = -this->nx;
-			this->vx = fabs(vx) * this->nx;
-		}
 		if (ny != 0) {
 			vy = 0;
 		}
@@ -234,16 +239,17 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					x += vx * dt;
 				}
-				if (e->ny < 0)
-				{
-					vy = 0;
-				}
 			}
 			else if (dynamic_cast<QuestionBrick *>(e->obj))
 			{
 				if (e->ny != 0)
 				{
 					vy = 0;
+				}
+				if (e->nx != 0)
+				{
+					this->nx = -this->nx;
+					this->vx = fabs(vx) * this->nx;
 				}
 			}
 			else if (e->obj->getTypeObject() == Type::WEAKBRICK)
@@ -264,6 +270,15 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					this->vx = this->vx * this->nx;
 				}
 			}
+			else if (e->obj->getTypeObject() == Type::PIPE)
+			{
+				if (e->nx != 0)
+				{
+					vx = -vx;
+					this->nx = -this->nx;
+				}
+			}
+
 		}
 	}
 	// clean up collision events
@@ -417,7 +432,7 @@ void CKoopas::Render()
 	{
 		pointEff->Render();
 	}
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CKoopas::SetState(int state)

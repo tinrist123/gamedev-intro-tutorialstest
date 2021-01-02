@@ -39,7 +39,8 @@ void Coin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	if (state != ITEM_STATE_HITTING_MARIO)
 		CalcPotentialCollisions(coObjects, coEvents);
 	// reset untouchable timer if untouchable time has passed
-	//vy += GRAVITY* dt;
+	if (state == ITEM_STATE_COIN_JUMP)
+	vy += GRAVITY* dt;
 	// No collision occured, proceed normally
 
 	if (coEvents.size() == 0)
@@ -49,6 +50,7 @@ void Coin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	else
 	{
+		// RIGHT : 10044-10045=========10046--10047
 		float min_tx, min_ty, nx = 0, ny;
 		float rdx = 0;
 		float rdy = 0;

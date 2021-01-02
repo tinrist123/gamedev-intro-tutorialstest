@@ -9,7 +9,8 @@ ColorBox::ColorBox(int width, int height) : Ground(width, height)
 {
 	this->width = width;
 	this->height = height;
-	this->type = 04;
+	this->type = Type::COLORBOX;
+	this->category = Category::GROUND;
 }
 
 void ColorBox::Render()

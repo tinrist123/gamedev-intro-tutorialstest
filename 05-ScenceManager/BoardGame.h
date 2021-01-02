@@ -29,13 +29,14 @@ class BoardGame : public BoardAddSprite
 
 	bool isTogglePMaxSpeed = false;
 	int rangeCarret = 0;
-	int posX;
-	int posY;
+	float posX;
+	float posY;
 	int score;
 	int heart;
 	int life;
 	int time;
-	void DrawBoard();
+
+	void DrawBackGround();
 	void DrawScores();
 	void DrawQuantityCoin(float x, float y);
 	void DrawNumber(float x, float y);
@@ -44,7 +45,7 @@ class BoardGame : public BoardAddSprite
 	vector<LPGAMEOBJECT> detectAndCreateListNumber(int);
 
 public:
-	void Update(DWORD dt, int camX, int camY);
+	void Update(DWORD dt, float camX, float camY);
 	void Render();
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 

@@ -37,7 +37,7 @@ public:
 	CMario *player;					// A play scene has to have player, right? 
 	Grid* grid;
 	Camera* cam;
-	
+	Timer* expiredTimeOfCoin;
 	
 
 	vector<LPGAMEOBJECT> objects;
@@ -58,8 +58,10 @@ public:
 
 	CPortal* Portal;
 
-	BoardGame* boardGame;
 
+	BoardGame* boardGame;
+	bool isCreatedCoinFromPSwitch_Active = false;
+	bool isReversedCoinToWeakBrick = false;
 
 	Timer* transitionGetIntoWorldMap = new Timer(0);
 	int indexScaleBackground = 0;
@@ -67,7 +69,6 @@ public:
 	Timer* transitionBgTime = new Timer(0);
 	bool isCompletedTransition = false;
 	bool isCompletedTransitionLightScreen = false;
-
 
 	void _ParseSection_TEXTURES(string line);
 	void _ParseSection_SPRITES(string line);
@@ -85,7 +86,7 @@ public:
 	virtual void Unload();
 	void GetObjectGrid();
 
-
+	void CheckTimeExpired_Transformed();
 	Item* CreateItemOfMario(QuestionBrick* object);
 	Item* CreateP_Switch(LPGAMEOBJECT object);
 	Enemy *CreateFlowerBullet(CFlower *flower);
@@ -117,6 +118,9 @@ public:
 	TileMap* map;
 	CMario * GetPlayer() { return player; } 
 
+
+	float camY;
+	void SetCamY_Mario(DWORD dt);
 	//friend class CPlayScenceKeyHandler;
 };
 

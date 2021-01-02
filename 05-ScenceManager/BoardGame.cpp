@@ -2,6 +2,13 @@
 
 
 
+void BoardGame::DrawBackGround()
+{
+	LPDIRECT3DTEXTURE9 darken = CTextures::GetInstance()->Get(1);
+
+	CGame::GetInstance()->Draw(posX, posY - 5, darken, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 255);
+}
+
 void BoardGame::DrawScores()
 {
 	
@@ -15,7 +22,7 @@ void BoardGame::DrawScores()
 	for (size_t i = 0; i < SNewScores.size(); i++)
 	{
 		ani = SNewScores[i] - '0';
-		DitgitScores.at(i)->SetPosition(posX + 16*6 + 4 - 8 * i, 448);
+		DitgitScores.at(i)->SetPosition(posX + 16*6 + 4 - 8 * i, this->posY + 16);
 		DitgitScores.at(i)->setAnimation(ani);
 		DitgitScores.at(i)->Render();
 	}
@@ -32,7 +39,7 @@ void BoardGame::DrawQuantityCoin(float x, float y)
 	for (size_t i = 0; i < SCoinCollected.size(); i++)
 	{
 		ani = SCoinCollected[i] - '0';
-		DitgitQuantityCoin.at(i)->SetPosition(x + 16 * 6 + 12 - 8 * i, 438);
+		DitgitQuantityCoin.at(i)->SetPosition(x + 16 * 6 + 12 - 8 * i,this->posY + 8);
 		DitgitQuantityCoin.at(i)->setAnimation(ani);
 		DitgitQuantityCoin.at(i)->Render();
 	}
@@ -48,7 +55,7 @@ void BoardGame::DrawNumber(float x, float y)
 	for (size_t i = 0; i < SCountdown.size(); i++)
 	{
 		ani = SCountdown[i] - '0';
-		listNumber.at(i)->SetPosition(x + 16*5 + 12 + 8 * i,447);
+		listNumber.at(i)->SetPosition(x + 16*5 + 12 + 8 * i,this->posY + 16);
 		listNumber.at(i)->setAnimation(ani);
 		listNumber.at(i)->Render();
 	}
@@ -71,7 +78,7 @@ vector<LPGAMEOBJECT> BoardGame::detectAndCreateListNumber(int quantity)
 	return list;
 }
 
-void BoardGame::Update(DWORD dt, int camX, int camY)
+void BoardGame::Update(DWORD dt, float camX, float camY)
 {
 	posX = camX;
 	posY = camY;
@@ -91,13 +98,22 @@ void BoardGame::Update(DWORD dt, int camX, int camY)
 	for (int i = 0; i < this->rangeCarret; i++)
 	{
 		if (i == 6) continue;
-		ListCarretRight.at(i)->Update(camX + 52 + 8*i, camY + 6);
+		ListCarretRight.at(i)->Update(camX + 52 + 8*i, camY +8);
 	}
-	pMaxSpeed->Update(camX + 52 + 8 * 6 + 2, camY + 6);
+	pMaxSpeed->Update(camX + 52 + 8 * 6 + 2, camY + 8);
+
+	if (isTogglePMaxSpeed)
+	{
+		if (!pMaxSpeedStart)
+		{
+			pMaxSpeedStart = true;
+		}
+	}
 }
 
 void BoardGame::Render()
 {
+	this->DrawBackGround();
 	this->animation_set->at(0)->Render(posX, posY,255);
 
 	for (int i = 0; i < this->rangeCarret; i++)
@@ -105,21 +121,15 @@ void BoardGame::Render()
 		if (i == 6) continue;
 		ListCarretRight.at(i)->Render();
 	}
-	if (isTogglePMaxSpeed)
-	{
-		if (pMaxSpeedStart)
-		{
-			pMaxSpeed->Render();
-		}
-		else
-		{
-			pMaxSpeedStart = true;
-		}
-	}
+	
 
 	this->DrawNumber(posX + 32, posY + 16);
 	this->DrawQuantityCoin(posX + 32, posY + 16);
 	this->DrawScores();
+	if (pMaxSpeedStart)
+	{
+		pMaxSpeed->Render();
+	}
 }
 
 void BoardGame::GetBoundingBox(float& left, float& top, float& right, float& bottom)

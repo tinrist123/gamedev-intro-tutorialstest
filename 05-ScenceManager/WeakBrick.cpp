@@ -75,7 +75,7 @@ void WeakBrick::Render()
 
 void WeakBrick::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	if (vanish) l = t = r = b;
+	if (vanish || isTranformed) l = t = r = b;
 	
 	else
 	{

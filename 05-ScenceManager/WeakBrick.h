@@ -15,6 +15,7 @@ public:
 	vector<LPGAMEOBJECT> listPiece;
 
 	bool vanish = false;
+	bool isTranformed = false;
 	int height;
 	int width;
 	bool isHaveP_Swtich = false;
@@ -25,5 +26,7 @@ public:
 	virtual void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void Render();
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
+	void activeTranform() { this->isTranformed = true; }
+	void InactiveTranform() { this->isTranformed = false; }
 };
 

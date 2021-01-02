@@ -16,7 +16,9 @@ public:
 	int pointCollisionX;
 	int pointCollisionY;
 
+	bool isHittingEnemy = false;
 	bool isCollision = false;
+
 
 	int ny;
 	MarioBullet();
@@ -28,5 +30,8 @@ public:
 
 	void BulletCollision() { this->isCollision = true; }
 	void DisapearBullet();
+
+
+	void BulletCollideWithEnemy(vector <LPGAMEOBJECT> enemies, vector<LPGAMEOBJECT> listEffect);
 };
 

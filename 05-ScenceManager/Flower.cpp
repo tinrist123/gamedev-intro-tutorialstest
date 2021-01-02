@@ -47,10 +47,11 @@ void CFlower::Render()
 		ani = FLOWER_GREEN_PIRANHA_ANI_UNFIRE;
 	}
 	animation_set->at(ani)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 void CFlower::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
+
 	l = x;
 	t = y;
 	r = x + FLOWER_BBOX_WIDTH;

@@ -12,7 +12,7 @@ CPortal::CPortal(int quantityW,int quantityH,int scene_id )
 
 void CPortal::Render()
 {
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CPortal::GetBoundingBox(float &l, float &t, float &r, float &b)

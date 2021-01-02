@@ -54,7 +54,11 @@ public:
 	MarioTail* Tail = new MarioTail();
 	MarioBullet* bullet = new MarioBullet();
 
-
+	float BBox_TopOfMario;  //top cua bbox
+	float BBox_LeftOfMario;
+	float BBox_BottomOfMario;
+	float BBox_RightOfMario;
+	bool isInSkyArea = false;
 
 	bool isCanHoldingKoopas = false;
 	bool isEnteredFirstSpaceUp = false;
@@ -170,11 +174,11 @@ public:
 	}
 
 	void SetState(int state);
-	void SetLevel(int l) { level = l; }
+	void SetLevel(int l) { level = l;  constant->changeLevelMario(level); }
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
 
 	void SetTimeFlyingForTail() { timeFlyingForTail = GetTickCount64(); }
-	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 3500;	}
+	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 7500;	}
 	void ChainKickKoopas(CKoopas* &koopas,bool isElastic);
 
 	void MarioHitEnemy();
@@ -228,5 +232,6 @@ public:
 		this->increScores();
 	}
 
+	void GetBoundingBoxForRespectiveLevel(float& left, float& top, float& right, float& bottom, int level, int nx);
 	virtual void GetBoundingBox(float& left, float& top, float& right, float& bottom);
 };

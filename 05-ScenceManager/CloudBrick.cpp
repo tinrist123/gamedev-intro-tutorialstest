@@ -4,6 +4,7 @@ CloudBrick::CloudBrick(int width, int height) : CBrick::CBrick(width,height)
 {
 	this->width = width;
 	this->height = height;
+	this->type = Type::CLOUDBRICK;
 }
 
 void CloudBrick::Render()

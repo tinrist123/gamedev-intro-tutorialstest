@@ -34,37 +34,7 @@ void TileMap::LoadMap()
 	}
 }
 
-//void TileMap::Update()
-//{
-//	if (CGame::GetInstance()->GetCamPosX() <= 0)
-//	{
-//		firstcol = (int)CGame::GetInstance()->GetCamPosX() / tile_width;
-//	}
-//	else //Khi camera di chuyen
-//	{
-//		mapResidualX = (int)CGame::GetInstance()->GetCamPosX() / tile_width;
-//		if (mapResidualX > MAP_RESIDUALX) mapResidualX = MAP_RESIDUALX;
-//		firstcol = (int)CGame::GetInstance()->GetCamPosX() / tile_width - mapResidualX;
-//	}
-//	lastcol = firstcol + (SCREEN_WIDTH / tile_width) + mapResidualX * 2;
-//
-//
-//	//Truc Y
-//	if (CGame::GetInstance()->GetCamPosY() <= 0)
-//	{
-//		firstrow = (int)CGame::GetInstance()->GetCamPosY() / tile_height;
-//	}
-//	else //Cam Y di chuyen
-//	{
-//		mapResidualY = (int)CGame::GetInstance()->GetCamPosY() / tile_height;
-//		if (mapResidualY > MAP_RESIDUALY) mapResidualY = MAP_RESIDUALY;
-//		firstrow = (int)CGame::GetInstance()->GetCamPosY() / tile_height - mapResidualY;
-//	}
-//	lastrow = firstrow + (SCREEN_HEIGHT / tile_height) + mapResidualY * 2;
-//
-//
-//
-//}
+
 
 void TileMap::Load()
 {
@@ -81,21 +51,6 @@ void TileMap::Load()
 		for (int j = 0; j < num_col_on_tilemap; j++)
 			fs >> tilemap[i][j];
 	}
-	//string line;
-	//while (!fs.eof())
-	//{
-	//	getline(fs, line);
-	//	// Lưu sprite tile vào vector tilemap
-	//	vector<LPSPRITE> spriteline;
-	//	stringstream ss(line);
-	//	int n;
-	//	while (ss >> n)
-	//	{
-	//		int idTile = id + n;
-	//		spriteline.push_back(sprites->Get(idTile));
-	//	}
-	//	tilemap.push_back(spriteline);
-	//}
 	fs.close();
 	DebugOut(L"[INFO] Done loading map resources %s\n", filePath_data);
 }
@@ -131,28 +86,23 @@ void TileMap::Draw()
 			float y = tileset_height * i;
 
 			sprites->Get(tilemap[i][j] + id)->Draw(x, y);
-			//tilemap[i][j]->Draw(x, y);
 		}
 	}
-	//for (UINT i = 0; i < num_row_on_tilemap; i++)
-	//{
-	//	for (UINT j = 0; j < num_col_on_tilemap; j++)
-	//	{
-	//		//float x = tileset_width * (j - firstcol) + CGame::GetInstance()->GetCamPosX() - (int)(CGame::GetInstance()->GetCamPosX()) % tileset_width;
-	//		//float y = tileset_height * i;
-	//		DebugOut(L"%d %d\n", i, j);
-	//		sprites->Get(tilemap[i][j] + id)->Draw(j*16 , i * 16 );
-	//		//tilemap[i][j]->Draw(x, y);
-	//	}
-	//}
 }
 
 
 TileMap::~TileMap()
 {
 }
+
 int TileMap::GetWidthTileMap()
 {
 	return (num_col_on_tilemap - 32) * tileset_width;
+
+}
+
+int TileMap::GetHeightTileMap()
+{
+	return (num_row_on_tilemap) * tileset_width;
 
 }

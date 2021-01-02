@@ -6,6 +6,8 @@
 #include "Flower.h"
 #include "WeakBrick.h"
 #include "QuestionBrick.h"
+#include "Goomba.h"
+#include "Koopas.h"
 
 
 
@@ -37,6 +39,21 @@ void MarioBullet::DisapearBullet()
 	pointCollisionY = y;
 
 	this->setObjDisappear();
+}
+
+void MarioBullet::BulletCollideWithEnemy(vector<LPGAMEOBJECT> enemies, vector<LPGAMEOBJECT> listEffect)
+{
+	for (size_t i = 0; i < enemies.size(); i++)
+	{
+		if (this->AABBCollision(enemies[i]))
+		{
+			if (enemies[i]->getTypeObject() == Type::GOOMBA)
+			{
+				CGoomba* goomba = dynamic_cast<CGoomba*>(enemies[i]);
+				goomba->SetState(GOOMBA_STATE_HIT_BY_WEAPON);
+			}
+		}
+	}
 }
 
 void MarioBullet::SetState(int state)
@@ -84,7 +101,7 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	vy += MARIO_GRAVITY * dt;
 
 	// turn off collision when die 
-	if (state != 4) CalcPotentialCollisions(coObjects, coEvents);
+	CalcPotentialCollisions(coObjects, coEvents);
 	// reset untouchable timer if untouchable time has passed
 	// No collision occured, proceed normally
 	if (coEvents.size() == 0)
@@ -103,6 +120,7 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
 		//if (rdx != 0 && rdx!=dx)
 			//x += nx*abs(rdx); 
+
 
 		// block every object first!
 		x += min_tx * dx + nx * 0.4f;
@@ -148,9 +166,9 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 					vy = -0.15;
 				}
 			}
-			else if (dynamic_cast<Pipe *>(e->obj))
+			else if (e->obj->getTypeObject() == Type::PIPE)
 			{
-				if (e->nx != 0)
+				if (e->nx != 0 || e->ny != 0)
 				{
 					this->BulletCollision();
 					DisapearBullet();
@@ -162,7 +180,26 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					this->BulletCollision();
 					DisapearBullet();
+					e->obj->setObjDisappear();
 				}
+			}
+			else if (e->obj->getTypeObject() == Type::GOOMBA)
+			{
+				CGoomba* goomba = dynamic_cast<CGoomba*>(e->obj);
+				goomba->SetState(GOOMBA_STATE_HIT_BY_WEAPON);
+				goomba->subHealth();
+				this->BulletCollision();
+				DisapearBullet();
+				this->isHittingEnemy = true;
+			}
+			else if (e->obj->getTypeObject() == Type::KOOPAS)
+			{
+				CKoopas* koopas = dynamic_cast<CKoopas*>(e->obj);
+				koopas->SetState(KOOPAS_STATE_HIT_BY_WEAPON_MARIO);
+				koopas->SetNoCollision();
+				this->BulletCollision();
+				DisapearBullet();
+				this->isHittingEnemy = true;
 			}
 		}
 	}

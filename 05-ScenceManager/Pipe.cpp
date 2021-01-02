@@ -12,6 +12,7 @@ Pipe::Pipe(int width, int height)
 	this->width = width;
 	this->height = height;
 	this->type = Type::PIPE;
+	this->category = Category::GROUND;
 }
 
 Pipe::Pipe(int width, int height,bool isHaveHiddenMap, bool isInHiddenMap, bool isPushMarioOut) : Ground(width, height)
@@ -19,6 +20,7 @@ Pipe::Pipe(int width, int height,bool isHaveHiddenMap, bool isInHiddenMap, bool 
 	this->width = width;
 	this->height = height;
 	this->type = Type::PIPE;
+	this->category = Category::GROUND;
 	this->isHaveHiddenMap = isHaveHiddenMap;
 	this->isInHiddenMap = isInHiddenMap;
 	this->isPushMarioOut = isPushMarioOut;

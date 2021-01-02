@@ -63,12 +63,13 @@ class CGameObject
 public:
 	bool isDisappeared = false;
 	bool isCreated = false;
-	bool isOnGround = true;
+	bool isOnGround = false;
 	bool isBoundingBox = true;
 	bool isAddedEffect = false;
 	bool isDamageable = true;
 	bool isTouchable = false;
 	bool isInCamera;
+	bool isUnupdated = false;
 
 	int type;
 	int category = -1;
@@ -81,6 +82,8 @@ public:
 	float dx;	// dx = vx*dt
 	float dy;	// dy = vy*dt
 
+	int start_state;
+	int start_nx = -1;
 	float start_x;
 	float start_y;
 
@@ -101,8 +104,14 @@ public:
 	int getTypeObject() { return type; }
 	int getCategoryObject() { return category; }
 
+
+	void InactiveUpdate() { this->isUnupdated = true; }
+	void activeUpdate() { this->isUnupdated = false; }
+	bool checkInActiveUpdated() { return this->isUnupdated; }
+
 	float GetX() { return this->x; }
 
+	void ResetStart();
 	void setAnimation(int ani) { this->ani = ani; }
 	void SetPosition(float x, float y) { this->x = x, this->y = y; }
 	void SetSpeed(float vx, float vy) { this->vx = vx, this->vy = vy; }
@@ -120,6 +129,8 @@ public:
 	{
 		return health == 0 && isDisappeared && !isBoundingBox;
 	}
+
+	bool NoRendered() { this->isRendered = false; }
 
 	void SetNoCollision()
 	{
@@ -187,21 +198,17 @@ public:
 
 	bool isGround(float x, float y, vector<LPGAMEOBJECT> arr)
 	{
-		int count = 0;
 		for (int i = 0; i < arr.size(); i++)
 		{
 			float l, t, r, b;
 			arr[i]->GetBoundingBox(l, t, r, b);
-			/*if (y - t >= 5.0f)
-				continue;*/
+			if (y - t >= 8.0f)
+				continue;
 			if (arr[i]->getCategoryObject() == Category::GROUND
 				|| arr[i]->getCategoryObject() == Category::BRICK)
 			{
 				if (x >= l && x <= r && y >= t && y <= b)
 					return true;
-			}
-			else {
-				count++;
 			}
 		}
 		return false;

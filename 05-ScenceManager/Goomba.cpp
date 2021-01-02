@@ -10,14 +10,18 @@ CGoomba::CGoomba(float x ,float y,int typeGoomba)
 
 	this->type = Type::GOOMBA;
 	this->level = typeGoomba;
+
+	this->start_state = -1;
+
 	if (this->level == PARAGOOMBA)
 	{
+		this->start_state = GOOMBA_STATE_WALKING_WITH_WING;
 		SetState(GOOMBA_STATE_WALKING_WITH_WING);
 		health++;
-		//SetState(GOOMBA_STATE_DIE);
 	}
 	else if (this->level == GOOMBA_LEVEL_BROWN)
 	{
+		this->start_state = GOOMBA_STATE_WALKING;
 		SetState(GOOMBA_STATE_WALKING);
 	}
 
@@ -99,12 +103,6 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	{
 		y += dy;
 		x += dx;
-		if (x < 0)
-		{
-			x = 1;
-			nx = -nx;
-			vx = -vx;
-		}
 	}
 	else
 	{
@@ -122,10 +120,13 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		x += min_tx * dx + nx * 0.4f;
 		y += min_ty * dy + ny * 0.4f;
 
-		//if (nx != 0) vx = 0;
+
+
+
 		if (ny != 0) {
 			vy = 0;
 		}
+		
 		//
 		// Collision logic with other objects
 		//
@@ -158,11 +159,6 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 						vy = 0;
 					}
 				}
-				else if (e->nx != 0)
-				{
-					vx = -vx;
-					
-				}
 			}
 			if (dynamic_cast<ColorBox*>(e->obj))
 			{
@@ -175,7 +171,14 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				if (e->nx != 0)
 				{
-					vx = -vx;
+					vx = -(vx);
+				}
+			}
+			else if (e->obj->getCategoryObject() == Category::BRICK)
+			{
+				if (e->nx != 0)
+				{
+					vx = -(vx);
 				}
 			}
 		}
@@ -231,7 +234,7 @@ void CGoomba::Render()
 		pointEff->Render();
 	}
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void CGoomba::SetState(int state)

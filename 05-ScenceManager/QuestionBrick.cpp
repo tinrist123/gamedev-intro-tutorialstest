@@ -14,6 +14,7 @@ QuestionBrick::QuestionBrick(int start_x,int start_y,int width, int height,int I
 	this->height = height;
 	this->start_x = start_x;
 	this->start_y = start_y;
+
 	this->type = Type::QUESTIONBRICK;
 }
 

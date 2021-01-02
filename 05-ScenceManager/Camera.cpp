@@ -1,62 +1,41 @@
 #include "Camera.h"
 
-Camera::Camera(CMario* player)
+Camera::Camera(CMario* player, TileMap *map)
 {
 	this->player = player;
-	//camX = playerX - (SCREEN_WIDTH / 4);
-	camY = 200;
-	CGame::GetInstance()->SetCamPos(camX, camY);
+	this->map = map;
 }
 
-void Camera::Update(DWORD dt)
+
+void Camera::Update()
 {
-	//DebugOut(L"CAM y: %f\n", camY);
-	//DebugOut(L"isWaggingTail = %d\n", player->isWaggingTail);
-	//DebugOut(L"mario vy: %f\n", player->vy);
-	float left, top, right, bottom;
-
-	player->GetBoundingBox(left, top, right, bottom);
-
-	if (player->isOnGround)
+	//Update camera to follow player
+	if (player->x > (CGame::GetInstance()->screen_width / 2) && player->x < map->GetWidthTileMap() - (CGame::GetInstance()->screen_width / 2))
 	{
-		camSpeedY = 0;
-		goto SET_CAM;
+		cam_x = player->x - (CGame::GetInstance()->screen_width / 2);
 	}
 
-	if ( !player->isOnGround)
+	if (!player->isInHiddenMap)
 	{
-		if (player->vy < 0 && top + 13 < camY + SCREEN_HEIGHT / 6)
+		//CAMY TOT NHAT 
+		if (player->y > CGame::GetInstance()->GetScreenHeight() / 4 && player->y < map->GetHeightTileMap() -  350)
 		{
-			camSpeedY = player->vy;
+			cam_y = player->y - CGame::GetInstance()->GetScreenHeight() / 4 - 25.0f;
 		}
-		else if (player->vy > 0 && top + 7 > camY + SCREEN_HEIGHT / 4)
-		{
-			camSpeedY = player->vy;
-		}
-		else
-			camSpeedY = 0;
 	}
 	else
 	{
-		if (player->vy < 0 && top + 13 < round(camY + SCREEN_HEIGHT / 6) && camY <= 200)
-		{
-			camSpeedY = player->vy;
-		}
-		else if (player->vy > 0 && top + 7 > round(camY + SCREEN_HEIGHT / 4 - 20) && camY <= 200)
-			camSpeedY = player->vy;
-		else
-			camSpeedY = 0;
+		cam_y = 436.0f;
+		isInHideMap = true;
+	}
+	//DebugOut(L"map->GetHeightMap(): %d ", map->GetHeightMap());
+	if (isInHideMap && !player->isInHiddenMap)
+	{
+		cam_y = 225.296234;
+		isInHideMap = false;
 	}
 
-SET_CAM:
-
-	camY += camSpeedY * dt;
-	if (camY <= 0 || camY > 200)
-		return;
-
-	CGame::GetInstance()->SetCamPosY(camY);
+	CGame::GetInstance()->SetCamPos(cam_x, cam_y);
 }
 
-Camera::~Camera()
-{
-}
+
