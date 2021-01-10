@@ -5,7 +5,7 @@ ColorBox::ColorBox() : Ground()
 {
 }
 
-ColorBox::ColorBox(int width, int height) : Ground(width, height)
+ColorBox::ColorBox(int width, int height) : Ground( width,  height)
 {
 	this->width = width;
 	this->height = height;

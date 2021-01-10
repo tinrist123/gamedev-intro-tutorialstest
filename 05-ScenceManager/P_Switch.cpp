@@ -6,6 +6,9 @@ P_Switch::P_Switch(float posX, float posY)
 	this->start_y = posY;
 
 	this->type = Type::P_SWITCH;
+
+	effect = new EffectsFire();
+	effect->SetPosition(start_x, start_y - 16);
 }
 
 P_Switch::P_Switch()
@@ -17,20 +20,6 @@ P_Switch::~P_Switch()
 {
 }
 
-void P_Switch::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
-{
-	CGameObject::Update(dt, coObjects);
-
-
-	if (y <= start_y - 16)
-	{
-		y = start_y - 16;
-		//this->isTouchable = true;
-	}
-	y += dy;
-	x += dx;
-}
-
 void P_Switch::Render()
 {
 	if (!isActived)
@@ -40,7 +29,7 @@ void P_Switch::Render()
 	else {
 		animation_set->at(PSWITCH_ANI_CRUSHED)->Render(x, y, 255);
 	}
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void P_Switch::GetBoundingBox(float& left, float& top, float& right, float& bottom)

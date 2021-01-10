@@ -43,7 +43,7 @@ void MarioTail::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj, vector<LPGAMEO
 				if (e->getTypeObject() == Type::WEAKBRICK)
 				{
 					WeakBrick* weakbrick = dynamic_cast<WeakBrick*>(e);
-					if (weakbrick->isHaveP_Swtich)
+					if (weakbrick->isHaveP_Switch)
 					{
 						weakbrick->SetState(WEAK_STATE_EMPTY_ANI);
 					}

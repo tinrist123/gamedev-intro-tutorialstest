@@ -6,6 +6,7 @@
 #include "PortalStop.h"
 #include "RandomItem.h"
 #include "P_Switch.h"
+#include "MovingWood.h"
 
 using namespace std;
 
@@ -41,6 +42,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath,bool isWorldSeletion) : CScene(i
 #define OBJECT_TYPE_Bullet				12
 #define OBJECT_TYPE_COIN				16
 #define OBJECT_TYPE_ITEM_END_GAME		17
+#define OBJECT_TYPE_MOVING_WOOD			18
 
 // =============WORLD SELECTION ELEMENT
 #define OBJECT_TYPE_SHAKE_TREE			20
@@ -198,6 +200,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new CGoomba(x,y,typeGoomba); 
 		break;
 	}
+	case OBJECT_TYPE_MOVING_WOOD:
+	{
+		obj = new MovingWood();
+		break;
+	}
 	case OBJECT_TYPE_ITEM_END_GAME:
 	{
 		obj = new RandomItem(x,y);
@@ -243,6 +250,8 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		if (tokens.size() == 7)
 			isHaveItem = atof(tokens[6].c_str());
 		obj = new WeakBrick(width, height, isHaveItem);
+		obj->start_x = x;
+		obj->start_y = y;
 		break;
 	}
 	case OBJECT_TYPE_Bullet: obj = new FireBullet(); break;
@@ -412,6 +421,7 @@ void CPlayScene::CheckTimeExpired_Transformed()
 		if (this->expiredTimeOfCoin->IsTimeUp())
 		{
 			this->isReversedCoinToWeakBrick = true;
+			this->isCreatedCoinFromPSwitch_Active = false;
 			this->expiredTimeOfCoin = 0;
 		}
 	}
@@ -429,49 +439,84 @@ Item* CPlayScene::CreateItemOfMario(QuestionBrick* object)
 	}
 	else if (object->ItemInside == SPECIAL_ITEM)
 	{
-		int kindAni = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : 2;
-		//int kindAni = 2;
-		if (kindAni == 2)
+		int typeItem = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : 2;
+		if (typeItem == 2)
 		{
 			Leaf *leaf = new Leaf(object->x, object->y);
-			leaf->SetPosition(object->x, object->y);
+			leaf->SetPosition(object->x, object->y - 4);
 			if (player->x > (leaf->x)) leaf->nx = -1;
 			else if (player->x < (leaf->x)) leaf->nx = 1;
 			leaf->SetState(ITEM_STATE_LEAF_FALL);
 			return leaf;
 		}
-		else if (kindAni == ITEM_ANI_MUSHROOM)
+		else if (typeItem == ITEM_ANI_MUSHROOM)
 		{
 			Mushroom *mushroom = new Mushroom(object->start_x, object->start_y);
-			mushroom->SetPosition(object->x, object->y);
+			mushroom->SetPosition(object->x, object->y - 2.5);
 			if (player->x > (mushroom->x )) mushroom->nx = -1;
 			else if (player->x < (mushroom->x )) mushroom->nx = 1;
 			mushroom->SetState(ITEM_STATE_SPECIAL_ITEM);
+			mushroom->setKindOfMushroom(KIND_RED_MUSHROOM);
 			return mushroom;
 		}
-		else if (kindAni == 3)
+	}
+}
+Item* CPlayScene::CreateItemForWeakBrick(WeakBrick* weakBrick)
+{
+	weakBrick->isTouchable = false;
+	if (weakBrick->kindOfItemInsinde == WEAK_BRICK_HAVE_P_SWITCH)
+	{
+		P_Switch* p_switch= new P_Switch(weakBrick->x, weakBrick->y);
+		p_switch->SetPosition(weakBrick->x, weakBrick->y - 16);
+		if (player->x > (p_switch->x)) p_switch->nx = -1;
+		else if (player->x < (p_switch->x)) p_switch->nx = 1;
+		return p_switch;
+	}
+	else if (weakBrick->kindOfItemInsinde == WEAK_BRICK_HAVE_COIN)
+	{
+		if (weakBrick->health > 0)
 		{
-			P_Switch* p = new P_Switch(object->start_x, object->start_y);
-			p->SetPosition(object->x, object->y);
-			p->SetState(ITEM_STATE_SPECIAL_ITEM);
-			return p;
+			weakBrick->isCreated = false;
+		}
+		Coin* coin = new Coin(weakBrick->x, weakBrick->y);
+		coin->SetPosition(weakBrick->x + 4, weakBrick->y);
+		coin->SetState(ITEM_STATE_COIN_JUMP);
+		return coin;
+	}
+	else if (weakBrick->kindOfItemInsinde == WEAK_BRICK_HAVE_LEVEL_MUSHROOM)
+	{
+		Mushroom* mushroom = new Mushroom(weakBrick->start_x, weakBrick->start_y);
+		mushroom->SetPosition(weakBrick->x, weakBrick->y - 2.5);
+		if (player->x > (mushroom->x)) mushroom->nx = -1;
+		else if (player->x < (mushroom->x)) mushroom->nx = 1;
+		mushroom->SetState(ITEM_STATE_SPECIAL_ITEM);
+		mushroom->setKindOfMushroom(KIND_GREEN_MUSHROOM);
+		return mushroom;
+	}
+	else if (weakBrick->kindOfItemInsinde == WEAK_BRICK_HAVE_SPECIAL_ITEM)
+	{
+		int typeItem = (player->level < MARIO_LEVEL_BIG_TAIL) ? ITEM_ANI_MUSHROOM : 2;
+		if (typeItem == 2)
+		{
+			Leaf* leaf = new Leaf(weakBrick->x, weakBrick->y);
+			leaf->SetPosition(weakBrick->x, weakBrick->y - 4);
+			if (player->x > (leaf->x)) leaf->nx = -1;
+			else if (player->x < (leaf->x)) leaf->nx = 1;
+			leaf->SetState(ITEM_STATE_LEAF_FALL);
+			return leaf;
+		}
+		else if (typeItem == ITEM_ANI_MUSHROOM)
+		{
+			Mushroom* mushroom = new Mushroom(weakBrick->start_x, weakBrick->start_y);
+			mushroom->SetPosition(weakBrick->x, weakBrick->y - 2.5);
+			if (player->x > (mushroom->x)) mushroom->nx = -1;
+			else if (player->x < (mushroom->x)) mushroom->nx = 1;
+			mushroom->SetState(ITEM_STATE_SPECIAL_ITEM);
+			mushroom->setKindOfMushroom(KIND_RED_MUSHROOM);
+			return mushroom;
 		}
 	}
 }
-
-Item* CPlayScene::CreateP_Switch(LPGAMEOBJECT object)
-{
-	{
-		P_Switch* p_switch= new P_Switch(object->x, object->y);
-		p_switch->SetPosition(object->x, object->y);
-		if (player->x > (p_switch->x)) p_switch->nx = -1;
-		else if (player->x < (p_switch->x)) p_switch->nx = 1;
-		p_switch->SetState(ITEM_STATE_SPECIAL_ITEM);
-		return p_switch;
-	}
-}
-
-
 Enemy* CPlayScene::CreateFlowerBullet(CFlower* flower)
 {
 	FireBullet* bullet = new FireBullet();
@@ -482,7 +527,6 @@ Enemy* CPlayScene::CreateFlowerBullet(CFlower* flower)
 	bullet->SetState(1);
 	return bullet;
 }
-
 
 // special item mean mushroom or leaf or more
 void CPlayScene::playerHittingSpecialItem(LPGAMEOBJECT& item)
@@ -667,90 +711,6 @@ void CPlayScene::Alter_Opacity_AlphaForBackground_Screen_By_Time(bool isDark)
 		}
 	}
 }
-void CPlayScene::SetCamY_Mario(DWORD dt)
-{
-	float camSpeedY = 0.0f;
-	if (player->isInWorldSelectionMap)
-	{
-		CGame::GetInstance()->SetCamPosY(0);
-		return;
-
-	}
-	{
-		if (camY == 0)
-			camY = 200;
-	}
-	if (player->isInHiddenMap)
-	{
-		camY = 400;
-	}
-	else if (!player->isInHiddenMap)
-	{
-		if (camY == 400 || camY == 0)
-			camY = 200;
-		if (player->isOnGround)
-		{
-			camSpeedY = 0;
-			camY = 200;
-			if (player->BBox_TopOfMario < camY)   //dung tren cuc gach tren cao va cloud brick
-			{
-				camY = player->BBox_TopOfMario - 170;
-				//player->standOnCloudBrick = true;
-				player->isInSkyArea = true;
-				//DebugOut(L"pppppppppppppp \n");
-			}
-			//&& player->standOnPipe
-			if (player->BBox_TopOfMario < 100 )
-			{
-				camY = player->BBox_TopOfMario - 50;
-				//DebugOut(L"lllllllllllllllll \n");
-			}
-			goto SetCam;
-		}
-		if (!player->isOnGround)
-		{
-			//camSpeedY = player->vy;
-
-			camY = player->y - 100.0f;
-
-			//DebugOut(L"aaaaaaaaaa \n");
-		}
-		//else if (player->inHighArea)
-		//{
-		//	if (player->standOnCloudBrick)
-		//	{
-		//		camSpeedY = player->vy;
-		//		//camY = player->topOfMario - 100;
-		//		//DebugOut(L"bbbbbbbbb \n");
-		//	}
-		//	else if (player->isJumping)
-		//	{
-		//		//camSpeedY = player->vy;
-		//		camY = player->topOfMario - 100;
-		//		//	DebugOut(L"cccccccc \n");
-		//	}
-		//	else if (player->topOfMario > 200 && !player->isJumping)
-		//	{
-		//		//DebugOut(L"eeeeeee \n");
-		//		camY = 200;
-		//	}
-		//}
-		//else if (player->isJumping)
-		//{
-		//	//DebugOut(L"%.4f, %.4f\n", camY);
-		//	if (player->topOfMario < camY + 5)
-		//	{
-		//		camSpeedY = player->vy;
-		//	}
-		//}
-
-	SetCam:
-		camY += camSpeedY * dt;
-		if (camY <= 0 || camY > 200)
-			return;
-	}
-	CGame::GetInstance()->SetCamPosY(camY);
-}
 void CPlayScene::DarkenTheScreen()
 {
 	LPDIRECT3DTEXTURE9 darken = CTextures::GetInstance()->Get(1);
@@ -776,7 +736,7 @@ void CPlayScene::GetObjectGrid()
 	ObjectsInScreen.clear();
 	items.clear();
 	staticObjects.clear();
-	listCBrick.clear();
+	//listCBrick.clear();
 	enemies.clear();
 
 	grid->GetGrid(ObjectsInScreen);
@@ -797,6 +757,8 @@ void CPlayScene::Update(DWORD dt)
 
 	for (size_t i = 0; i < ObjectsInScreen.size(); i++)
 	{
+		coObjects.push_back(ObjectsInScreen[i]);
+
 		if (ObjectsInScreen[i]->getCategoryObject() == Category::GROUND)
 		{
 			staticObjects.push_back(ObjectsInScreen[i]);
@@ -811,14 +773,9 @@ void CPlayScene::Update(DWORD dt)
 		}
 		else if (ObjectsInScreen[i]->getCategoryObject() == Category::BRICK)
 		{
-			listCBrick.push_back(ObjectsInScreen[i]);
+			//listCBrick.push_back(ObjectsInScreen[i]);
 			staticObjects.push_back(ObjectsInScreen[i]);
 		}
-	}
-
-	for (size_t i = 0; i < ObjectsInScreen.size(); i++)
-	{
-		coObjects.push_back(ObjectsInScreen[i]);
 	}
 
 	{
@@ -854,40 +811,34 @@ void CPlayScene::Update(DWORD dt)
 		}
 	}
 
-	for (size_t i = 0; i < listCBrick.size(); i++)
+	for (size_t i = 0; i < staticObjects.size(); i++)
 	{
-		if (listCBrick[i]->health == 0 && dynamic_cast<QuestionBrick*>(listCBrick[i]) && !listCBrick[i]->isCreated)
+		if (staticObjects[i]->health == 0 && dynamic_cast<QuestionBrick*>(staticObjects[i]) && !staticObjects[i]->isCreated)
 		{
-			QuestionBrick* questionBrick = dynamic_cast<QuestionBrick*>(listCBrick[i]);
+			QuestionBrick* questionBrick = dynamic_cast<QuestionBrick*>(staticObjects[i]);
 			// TODO: EFFECT DISAPEAR SO COIN MUST DISAPEAR TOO, so Calculate it
 			// DONE
 			dynamicItems.push_back(CreateItemOfMario(questionBrick));
 		}
-		else if (listCBrick[i]->health == 0
-			&& listCBrick[i]->getTypeObject() == Type::WEAKBRICK
-			&& !listCBrick[i]->isCreated)
+		else if (staticObjects[i]->getTypeObject() == Type::WEAKBRICK
+			&& !staticObjects[i]->isCreated && staticObjects[i]->isTouchable)
 		{
-			WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(listCBrick[i]);
-
-			if (weakBrick->isHaveP_Swtich)
-			{
-				weakBrick->isCreated = true;
-				dynamicItems.push_back(CreateP_Switch(weakBrick));
-			}
+			WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(staticObjects[i]);
+			weakBrick->isCreated = true;
+			dynamicItems.push_back(CreateItemForWeakBrick(weakBrick));
 		}
-		if (this->isCreatedCoinFromPSwitch_Active)
+		/*if (this->isCreatedCoinFromPSwitch_Active)
 		{
 			if (listCBrick[i]->getTypeObject() == Type::WEAKBRICK)
 			{
 				WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(listCBrick[i]);
-				if (!weakBrick->isTranformed)
+				if (!weakBrick->isTranformed && !weakBrick->isHaveP_Switch)
 				{
-					weakBrick->activeTranform();
-
-					if(!weakBrick->isHaveP_Swtich)
+					{
+						weakBrick->activeTranform();
+						weakBrick->isRendered = false;
 						weakBrick->InactiveUpdate();
-					weakBrick->isRendered = false;
-
+					}
 
 					Coin* coin = new Coin();
 					coin->SetPosition(weakBrick->x, weakBrick->y);
@@ -896,26 +847,32 @@ void CPlayScene::Update(DWORD dt)
 				}
 				
 			}
-		}
-
-		if (listCBrick[i]->isAddedEffect && listCBrick[i]->getTypeObject() == Type::WEAKBRICK)
+		}*/
+		
+		// WeakBrick is hit by Mario and tranform 4 pieces
+		if (staticObjects[i]->isAddedEffect && staticObjects[i]->getTypeObject() == Type::WEAKBRICK)
 		{
-			WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(listCBrick[i]);
-			effects.insert(effects.end(),{ weakBrick->listPiece[0],weakBrick->listPiece[1],weakBrick->listPiece[2],weakBrick->listPiece[3] });
+			WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(staticObjects[i]);
+			effects.push_back(weakBrick->listPiece[0]);
+			effects.push_back(weakBrick->listPiece[1]);
+			effects.push_back(weakBrick->listPiece[2]);
+			effects.push_back(weakBrick->listPiece[3]);
 			weakBrick->setObjDisappear();
 		}
 
-		if (listCBrick[i]->checkInActiveUpdated())
+		/*if (listCBrick[i]->checkInActiveUpdated())
 		{
 			if (this->isReversedCoinToWeakBrick)
 			{
-				listCBrick[i]->activeUpdate();
-				listCBrick[i]->isRendered = true;;
+				WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(listCBrick[i]);
+				weakBrick->activeUpdate();
+				weakBrick->isRendered = true;
+				weakBrick->isTranformed = false;
 			}
 			continue;
-		}
+		}*/
 
-		listCBrick[i]->Update(dt, &coObjects);
+		staticObjects[i]->Update(dt, &coObjects);
 
 	}
 
@@ -982,15 +939,22 @@ void CPlayScene::Update(DWORD dt)
 				}
 			}
 		}
-		if (dynamicItems[i]->getTypeObject() == Type::P_SWITCH && !this->isCreatedCoinFromPSwitch_Active)
+		//if (dynamicItems[i]->getTypeObject() == Type::P_SWITCH && !this->isCreatedCoinFromPSwitch_Active)
+		if (dynamicItems[i]->getTypeObject() == Type::P_SWITCH)
 		{
 			P_Switch* p_switch = dynamic_cast<P_Switch*>(dynamicItems[i]);
-			if (p_switch->isActived)
+			if (p_switch->effect && !p_switch->isCreated)
 			{
+				p_switch->isCreated = true;
+				effects.push_back(p_switch->effect);
+			}
+			/*if (p_switch->isActived && p_switch->health == 1)
+			{
+				p_switch->subHealth();
 				this->isCreatedCoinFromPSwitch_Active = true;
 				expiredTimeOfCoin = new Timer(6000);
 				expiredTimeOfCoin->Start();
-			}
+			}*/
 
 		}
 		dynamicItems[i]->Update(dt, &coObjects);
@@ -1094,7 +1058,7 @@ void CPlayScene::Update(DWORD dt)
 			koopas->CollideWithEnemies(&enemies,&effects);
 		}
 
-		if (enemies[i]->isReCreated)
+		/*if (enemies[i]->isReCreated)
 		{
 			enemies[i]->ResetStart();
 			enemies[i]->isReCreated = false;
@@ -1110,20 +1074,20 @@ void CPlayScene::Update(DWORD dt)
 				enemies[i]->EnableObj_InCamera();
 				enemies[i]->isReCreated = true;
 			}
-		}
+		}*/
 
 		enemies[i]->Update(dt, &staticObjects);
 	}
 
 	//player->CollideWithEnemy(enemies);
 	// remove everything
-	/*for (size_t i = 0; i < objects.size(); i++)
+	for (size_t i = 0; i < objects.size(); i++)
 	{
 		if (objects[i]->objectDisappear())
 		{
 			objects.erase(objects.begin() + i);
 		}
-	}*/
+	}
 
 	for (size_t i = 0; i < effects.size(); i++)
 	{
@@ -1285,10 +1249,13 @@ void CPlayScene::Update(DWORD dt)
 void CPlayScene::Render()
 {
 	map->Draw();
-	
-	for (size_t i = 0; i < mapObjects.size(); i++)
+
+	player->Render();
+
+
+	for (size_t i = 0; i < dynamicItems.size(); i++)
 	{
-		mapObjects[i]->Render();
+		dynamicItems[i]->Render();
 	}
 
 	for (size_t i = 0; i < listPortalStop.size(); i++)
@@ -1310,7 +1277,7 @@ void CPlayScene::Render()
 
 	for (size_t i = 0; i < enemies.size(); i++)
 	{
-		if (enemies[i]->isRendered)
+		//if (enemies[i]->isRendered)
 		{
  			enemies[i]->Render();
 		}
@@ -1324,22 +1291,9 @@ void CPlayScene::Render()
 
 	}
 
-	/*for (size_t i = 0; i < listCBrick.size(); i++)
-	{
-		if (listCBrick[i]->isRendered)
-		{
-			listCBrick[i]->Render();
-		}
-	}*/
-
 	for (size_t i = 0; i < effects.size(); i++)
 	{
 		effects[i]->Render();
-	}
-
-	for (size_t i = 0; i < dynamicItems.size(); i++)
-	{
-		dynamicItems[i]->Render();
 	}
 
 	for (size_t i = 0; i < marioBullet.size(); i++)
@@ -1352,7 +1306,6 @@ void CPlayScene::Render()
 		flowerBullet[i]->Render();
 	}
 		
-	player->Render();
 
 	if (!this->isCompletedTransition && player->CheckMarioSlideIntoPipe())
 	{
@@ -1542,8 +1495,8 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 				if (mario->isAttacking && (mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_LEFT)->IsRenderOver(375)
 					|| mario->animation_set->at(MARIO_ANI_BIG_TAIL_ATTACKING_RIGHT)->IsRenderOver(375)))
 					return;
-				mario->setTailPos();
 				mario->isAttacking = true;
+				mario->setTailPos();
 				mario->SetState(MARIO_STATE_BIG_ATTACK);
 				break;
 			}

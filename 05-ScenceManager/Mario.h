@@ -18,6 +18,7 @@
 #include "MarioTail.h"
 #include "Coin.h"
 #include "MarioBullet.h"
+#include "Timer.h"
 //#include "Scence.h"
 
 
@@ -27,9 +28,16 @@ public:
 	static CMario* __instance;
 	bool isSwitchedScreen = false;
 
+	
+
+	// Asset of Mario
+	vector<int> listItemCollected;
+	Timer* timeToShowEndGameText;
+
+
 	/// <summary>
 	///  World Selection Variables
-	bool isInWorldSelectionMap = true;
+	bool isInWorldSelectionMap = false;
 	int lastPortalStopIndex = -1;
 	bool isMovedToLeft = true;
 	bool isMovedToTop = true;

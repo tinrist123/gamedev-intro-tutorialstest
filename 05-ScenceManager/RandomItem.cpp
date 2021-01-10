@@ -24,6 +24,10 @@ RandomItem::RandomItem(float x, float y) :  Item()
 	this->isTouchable = true;
 }
 
+RandomItem::RandomItem()
+{
+}
+
 void RandomItem::Render()
 {
 	if (isRandomizeState)
@@ -40,7 +44,7 @@ void RandomItem::Render()
 			ani = ITEM_ANI_STAR_END_GAME;
 	}
 	animation_set->at(ani)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void RandomItem::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

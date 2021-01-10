@@ -2,11 +2,25 @@
 #include "Brick.h"
 #include "PieceBrick.h"
 
+#define QUESTION_BRICK_SPEED_Y		0.07f	
+
 #define WEAK_BREAK_ANI			1	
-#define BRICK_EMPTY				3	
+#define ANI_BRICK_EMPTY			3	
 
 #define WEAK_STATE_DESTROY		1	
 #define WEAK_STATE_EMPTY_ANI	2
+#define WEAK_STATE_JUMP			3
+
+
+#define WEAK_BRICK_HAVE_EMPTY_ITEM			0
+#define WEAK_BRICK_HAVE_P_SWITCH			1
+#define WEAK_BRICK_HAVE_COIN				2
+#define WEAK_BRICK_HAVE_LEVEL_MUSHROOM		3
+#define WEAK_BRICK_HAVE_SPECIAL_ITEM		4
+
+
+
+
 
 class WeakBrick :
     public CBrick
@@ -18,7 +32,8 @@ public:
 	bool isTranformed = false;
 	int height;
 	int width;
-	bool isHaveP_Swtich = false;
+	bool isHaveP_Switch = false;
+	int kindOfItemInsinde = 0;
 public:
 	WeakBrick();
 	WeakBrick(int width, int height, int = 0);

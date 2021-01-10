@@ -1,8 +1,10 @@
 #include "Mario.h"
 #include "P_Switch.h"
 #include "PortalStop.h"
-
-
+#include "WeakBrick.h"
+#include "RandomItem.h"
+#include "Mushroom.h"
+#include "MovingWood.h"
 
 // TODO: MARIO CAM RUA THA NUT ATACKKING CHUA DA DUOC	DONE
 // TODO: ANIMATION CAM RUA CON CHUA ON DINH				DONE
@@ -380,17 +382,25 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 			LPCOLLISIONEVENT e = coEventsResult_static_Obj[i];
 
 			if (dynamic_cast<Ground*>(e->obj))
-			{
+			{	
 				if (e->ny < 0)
 				{
-					vy = 0;
-					isOnGround = true;
+					this->vy = 0;
+					this->isOnGround = true;
 					OffPreventSpamSpace();
 					blockJumping = false;
 				}
-				
 			}
-			if (e->obj->getTypeObject() == Type::QUESTIONBRICK)
+			if (e->obj->getTypeObject() == Type::MOVINGWOOD)
+			{
+				this->vy = 0;
+				if (e->ny < 0)
+				{
+					MovingWood* wood = dynamic_cast<MovingWood*>(e->obj);
+					wood->SetState(MOVING_WOOD_STATE_FALLING);
+				}
+			}
+			else if (e->obj->getTypeObject() == Type::QUESTIONBRICK)
 			{
 				QuestionBrick* questionbrick = dynamic_cast<QuestionBrick*>(e->obj);
 				if (e->ny > 0)
@@ -408,9 +418,46 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 					this->ReduceVelocityWhenFly();
 				}
 			}
+			else if (e->obj->getTypeObject() == Type::WEAKBRICK)
+			{
+				if (e->ny > 0)
+				{
+					WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(e->obj);
+
+					this->vy = 0;
+					if (weakBrick->GetHealth() == 0)
+					{
+						break;
+					}
+
+					if (weakBrick->kindOfItemInsinde == WEAK_BRICK_HAVE_EMPTY_ITEM)
+					{
+						if (this->level == MARIO_LEVEL_SMALL)
+						{
+							e->obj->SetState(WEAK_STATE_JUMP);
+						}
+						else
+						{
+							e->obj->SetState(WEAK_STATE_DESTROY);
+						}
+					}
+					else
+					{
+						weakBrick->isTouchable = true;
+						if (weakBrick->kindOfItemInsinde == WEAK_BRICK_HAVE_P_SWITCH)
+						{
+							weakBrick->SetState(WEAK_STATE_EMPTY_ANI);
+						}
+						else
+						{
+							weakBrick->SetState(WEAK_STATE_JUMP);
+						}
+						
+					}
+				}
+			}
 			else if (e->obj->getTypeObject() == Type::COLORBOX)
 			{
-
 				if (e->ny < 0)
 				{
 					vy = 0;
@@ -515,10 +562,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 			//x += nx*abs(rdx); 
 
 		// block every object first!
-		//x += min_tx * dx + nx * 0.2f;
-		y -= min_ty * dy + ny * 1.8f;
+		x += min_tx * dx + nx * 0.4f;
+		y += min_ty * dy + ny * 0.4f;
 		if (nx != 0)
 		{
+			vx = 0;
 		}
 		else imMovable = true;
 
@@ -652,7 +700,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 				else if (koopas->GetState() == KOOPAS_STATE_SHELL)
 				{
 					// is Attacking mean Hold DIK_Z
-					if (isAttacking && e->nx != 0)
+					if (isAttacking && (e->ny != 0 || e->nx != 0))
 					{
 						isCanHoldingKoopas = true;
 						koopas->SetState(KOOPAS_STATE_SHELL_OUT_CONTROL);
@@ -696,7 +744,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 					}
 				}
 				else if (koopas->GetState() == KOOPAS_STATE_HAVE_WING_WALKING ||
-					koopas->GetState() == KOOPAS_STATE_HAVE_WING_FLYING)
+					koopas->GetState() == KOOPAS_STATE_HAVE_WING_JUMPING)
 				{
 					if (e->ny == -1)
 					{
@@ -1666,15 +1714,29 @@ void CMario::CollideWithEnemy(vector<LPGAMEOBJECT> enemies)
 void CMario::playerHittingSpecialItem(LPGAMEOBJECT& item, vector<LPGAMEOBJECT>& listEffect)
 {
 	item->SetState(ITEM_STATE_HITTING_MARIO);
-	this->SetLevel((this->level >= MARIO_LEVEL_BIG_TAIL) ? MARIO_LEVEL_BIG_TAIL : ++this->level);
+	if (item->getTypeObject() == Type::SUPER_MUSHROOM)
+	{
+		Mushroom* mushroom = static_cast<Mushroom*>(item);
 
-	// GET ITEM AND UPDATE MARIO LEVEL
-	/*if (this->level >= 2) this->y += -2.0f;
-	else this->y += -0.4f;*/
+		if (mushroom->kindOfMushroom == KIND_RED_MUSHROOM)
+		{
+			this->SetLevel(++this->level);
+		}
+		else if (mushroom->kindOfMushroom == KIND_GREEN_MUSHROOM)
+		{
+			this->health++;
+		}
+	}
+	else if (item->getTypeObject() == Type::SUPER_LEAF)
+	{
+		this->SetLevel(++this->level);
+	}
 
 	EffectPoint* effect = new EffectPoint();
 	effect->SetPosition(item->x, item->y);
 	listEffect.push_back(effect);
+
+	this->increScores();
 }
 
 void CMario::CollideWithItem(vector<LPGAMEOBJECT> items, vector<LPGAMEOBJECT>& listEffect)
@@ -1692,15 +1754,18 @@ void CMario::CollideWithItem(vector<LPGAMEOBJECT> items, vector<LPGAMEOBJECT>& l
 			{
 				if (items[i]->getTypeObject() == Type::RANDOMITEM)
 				{
-
+					RandomItem* radomizeItem = dynamic_cast<RandomItem*>(items[i]);
 					items[i]->SetState(ITEM_STATE_MOVE_UP);
 					this->SetState(MARIO_STATE_BLOCK_STATE_END_GAME);
+					this->listItemCollected.push_back(radomizeItem->typeItemCollected);
+					radomizeItem->isTouchable = false;
+					timeToShowEndGameText = new Timer(3000);
+					timeToShowEndGameText->Start();
 ;					continue;
 				}
 				else if ((items[i]->GetState() == ITEM_STATE_SPECIAL_ITEM || items[i]->GetState() == ITEM_STATE_LEAF_FALL))
 				{
 					playerHittingSpecialItem(items[i], listEffect);
-					this->increScores();
 				}
 				else if (items[i]->getTypeObject() == Type::COIN)
 				{

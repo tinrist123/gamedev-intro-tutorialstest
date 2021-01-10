@@ -55,28 +55,10 @@ void TileMap::Load()
 	DebugOut(L"[INFO] Done loading map resources %s\n", filePath_data);
 }
 
-void TileMap::DrawSelectionMap()
-{
-	//int firstcol = (int)CGame::GetInstance()->GetCamPosX() / tileset_width;
-	//int lastcol = firstcol + (SCREEN_WIDTH / tileset_width);
-	//int lastcol = firstcol + 45;
-
-	for (UINT i = 0; i < 13; i++)
-	{
-		for (UINT j = 0; j < 22 ; j++)
-		{
-			//float x = tileset_width * (j - firstcol) + CGame::GetInstance()->GetCamPosX() - (int)(CGame::GetInstance()->GetCamPosX()) % tileset_width;
-			//float y = tileset_height * i;
-			sprites->Get(tilemap[i][j] + id)->Draw(j*16 + 16 , i*16 + 16 );
-			//tilemap[i][j]->Draw(x, y);
-		}
-	}
-}
-
 void TileMap::Draw()
 {
 	int firstcol = (int)CGame::GetInstance()->GetCamPosX() / tileset_width;
-	int lastcol = firstcol + (CGame::GetInstance()->GetScreenWidth() / tileset_width);
+	int lastcol = firstcol + round((CGame::GetInstance()->GetScreenWidth() / tileset_width));
 	
 	for (UINT i = 0; i < num_row_on_tilemap; i++)
 	{

@@ -6,21 +6,20 @@ Camera::Camera(CMario* player, TileMap *map)
 	this->map = map;
 }
 
-
 void Camera::Update()
 {
 	//Update camera to follow player
-	if (player->x > (CGame::GetInstance()->screen_width / 2) && player->x < map->GetWidthTileMap() - (CGame::GetInstance()->screen_width / 2))
+	if (player->x > (CGame::GetInstance()->screen_width / 3) && player->x < map->GetWidthTileMap() - (CGame::GetInstance()->screen_width / 3))
 	{
-		cam_x = player->x - (CGame::GetInstance()->screen_width / 2);
+		cam_x = player->x - (CGame::GetInstance()->screen_width / 3);
 	}
 
 	if (!player->isInHiddenMap)
 	{
 		//CAMY TOT NHAT 
-		if (player->y > CGame::GetInstance()->GetScreenHeight() / 4 && player->y < map->GetHeightTileMap() -  350)
+		if (player->y > CGame::GetInstance()->GetScreenHeight() / 4 && player->y < map->GetHeightTileMap() - 350)
 		{
-			cam_y = player->y - CGame::GetInstance()->GetScreenHeight() / 4 - 25.0f;
+			cam_y = player->y - CGame::GetInstance()->GetScreenHeight() / 4 - 15.0f ;
 		}
 	}
 	else
@@ -34,7 +33,6 @@ void Camera::Update()
 		cam_y = 225.296234;
 		isInHideMap = false;
 	}
-
 	CGame::GetInstance()->SetCamPos(cam_x, cam_y);
 }
 

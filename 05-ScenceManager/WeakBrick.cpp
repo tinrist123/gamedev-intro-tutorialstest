@@ -4,15 +4,21 @@
 
 WeakBrick::WeakBrick() : CBrick()
 {
-
 }
 
-WeakBrick::WeakBrick(int width, int height, int isHaveItem) : CBrick::CBrick(width, height)
+WeakBrick::WeakBrick(int width, int height, int kindOfItemInside) : CBrick::CBrick(width, height)
 {
 	this->width = width;
 	this->height = height;
-	this->isHaveP_Swtich = (isHaveItem == 1);
+	this->kindOfItemInsinde = kindOfItemInside;
 	this->type = Type::WEAKBRICK;
+	this->isHaveP_Switch = kindOfItemInside == WEAK_BRICK_HAVE_P_SWITCH;
+
+	if (this->kindOfItemInsinde == WEAK_BRICK_HAVE_COIN)
+	{
+		this->setHealth(10);
+	}
+
 }
 
 void WeakBrick::SetState(int state)
@@ -23,12 +29,13 @@ void WeakBrick::SetState(int state)
 	{
 		case WEAK_STATE_EMPTY_ANI:
 		{
+			vy = -QUESTION_BRICK_SPEED_Y;
 			subHealth();
 			break;
 		}
 		case WEAK_STATE_DESTROY:
 		{
-			if (!isHaveP_Swtich)
+			if (!isHaveP_Switch)
 			{
 				PieceBrick* topLeftPiece = new PieceBrick({ x - 1, y - 2 }, -1, 2);
 				PieceBrick* topRightPiece = new PieceBrick({ x + BBOX_BIT - BROKEN_BRICK_PIECE_WIDTH + 1, y - 2 }, 1, 2);
@@ -40,6 +47,10 @@ void WeakBrick::SetState(int state)
 			}
 			break;
 		}
+		case WEAK_STATE_JUMP:
+			vy = -QUESTION_BRICK_SPEED_Y;
+			subHealth();
+			break;
 		default:
 			break;
 	}
@@ -47,6 +58,29 @@ void WeakBrick::SetState(int state)
 
 void WeakBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {
+	CGameObject::Update(dt, coObjects);
+	
+	if (this->GetHealth() == 0)
+	{
+		this->state = (WEAK_STATE_EMPTY_ANI);
+	}
+
+	x += dx;
+	y += dy;
+
+	if (y >= start_y)
+	{
+		if (y == start_y) return;
+		y = start_y;
+		vy = 0;
+	}
+	else if (y < start_y)
+	{
+		vy += MARIO_GRAVITY * dt;
+	}
+
+
+
 	int num_vanishPiece = 0;
  	for (LPGAMEOBJECT piece : listPiece)
 	{
@@ -61,9 +95,9 @@ void WeakBrick::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 
 void WeakBrick::Render()
 {
-	if (state == WEAK_STATE_EMPTY_ANI && isHaveP_Swtich)
+	if (state == WEAK_STATE_EMPTY_ANI)
 	{
-		animation_set->at(BRICK_EMPTY)->Render(x, y);
+		animation_set->at(ANI_BRICK_EMPTY)->Render(x, y);
 	}
 	else 
 	if (!vanish)

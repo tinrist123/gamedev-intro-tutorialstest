@@ -164,7 +164,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				if (e->nx != 0)
 				{
-					x += vx * dt;
+					x += dx;
 				}
 			}
 			else if (dynamic_cast<Pipe*>(e->obj))

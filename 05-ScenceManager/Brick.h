@@ -9,6 +9,9 @@ class CBrick : public Ground
 {
 	int height;
 	int width;
+	
+	bool isHitting = false;
+
 public:
 	CBrick();
 	explicit CBrick(int width,int height);

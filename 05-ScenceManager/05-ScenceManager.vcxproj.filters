@@ -174,9 +174,6 @@
     <ClCompile Include="PMaxSpeed.cpp">
       <Filter>Source Files\BoardGame</Filter>
     </ClCompile>
-    <ClCompile Include="Letter.cpp">
-      <Filter>Source Files\BoardGame</Filter>
-    </ClCompile>
     <ClCompile Include="CarretSpeed.cpp">
       <Filter>Source Files\BoardGame</Filter>
     </ClCompile>
@@ -212,6 +209,18 @@
     </ClCompile>
     <ClCompile Include="RandomItem.cpp">
       <Filter>Source Files\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="LetterEndGame.cpp">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClCompile>
+    <ClCompile Include="BoxItem.cpp">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClCompile>
+    <ClCompile Include="TripleBoxItem.cpp">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClCompile>
+    <ClCompile Include="MovingWood.cpp">
+      <Filter>Source Files\StaticObj</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -332,9 +341,6 @@
     <ClInclude Include="PMaxSpeed.h">
       <Filter>Source Files\BoardGame</Filter>
     </ClInclude>
-    <ClInclude Include="Letter.h">
-      <Filter>Source Files\BoardGame</Filter>
-    </ClInclude>
     <ClInclude Include="Number.h">
       <Filter>Source Files\BoardGame</Filter>
     </ClInclude>
@@ -376,6 +382,18 @@
     </ClInclude>
     <ClInclude Include="RandomItem.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LetterEndGame.h">
+      <Filter>Source Files\BoardGame</Filter>
+    </ClInclude>
+    <ClInclude Include="BoxItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TripleBoxItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MovingWood.h">
+      <Filter>Source Files\StaticObj</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -11,7 +11,10 @@ void Mushroom::Render()
 		pointEff->Render();
 	}
 	else {
-		animation_set->at(ITEM_ANI_MUSHROOM)->Render(x, y, 255);
+		if (this->kindOfMushroom == KIND_RED_MUSHROOM) ani = ITEM_ANI_MUSHROOM;
+		else if (this->kindOfMushroom == KIND_GREEN_MUSHROOM) ani = ITEM_ANI_GREEN_MUSHROOM;
+
+		animation_set->at(ani)->Render(x, y, 255);
 	}
 }
 
@@ -25,9 +28,9 @@ void Mushroom::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 		return;
 	}
 
-	if (y <= start_y - 18 && !onGravity)
+	if (y <= start_y - 16 && !onGravity)
 	{
-		y = start_y - 18;
+		y = start_y - 16;
 		onGravity = true;
 		vx = 0.08*nx;
 		this->isTouchable = true;

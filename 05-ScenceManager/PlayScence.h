@@ -88,8 +88,9 @@ public:
 
 	void CheckTimeExpired_Transformed();
 	Item* CreateItemOfMario(QuestionBrick* object);
-	Item* CreateP_Switch(LPGAMEOBJECT object);
+	Item* CreateItemForWeakBrick(WeakBrick* object);
 	Enemy *CreateFlowerBullet(CFlower *flower);
+
 
 	void playerHittingSpecialItem(LPGAMEOBJECT& item);
 	
@@ -120,7 +121,6 @@ public:
 
 
 	float camY;
-	void SetCamY_Mario(DWORD dt);
 	//friend class CPlayScenceKeyHandler;
 };
 

@@ -26,8 +26,8 @@ CKoopas::CKoopas(float start_x,float start_y,int typeKoopas, int typeColorKoopas
 	switch (this->TypeKoopas)
 	{
 	case KOOPAS_TYPE_HAVE_WING:
-		this->start_state = KOOPAS_STATE_HAVE_WING_FLYING;
-		SetState(KOOPAS_STATE_HAVE_WING_FLYING);
+		this->start_state = KOOPAS_STATE_HAVE_WING_JUMPING;
+		SetState(KOOPAS_STATE_HAVE_WING_JUMPING);
 		health++;
 		break;
 	case KOOPAS_TYPE_NORMAL:
@@ -38,6 +38,11 @@ CKoopas::CKoopas(float start_x,float start_y,int typeKoopas, int typeColorKoopas
 	case KOOPAS_TYPE_HAVE_WING_WALKING:
 		this->start_state = KOOPAS_STATE_HAVE_WING_WALKING;
 
+		SetState(KOOPAS_STATE_HAVE_WING_WALKING);
+		health++;
+		break;
+	case KOOPAS_TYPE_HAVE_WING_FLYING:
+		this->start_state = KOOPAS_STATE_HAVE_WING_WALKING;
 		SetState(KOOPAS_STATE_HAVE_WING_WALKING);
 		health++;
 		break;
@@ -220,7 +225,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						firstTime = true;
 					}
-					if (state == KOOPAS_STATE_HAVE_WING_FLYING)
+					if (state == KOOPAS_STATE_HAVE_WING_JUMPING)
 					{	
 						vy = -0.2f;
 					}
@@ -258,7 +263,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				{
 					WeakBrick* weakbrick = dynamic_cast<WeakBrick*>(e->obj);
 					
-					if (weakbrick->isHaveP_Swtich)
+					if (weakbrick->isHaveP_Switch)
 					{
 						weakbrick->SetState(WEAK_STATE_EMPTY_ANI);
 					}
@@ -303,7 +308,8 @@ void CKoopas::AddAniForKoopasGreenToList()
 	listAnimationKoopas.push_back(KOOPAS_ANI_HAVE_WING_FLYING_LEFT);
 }
 
-void CKoopas::CollideWithEnemies(vector<LPGAMEOBJECT>* enemies, vector<LPGAMEOBJECT>* listEffect)
+void CKoopas::CollideWithEnemies
+(vector<LPGAMEOBJECT>* enemies, vector<LPGAMEOBJECT>* listEffect)
 {
 	for (size_t i = 0; i < enemies->size(); i++)
 	{
@@ -369,7 +375,7 @@ void CKoopas::Render()
 		if (nx == 1 ) ani = listAnimationKoopas.at(0);
 		else if (nx == -1) ani = listAnimationKoopas.at(1);
 	}
-	else if (state == KOOPAS_STATE_HAVE_WING_FLYING)
+	else if (state == KOOPAS_STATE_HAVE_WING_JUMPING)
 	{
 		if (nx == -1)
 			ani = listAnimationKoopas.at(13);
@@ -471,9 +477,12 @@ void CKoopas::SetState(int state)
 	case KOOPAS_STATE_HAVE_WING_WALKING:
 		vx = KOOPAS_ANI_WALKING_RIGHT_SPEED_X *nx;
 		break;
-	case KOOPAS_STATE_HAVE_WING_FLYING:
+	case KOOPAS_STATE_HAVE_WING_JUMPING:
 		vx = 0.05f *nx;
 		//vy = -0.10f;
+		break;
+	case KOOPAS_STATE_HAVE_WING_FLYING:
+
 		break;
 	case KOOPAS_STATE_PRE_REVIE:
 		break;

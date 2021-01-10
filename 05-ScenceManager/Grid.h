@@ -2,11 +2,16 @@
 #include"GameObject.h"
 #include"Game.h"
 #include"Utils.h"
-#define CELL_WIDTH 260
-#define CELL_HEIGHT 260
+#define CELL_WIDTH 250
+#define CELL_HEIGHT 250
+
+//#define CELL_WIDTH 10
+//#define CELL_HEIGHT 10
 
 #define MAP_WIDTH 3328
 #define MAP_HEIGHT  1000
+
+
 
 class Grid
 {
@@ -23,5 +28,4 @@ public:
 	void GetGrid(vector<LPGAMEOBJECT>& list);
 	void PushGridStart(LPGAMEOBJECT obj, int row, int col);
 	void CheckCamGrid(vector<LPGAMEOBJECT>& list);
-
 };

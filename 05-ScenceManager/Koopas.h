@@ -12,7 +12,8 @@
 #define KOOPAS_TYPE_HAVE_WING										1
 #define KOOPAS_TYPE_NORMAL											2
 #define KOOPAS_TYPE_HAVE_WING_WALKING								3
-#define KOOPAS_TYPE_HAVE_WING_FLYING								4
+#define KOOPAS_TYPE_HAVE_WING_JUMPING								4
+#define KOOPAS_TYPE_HAVE_WING_FLYING								5
 
 
 #define KOOPAS_BBOX_WIDTH											16
@@ -24,12 +25,13 @@
 #define KOOPAS_STATE_SHELL_MOVING									3
 #define KOOPAS_STATE_SHELL											4
 #define KOOPAS_STATE_HAVE_WING_WALKING								5
-#define KOOPAS_STATE_HAVE_WING_FLYING								6
+#define KOOPAS_STATE_HAVE_WING_JUMPING								6
 #define KOOPAS_STATE_REIVING										7
 #define KOOPAS_STATE_SHELL_OUT_CONTROL								8
 #define KOOPAS_STATE_PRE_REVIE										9
 #define KOOPAS_STATE_PRE_REVIE_2									10
 #define KOOPAS_STATE_HIT_BY_WEAPON_MARIO							11
+#define KOOPAS_STATE_HAVE_WING_FLYING								12
 
 #define KOOPAS_ANI_WALKING_LEFT										0
 #define KOOPAS_ANI_WALKING_RIGHT									1

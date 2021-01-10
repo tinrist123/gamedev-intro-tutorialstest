@@ -19,8 +19,9 @@
 #define ITEM_ANI_COIN_IDLE              7
 #define ITEM_ANI_MUSHROOM_END_GAME      8
 #define ITEM_ANI_FLOWER_END_GAME        9
-#define ITEM_ANI_STAR_END_GAME         10
+#define ITEM_ANI_STAR_END_GAME          10
 #define ITEM_ANI_RANDOMIZE_END_GAME     11
+#define ITEM_ANI_GREEN_MUSHROOM         12
 
 #define ITEM_STATE_SPECIAL_ITEM         1
 #define ITEM_STATE_HITTING_MARIO        2

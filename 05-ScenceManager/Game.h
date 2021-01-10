@@ -7,10 +7,11 @@
 #include <d3dx9.h>
 
 #define DIRECTINPUT_VERSION 0x0800
-#define SCREEN_WIDTH					800
-#define SCREEN_HEIGHT					600
 #include <dinput.h>
 #include "Scence.h"
+
+#define SCREEN_WIDTH					800
+#define SCREEN_HEIGHT					600
 
 using namespace std;
 
