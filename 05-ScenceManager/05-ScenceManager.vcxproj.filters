@@ -52,6 +52,9 @@
     <Filter Include="Source Files\WorldSelection">
       <UniqueIdentifier>{7dfe7102-09eb-4935-bea2-60d7585c6274}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Intro">
+      <UniqueIdentifier>{ca13c84a-df48-49c0-9940-b28f1c80b358}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -221,6 +224,18 @@
     </ClCompile>
     <ClCompile Include="MovingWood.cpp">
       <Filter>Source Files\StaticObj</Filter>
+    </ClCompile>
+    <ClCompile Include="EndGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BomerangWeapon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BoOmerangBrother.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SelectionCarret.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -394,6 +409,18 @@
     </ClInclude>
     <ClInclude Include="MovingWood.h">
       <Filter>Source Files\StaticObj</Filter>
+    </ClInclude>
+    <ClInclude Include="EndGame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BomerangWeapon.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoomerangBrother.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectionCarret.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

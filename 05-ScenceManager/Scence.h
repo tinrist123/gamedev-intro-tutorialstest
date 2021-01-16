@@ -10,8 +10,9 @@ protected:
 	int id;
 	LPCWSTR sceneFilePath;
 public: 
+	bool typeCamera;
 	bool isWorldSeletion;
-	CScene(int id, LPCWSTR filePath, bool isWorldSeletion);
+	CScene(int id, LPCWSTR filePath, bool isWorldSeletion, int typeCamera = 0);
 
 	CKeyEventHandler * GetKeyEventHandler() { return key_handler; }
 	virtual void Load() = 0;

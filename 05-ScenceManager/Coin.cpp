@@ -1,4 +1,5 @@
 #include "Coin.h"
+#include "Brick.h"
 
 
 
@@ -31,62 +32,34 @@ void Coin::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 	}
 	CGameObject::Update(dt, coObjects);
 
-	vector<LPCOLLISIONEVENT> coEvents;
-	vector<LPCOLLISIONEVENT> coEventsResult;
+	//if (state != ITEM_STATE_HITTING_MARIO)
+	//	CalcPotentialCollisions(coObjects, coEvents);
 
-	coEvents.clear();
-	// turn off collision when die 
-	if (state != ITEM_STATE_HITTING_MARIO)
-		CalcPotentialCollisions(coObjects, coEvents);
-	// reset untouchable timer if untouchable time has passed
-	if (state == ITEM_STATE_COIN_JUMP)
-	vy += GRAVITY* dt;
-	// No collision occured, proceed normally
-
-	if (coEvents.size() == 0)
+	if (this->y < start_y - 16)
 	{
-		y += dy;
-		x += dx;
+		this->isTouchable = true;
 	}
-	else
+
+
+	if (state == ITEM_STATE_COIN_JUMP)
 	{
-		// RIGHT : 10044-10045=========10046--10047
-		float min_tx, min_ty, nx = 0, ny;
-		float rdx = 0;
-		float rdy = 0;
+		if (isBoundingBox) 
+			isBoundingBox = false;
+		
+		vy += (GRAVITY + 0.0002f)* dt;
 
-		FilterCollision(coEvents, coEventsResult, min_tx, min_ty, nx, ny, rdx, rdy);
-
-		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
-		//if (rdx != 0 && rdx!=dx)
-			//x += nx*abs(rdx); 
-		// block every object first!
-		//x += min_tx * dx + nx * 0.1f;
-		//y += min_ty * dy + ny * 0.1f;
-		/*if (nx != 0) vx = 0;
-		if (ny != 0) {
-			vy = START_SPEED_Y;
-		}*/
-		//
-		// Collision logic with other objects
-		//
-		for (UINT i = 0; i < coEventsResult.size(); i++)
+		if (this->isTouchable)
 		{
-			LPCOLLISIONEVENT e = coEventsResult[i];
-			if (dynamic_cast<Ground*>(e->obj))
+			if (this->y > start_y - 16)
 			{
-				if (e->ny < 0)
-				{
-					if (state == ITEM_STATE_COIN_JUMP)
-					{
-						addPointToItem();
-					}
-				}
+				addPointToItem();
 			}
 		}
+		
 	}
-	// clean up collision events
-	for (UINT i = 0; i < coEvents.size(); i++) delete coEvents[i];
+
+	y += dy;
+
 }
 
 void Coin::Render()
@@ -97,6 +70,10 @@ void Coin::Render()
 	}
 	else
 	{
+		if (this->GetState() == ITEM_STATE_IDLE_COIN)
+		{
+			ani = ITEM_ANI_IDLE_COIN;
+		}
 		animation_set->at(ani)->Render(x, y);
 	}
 	//RenderBoundingBox();

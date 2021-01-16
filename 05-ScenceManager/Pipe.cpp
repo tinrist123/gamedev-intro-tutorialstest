@@ -15,7 +15,7 @@ Pipe::Pipe(int width, int height)
 	this->category = Category::GROUND;
 }
 
-Pipe::Pipe(int width, int height,bool isHaveHiddenMap, bool isInHiddenMap, bool isPushMarioOut) : Ground(width, height)
+Pipe::Pipe(int width, int height,bool isHaveHiddenMap, bool isInHiddenMap, bool isPushMarioOut, int directionOyOfMario) : Ground(width, height)
 {
 	this->width = width;
 	this->height = height;
@@ -24,6 +24,8 @@ Pipe::Pipe(int width, int height,bool isHaveHiddenMap, bool isInHiddenMap, bool 
 	this->isHaveHiddenMap = isHaveHiddenMap;
 	this->isInHiddenMap = isInHiddenMap;
 	this->isPushMarioOut = isPushMarioOut;
+
+	this->directionOy = directionOyOfMario;
 }
 
 void Pipe::Render()
@@ -41,7 +43,7 @@ void Pipe::Render()
 		ani = 1;
 	}
 	animation_set->at(ani)->Render(x, y);
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void Pipe::GetBoundingBox(float& l, float& t, float& r, float& b)

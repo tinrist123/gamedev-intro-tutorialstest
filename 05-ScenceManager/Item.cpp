@@ -25,7 +25,7 @@ void Item::SetState(int state)
 		setObjDisappear();
 		break;
 	case ITEM_STATE_COIN_JUMP:
-		vy = -0.2f;
+		vy = -0.3f;
 		break;
 	case ITEM_STATE_LEAF_FALL:
 		vy = -LEAF_SPEED_Y;

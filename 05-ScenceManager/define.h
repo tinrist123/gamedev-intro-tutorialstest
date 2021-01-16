@@ -18,7 +18,8 @@ enum Type
 	GOOMBA = 21,
 	FLOWER = 22,
 	FIREBULLET = 23,
-
+	BOOMERANGBROTHER = 24,
+	BOOMERANG = 25,
 	// ITEM
 	COIN = 40,
 	SUPER_MUSHROOM = 41,
@@ -28,6 +29,8 @@ enum Type
 
 
 	PORTALSTOP = 70,
+
+	SHAKETREE = 81,
 };
 
 enum Category

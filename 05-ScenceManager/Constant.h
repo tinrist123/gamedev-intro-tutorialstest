@@ -200,8 +200,8 @@ using namespace std;
 
 
 //================================IDLE HOLD KOOPAS =================================
-#define MARIO_ANI_SMALL_IDLE_HOLD_KOOPAS_RIGHT				105
-#define MARIO_ANI_SMALL_IDLE_HOLD_KOOPAS_LEFT				108
+#define MARIO_ANI_SMALL_IDLE_HOLD_KOOPAS_RIGHT				106
+#define MARIO_ANI_SMALL_IDLE_HOLD_KOOPAS_LEFT				109
 
 #define MARIO_ANI_BIG_FIRE_IDLE_HOLD_KOOPAS_RIGHT			79
 #define MARIO_ANI_BIG_FIRE_IDLE_HOLD_KOOPAS_LEFT			81
@@ -215,8 +215,8 @@ using namespace std;
 
 
 //================================WALKING HOLD KOOPAS =================================
-#define MARIO_ANI_SMALL_WALKING_HOLD_KOOPAS_RIGHT							106
-#define MARIO_ANI_SMALL_WALKING_HOLD_KOOPAS_LEFT							109
+#define MARIO_ANI_SMALL_WALKING_HOLD_KOOPAS_RIGHT							107
+#define MARIO_ANI_SMALL_WALKING_HOLD_KOOPAS_LEFT							110
 
 #define MARIO_ANI_BIG_FIRE_WALKING_HOLD_KOOPAS_RIGHT			80
 #define MARIO_ANI_BIG_FIRE_WALKING_HOLD_KOOPAS_LEFT				82
@@ -229,8 +229,8 @@ using namespace std;
 
 
 //================================ END WALKING HOLD KOOPAS =================================
-#define MARIO_ANI_SMALL_HOLD_JUPMING_KOOPAS_RIGHT							107
-#define MARIO_ANI_SMALL_HOLD_JUPMING_KOOPAS_LEFT							110
+#define MARIO_ANI_SMALL_HOLD_JUPMING_KOOPAS_RIGHT							108
+#define MARIO_ANI_SMALL_HOLD_JUPMING_KOOPAS_LEFT							111
 
 #define	MARIO_ANI_BIG_HOLD_JUMPING_KOOPAS_RIGHT								91			 
 #define	MARIO_ANI_BIG_HOLD_JUMPING_KOOPAS_LEFT								92

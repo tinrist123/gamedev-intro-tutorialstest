@@ -1,14 +1,15 @@
 #include "ColorBox.h"
 
 
-ColorBox::ColorBox() : Ground()
+ColorBox::ColorBox() 
 {
 }
 
-ColorBox::ColorBox(int width, int height) : Ground( width,  height)
+ColorBox::ColorBox(int width, int height) 
 {
 	this->width = width;
 	this->height = height;
+
 	this->type = Type::COLORBOX;
 	this->category = Category::GROUND;
 }

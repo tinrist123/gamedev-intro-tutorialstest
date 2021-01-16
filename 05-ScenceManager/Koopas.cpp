@@ -214,6 +214,7 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//
 		// Collision logic with other objects
 		//
+		DebugOut(L"%f\n", this->vx);
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
@@ -237,9 +238,36 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 						vy = 0;
 					}
 				}
+				else if (e->nx != 0)
+				{
+					this->nx = -this->nx;
+					this->vx = fabs(this->vx) * this->nx;
+				}
 			}
 			if (dynamic_cast<ColorBox*>(e->obj))
 			{
+				if (e->ny > 0)
+				{
+					y += dy;
+				}
+				else if (e->ny < 0)
+				{
+					if (!firstTime)
+					{
+						firstTime = true;
+					}
+					if (state == KOOPAS_STATE_HAVE_WING_JUMPING)
+					{
+						vy = -0.2f;
+					}
+					else if (state == KOOPAS_STATE_HIT_BY_WEAPON_MARIO) {
+						SetState(KOOPAS_STATE_SHELL);
+					}
+					else
+					{
+						vy = 0;
+					}
+				}
 				if (e->nx != 0)
 				{
 					x += vx * dt;
@@ -250,11 +278,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 				if (e->ny != 0)
 				{
 					vy = 0;
-				}
-				if (e->nx != 0)
-				{
-					this->nx = -this->nx;
-					this->vx = fabs(vx) * this->nx;
 				}
 			}
 			else if (e->obj->getTypeObject() == Type::WEAKBRICK)
@@ -271,19 +294,8 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 					{
 						weakbrick->SetState(WEAK_STATE_DESTROY);
 					}
-					this->nx = -this->nx;
-					this->vx = this->vx * this->nx;
 				}
 			}
-			else if (e->obj->getTypeObject() == Type::PIPE)
-			{
-				if (e->nx != 0)
-				{
-					vx = -vx;
-					this->nx = -this->nx;
-				}
-			}
-
 		}
 	}
 	// clean up collision events

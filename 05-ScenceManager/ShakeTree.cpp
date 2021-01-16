@@ -3,6 +3,7 @@
 ShakeTree::ShakeTree()
 {
 	this->category = Category::MAPOBJECT;
+	this->type = Type::SHAKETREE;
 }
 
 void ShakeTree::Render()

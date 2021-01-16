@@ -64,7 +64,6 @@ void Grid::CheckCamGrid(vector<LPGAMEOBJECT>& list)
 		list[i]->isInCamera = false;
 }
 
-
 void Grid::GetGrid(vector<LPGAMEOBJECT>& list)
 {
 	int firstCol = (int)(CGame::GetInstance()->GetCamPosX() / cell_width);
@@ -72,12 +71,6 @@ void Grid::GetGrid(vector<LPGAMEOBJECT>& list)
 
 	int firstRow = (int)(CGame::GetInstance()->GetCamPosY() / cell_height);
 	int totalRow = ceil((CGame::GetInstance()->GetCamPosY() + (CGame::GetInstance()->GetScreenHeight())) / cell_height) ;
-
-
-	if (lastCol - firstCol <= 5)
-	{
-		DebugOut(L"oke\n");
-	}
 
 	for (int i = firstRow; i < totalRow; i++)
 	{
@@ -93,8 +86,6 @@ void Grid::GetGrid(vector<LPGAMEOBJECT>& list)
 			}
 		}
 	}
-	DebugOut(L"oke\n %d",list.size());
-
 }
 
 Grid::~Grid()

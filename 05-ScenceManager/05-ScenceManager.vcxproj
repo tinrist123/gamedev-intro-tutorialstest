@@ -127,6 +127,8 @@
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="BoardAddSprite.cpp" />
     <ClCompile Include="BoardGame.cpp" />
+    <ClCompile Include="BoOmerangBrother.cpp" />
+    <ClCompile Include="BomerangWeapon.cpp" />
     <ClCompile Include="BoxItem.cpp" />
     <ClCompile Include="Brick.cpp" />
     <ClCompile Include="Camera.cpp" />
@@ -137,6 +139,7 @@
     <ClCompile Include="EffectHitTail.cpp" />
     <ClCompile Include="EffectPoint.cpp" />
     <ClCompile Include="EffectsFire.cpp" />
+    <ClCompile Include="EndGame.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="FireBullet.cpp" />
     <ClCompile Include="Grid.cpp" />
@@ -166,6 +169,7 @@
     <ClCompile Include="P_Switch.cpp" />
     <ClCompile Include="QuestionBrick.cpp" />
     <ClCompile Include="RandomItem.cpp" />
+    <ClCompile Include="SelectionCarret.cpp" />
     <ClCompile Include="ShakeTree.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TripleBoxItem.cpp" />
@@ -185,6 +189,8 @@
     <ClInclude Include="Animations.h" />
     <ClInclude Include="BoardAddSprite.h" />
     <ClInclude Include="BoardGame.h" />
+    <ClInclude Include="BoomerangBrother.h" />
+    <ClInclude Include="BomerangWeapon.h" />
     <ClInclude Include="BoxItem.h" />
     <ClInclude Include="Brick.h" />
     <ClInclude Include="Camera.h" />
@@ -196,6 +202,7 @@
     <ClInclude Include="EffectHitTail.h" />
     <ClInclude Include="EffectPoint.h" />
     <ClInclude Include="EffectsFire.h" />
+    <ClInclude Include="EndGame.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="FireBullet.h" />
     <ClInclude Include="Grid.h" />
@@ -225,6 +232,7 @@
     <ClInclude Include="P_Switch.h" />
     <ClInclude Include="QuestionBrick.h" />
     <ClInclude Include="RandomItem.h" />
+    <ClInclude Include="SelectionCarret.h" />
     <ClInclude Include="ShakeTree.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TripleBoxItem.h" />

@@ -1,50 +1,42 @@
 #include "LetterEndGame.h"
 
-LetterEndGame::LetterEndGame()
+LettersEndGame::LettersEndGame(float x, float y, string inputText)
 {
+	this->x = x;
+	this->y = y;
+	this->STextInput = inputText;
+	detectStringToAnimation();
 }
 
-void LetterEndGame::Render()
+void LettersEndGame::UpperCaseString()
 {
-	switch (state)
+	for (auto& c : STextInput) c = toupper(c);
+}
+
+void LettersEndGame::detectStringToAnimation()
+{
+	for (int i = 0; i < STextInput.length(); i++)
 	{
-	case LETTER_STATE_A: ani = LETTER_ANI_A; break;
-	case LETTER_STATE_B: ani = LETTER_ANI_B; break;
-	case LETTER_STATE_C: ani = LETTER_ANI_C; break;
-	case LETTER_STATE_D: ani = LETTER_ANI_D; break;
-	case LETTER_STATE_E: ani = LETTER_ANI_E; break;
-	case LETTER_STATE_F: ani = LETTER_ANI_F; break;
-	case LETTER_STATE_G: ani = LETTER_ANI_G; break;
-	case LETTER_STATE_H: ani = LETTER_ANI_H; break;
-	case LETTER_STATE_I: ani = LETTER_ANI_I; break;
-	case LETTER_STATE_J: ani = LETTER_ANI_J; break;
-	case LETTER_STATE_K: ani = LETTER_ANI_K; break;
-	case LETTER_STATE_L: ani = LETTER_ANI_L; break;
-	case LETTER_STATE_M: ani = LETTER_ANI_M; break;
-	case LETTER_STATE_N: ani = LETTER_ANI_N; break;
-	case LETTER_STATE_O: ani = LETTER_ANI_O; break;
-	case LETTER_STATE_P: ani = LETTER_ANI_P; break;
-	case LETTER_STATE_Q: ani = LETTER_ANI_Q; break;
-	case LETTER_STATE_R: ani = LETTER_ANI_R; break;
-	case LETTER_STATE_S: ani = LETTER_ANI_S; break;
-	case LETTER_STATE_T: ani = LETTER_ANI_T; break;
-	case LETTER_STATE_U: ani = LETTER_ANI_U; break;
-	case LETTER_STATE_V: ani = LETTER_ANI_V; break;
-	case LETTER_STATE_W: ani = LETTER_ANI_W; break;
-	case LETTER_STATE_X: ani = LETTER_ANI_X; break;
-	case LETTER_STATE_Y: ani = LETTER_ANI_Y; break;
-	case LETTER_STATE_Z: ani = LETTER_ANI_Z; break;
-	default:
-		break;
+		if (STextInput[i] != 32)
+		{
+			LetterAnimation* character = new LetterAnimation(STextInput[i] - 64 + LETTER_ANI_INDEX_START);
+			character->SetPosition(x + 8 * i, y);
+			listLetter.push_back(character);
+		}
 	}
-	animation_set->at(ani + 1)->Render(x, y);
 }
 
-void LetterEndGame::Update(float camX, float camY)
+void LettersEndGame::Render()
 {
+	for (size_t i = 0; i < listLetter.size(); i++)
+	{
+		listLetter.at(i)->Render();
+	}
 }
 
-void LetterEndGame::SetState(int state)
+
+
+void LettersEndGame::SetState(int state)
 {
 	CGameObject::SetState(state);
 
@@ -82,7 +74,22 @@ void LetterEndGame::SetState(int state)
 
 }
 
-void LetterEndGame::GetBoundingBox(float& l, float& t, float& r, float& b)
+void LettersEndGame::GetBoundingBox(float& l, float& t, float& r, float& b)
+{
+	l = t = r = b;
+}
+
+LetterAnimation::LetterAnimation(int aniTextIndex)
+{
+	this->aniTextIndex = aniTextIndex;
+}
+
+void LetterAnimation::Render()
+{
+	animation_set->at(aniTextIndex)->Render(x, y);
+}
+
+void LetterAnimation::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
 	l = t = r = b;
 }

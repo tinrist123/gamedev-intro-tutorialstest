@@ -8,6 +8,7 @@
 #include "QuestionBrick.h"
 #include "Goomba.h"
 #include "Koopas.h"
+#include "BoomerangBrother.h"
 
 
 
@@ -201,6 +202,16 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				DisapearBullet();
 				this->isHittingEnemy = true;
 			}
+			else if (e->obj->getTypeObject() == Type::BOOMERANGBROTHER)
+			{
+				BoomerangBrother* brother = dynamic_cast<BoomerangBrother*>(e->obj);
+				brother->SetState(BOOMERANG_BROTHER_STATE_DEATH);
+				brother->subHealth();
+				this->BulletCollision();
+				DisapearBullet();
+				this->isHittingEnemy = true;
+			}
+			
 		}
 	}
 	// clean up collision events

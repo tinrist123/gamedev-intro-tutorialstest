@@ -159,6 +159,11 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 						vy = 0;
 					}
 				}
+				else if (e->nx != 0)
+				{
+					this->nx = -this->nx;
+					this->vx = this->vx * this->nx;
+				}
 			}
 			if (dynamic_cast<ColorBox*>(e->obj))
 			{
@@ -166,6 +171,7 @@ void CGoomba::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 				{
 					x += dx;
 				}
+				//else if (e->ny)
 			}
 			else if (dynamic_cast<Pipe*>(e->obj))
 			{

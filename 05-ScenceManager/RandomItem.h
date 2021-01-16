@@ -19,6 +19,7 @@ public:
 	void Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects);
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 
-	void RandomizeItem() { this->typeItemCollected = rand() % 3 + 1; }
+	void RandomizeItem() { 
+		this->typeItemCollected = rand() % 3 + 1; }
 };
 

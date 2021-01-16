@@ -10,12 +10,16 @@
 #include <dinput.h>
 #include "Scence.h"
 
-#define SCREEN_WIDTH					800
+#define SCREEN_WIDTH					600
 #define SCREEN_HEIGHT					600
 
 using namespace std;
 
 #define KEYBOARD_BUFFER_SIZE 1024
+
+#define SCENCE_ID_WORLD_SELECTION			4
+#define SCENCE_ID_WORLD_MOVING_CAMERA		5
+
 
 class CGame
 {
@@ -98,9 +102,12 @@ public:
 
 	void SetCamPos(float x, float y) { cam_x = x; cam_y = y; }
 	void SetCamPosY(float b) { cam_y = b; }
+	void SetCamPosX(float b) { cam_x = b; }
 
 	float GetCamPosX() { return cam_x; }
 	float GetCamPosY() { return cam_y; }
+
+	void ResetCamera() { cam_x = 0; cam_y = 0; }
 
 	static CGame * GetInstance();
 

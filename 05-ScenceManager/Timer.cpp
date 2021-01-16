@@ -14,6 +14,7 @@ void Timer::Start()
 
 void Timer::Stop()
 {
+	this->isStarted = false;
 	startTime = 0;
 }
 

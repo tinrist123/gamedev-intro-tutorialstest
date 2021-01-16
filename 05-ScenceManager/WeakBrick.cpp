@@ -49,7 +49,8 @@ void WeakBrick::SetState(int state)
 		}
 		case WEAK_STATE_JUMP:
 			vy = -QUESTION_BRICK_SPEED_Y;
-			subHealth();
+			if (!this->kindOfItemInsinde == WEAK_BRICK_HAVE_EMPTY_ITEM)
+				subHealth();
 			break;
 		default:
 			break;
@@ -109,7 +110,7 @@ void WeakBrick::Render()
 
 void WeakBrick::GetBoundingBox(float& l, float& t, float& r, float& b)
 {
-	if (vanish || isTranformed) l = t = r = b;
+	if (isTranformed || !isBoundingBox) l = t = r = b;
 	
 	else
 	{

@@ -29,7 +29,9 @@
 #include "BoardGame.h"
 #include "Camera.h"
 #include "Timer.h"
-
+#include "LetterEndGame.h"
+#include "BoxItem.h"
+#include "RandomItem.h"
 
 class CPlayScene: public CScene
 {
@@ -38,7 +40,7 @@ public:
 	Grid* grid;
 	Camera* cam;
 	Timer* expiredTimeOfCoin;
-	
+	Timer* EndGameTime = new Timer(900);
 
 	vector<LPGAMEOBJECT> objects;
 	vector<LPGAMEOBJECT> mapObjects;
@@ -51,13 +53,32 @@ public:
 	vector<LPGAMEOBJECT> staticObjects;
 	vector<LPGAMEOBJECT> listCBrick;
 
+	// This List is special, It Trigger Event P_switch active 
+	// Transform Coin to Weak or turn back
+	vector<LPGAMEOBJECT> listWeakBrick;
+	vector<LPGAMEOBJECT> listCoinTransform;
+
 	vector<LPGAMEOBJECT> effects;
-	vector<LPGAMEOBJECT> flowerBullet;
+	vector<LPGAMEOBJECT> listFireBall;
 	vector<LPGAMEOBJECT> marioBullet;
 	vector<LPGAMEOBJECT> listPipe;
 
+	float posOfTextEndGame_x;
+	float posOfTextEndGame_y;
+
+	void storePosTextEndGame(float x, float y)
+	{
+		this->posOfTextEndGame_x = x;
+		this->posOfTextEndGame_y = y;
+	}
+
 	CPortal* Portal;
 
+	bool secondStringCreated = false;
+	LettersEndGame* firstRowString;
+	LettersEndGame* secondRowString = NULL;
+	RandomItem* itemCollected = NULL;
+	BoxItem* boxCollectedItem = NULL;
 
 	BoardGame* boardGame;
 	bool isCreatedCoinFromPSwitch_Active = false;
@@ -69,6 +90,7 @@ public:
 	Timer* transitionBgTime = new Timer(0);
 	bool isCompletedTransition = false;
 	bool isCompletedTransitionLightScreen = false;
+	bool isSpecialPipeContext = false;
 
 	void _ParseSection_TEXTURES(string line);
 	void _ParseSection_SPRITES(string line);
@@ -78,7 +100,7 @@ public:
 	void _ParseSection_Map(string line);
 	
 public: 
-	CPlayScene(int id, LPCWSTR filePath, bool isWorldSeletion);
+	CPlayScene(int id, LPCWSTR filePath, bool isWorldSeletion, int typeCamera);
 
 	virtual void Load();
 	virtual void Update(DWORD dt);
@@ -91,6 +113,7 @@ public:
 	Item* CreateItemForWeakBrick(WeakBrick* object);
 	Enemy *CreateFlowerBullet(CFlower *flower);
 
+	//void CreateBoomerang(bool &isFired, BoomerangBrother *boomerangBrother);
 
 	void playerHittingSpecialItem(LPGAMEOBJECT& item);
 	
@@ -100,13 +123,14 @@ public:
 	bool checkOrdinateOutOfCamera(float x, float y);
 
 	// Opacity for Dark Screen
-	int alphaTransition_opacity = 255;
+	int alphaTransition_opacity = 0;
 	
 	bool isTransition_For_LightScreen = false;
 	// Render Dark Screen
 	void DarkenTheScreen();
 	void LightenTheScreen();
 	
+	void SwitchToSelectionWorld();
 
 	bool isTransitionScaleBg = false;
 	void TransitionDarkScreen(int quantityW,int quantityH,int posX, int posY);
@@ -119,6 +143,8 @@ public:
 	TileMap* map;
 	CMario * GetPlayer() { return player; } 
 
+
+	void DetectSpecialAttributeOfMap();
 
 	float camY;
 	//friend class CPlayScenceKeyHandler;

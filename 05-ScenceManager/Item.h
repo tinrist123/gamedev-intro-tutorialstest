@@ -22,12 +22,14 @@
 #define ITEM_ANI_STAR_END_GAME          10
 #define ITEM_ANI_RANDOMIZE_END_GAME     11
 #define ITEM_ANI_GREEN_MUSHROOM         12
+#define ITEM_ANI_IDLE_COIN              13
 
 #define ITEM_STATE_SPECIAL_ITEM         1
 #define ITEM_STATE_HITTING_MARIO        2
 #define ITEM_STATE_LEAF_FALL            3
 #define ITEM_STATE_COIN_JUMP            4
 #define ITEM_STATE_MOVE_UP              5
+#define ITEM_STATE_IDLE_COIN            6
 
 
 #define GRAVITY                          0.0004f

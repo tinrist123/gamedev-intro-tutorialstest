@@ -19,6 +19,8 @@
 #include "Coin.h"
 #include "MarioBullet.h"
 #include "Timer.h"
+#include "PortalStop.h"
+
 //#include "Scence.h"
 
 
@@ -37,7 +39,7 @@ public:
 
 	/// <summary>
 	///  World Selection Variables
-	bool isInWorldSelectionMap = false;
+	bool isInWorldSelectionMap = true;
 	int lastPortalStopIndex = -1;
 	bool isMovedToLeft = true;
 	bool isMovedToTop = true;
@@ -61,6 +63,8 @@ public:
 	DWORD timeFlyingForTail = 0;
 	MarioTail* Tail = new MarioTail();
 	MarioBullet* bullet = new MarioBullet();
+	PortalStop* portalStop = new PortalStop();
+
 
 	float BBox_TopOfMario;  //top cua bbox
 	float BBox_LeftOfMario;
@@ -100,7 +104,7 @@ public:
 
 	void KickingKoopas() { isKickedKoopas = true; tDraw = GetTickCount64(); }
 
-
+	
 
 	// Turn on SwitchScreen
 	void SwitchScreen();
@@ -123,7 +127,7 @@ public:
 	// Store position of Pipe that Mario get into
 	float posX_OfPipe_HaveHiddenMap;
 	float posY_OfPipe_HaveHiddenMap;
-	void storePosPipe_HaveHiddenMap(float posX, float posY);
+	void  storePosPipe_HaveHiddenMap(float posX, float posY);
 
 
 	float detectVxLevelSpeed;
@@ -191,7 +195,9 @@ public:
 
 	void MarioHitEnemy();
 	void AccurateCollisionWithEnemy(LPGAMEOBJECT enemies);
+	void CollisionWithFireball(vector <LPGAMEOBJECT> listFireball);
 
+	void CollideWithCoinTransform(vector<LPGAMEOBJECT> listCoinTransform, vector<LPGAMEOBJECT> listWeakBrick);
 	void CollideWithEnemy(vector<LPGAMEOBJECT> enemies);
 	void playerHittingSpecialItem(LPGAMEOBJECT& item,vector<LPGAMEOBJECT>& listEffect);
 	void CollideWithItem(vector<LPGAMEOBJECT> items, vector<LPGAMEOBJECT>& listEffect);

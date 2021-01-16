@@ -3,7 +3,7 @@
 MovingWood::MovingWood()
 {
 	this->type = Type::MOVINGWOOD;
-	this->category = Category::GROUND;
+	this->category = Category::BRICK;
 	this->SetState(MOVING_WOOD_STATE_MOVING_HORIZONTAL);
 }
 
@@ -18,7 +18,7 @@ void MovingWood::SetState(int state)
 	switch (state)
 	{
 	case MOVING_WOOD_STATE_MOVING_HORIZONTAL:
-		vx = -MOVING_WOOD_SPEED_X;
+		//vx = -MOVING_WOOD_SPEED_X;
 		break;
 	case MOVING_WOOD_STATE_FALLING:
 
@@ -32,11 +32,17 @@ void MovingWood::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj)
 {
 	CGameObject::Update(dt, staticObj);
 
-	if (state == MOVING_WOOD_STATE_FALLING)
+	if (state == MOVING_WOOD_STATE_MOVING_HORIZONTAL)
+	{
+		if (x - ((CGame::GetInstance()->GetCamPosX() + CGame::GetInstance()->GetScreenWidth())) < 50)
+		{
+			vx = -MOVING_WOOD_SPEED_X;
+		}
+	}
+	else if (state == MOVING_WOOD_STATE_FALLING)
 	{
 		vy += MARIO_GRAVITY * dt;
 	}
-
 	x += dx;
 	y += dy;
 }

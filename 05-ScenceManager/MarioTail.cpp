@@ -5,6 +5,7 @@
 #include "Goomba.h"
 #include "WeakBrick.h"
 #include "Flower.h"
+#include "BoomerangBrother.h"
 
 MarioTail::MarioTail()
 {
@@ -42,10 +43,18 @@ void MarioTail::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj, vector<LPGAMEO
 			{
 				if (e->getTypeObject() == Type::WEAKBRICK)
 				{
+
 					WeakBrick* weakbrick = dynamic_cast<WeakBrick*>(e);
+					
+					if (weakbrick->GetHealth() == 0)
+					{
+						break;
+					}
+
 					if (weakbrick->isHaveP_Switch)
 					{
 						weakbrick->SetState(WEAK_STATE_EMPTY_ANI);
+						weakbrick->isTouchable = true;
 					}
 					else
 					{
@@ -105,6 +114,14 @@ void MarioTail::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj, vector<LPGAMEO
 						flower->addPointToItem();
 						e->subHealth();
 						//flower->setObjDisappear();
+					}
+					else if (e->getTypeObject() == Type::BOOMERANGBROTHER)
+					{
+						BoomerangBrother* brother = dynamic_cast<BoomerangBrother*>(e);
+						brother->SetState(BOOMERANG_BROTHER_STATE_DEATH);
+						brother->subHealth();
+						brother->addPointToItem();
+						CreateEffect();
 					}
 				}
 			}

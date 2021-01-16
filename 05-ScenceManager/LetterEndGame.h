@@ -28,6 +28,9 @@
 #define LETTER_ANI_Y	34
 #define LETTER_ANI_Z	35
 
+#define LETTER_ANI_INDEX_START		10
+
+
 #define LETTER_STATE_A	10
 #define LETTER_STATE_B	11
 #define LETTER_STATE_C	12
@@ -55,13 +58,37 @@
 #define LETTER_STATE_Y	34
 #define LETTER_STATE_Z	35
 
-class LetterEndGame : public BoardAddSprite
+
+
+
+
+class LetterAnimation : public BoardAddSprite
 {
 public:
-	LetterEndGame();
+	int aniTextIndex;
+
+public:
+	LetterAnimation(int aniTextIndex);
 	virtual void Render();
-	void Update(float camX, float camY);
-	void SetState(int state);
+	//void SetState(int state);
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 };
 
+typedef LetterAnimation* LPLETTER;
+
+class LettersEndGame : public CGameObject
+{
+public:
+	string STextInput;
+	vector <LPLETTER> listLetter;
+
+public:
+	LettersEndGame(float x, float y, string inputText);
+
+	void UpperCaseString();
+	void detectStringToAnimation();
+
+	virtual void Render();
+	void SetState(int state);
+	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
+};

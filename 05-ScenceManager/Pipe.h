@@ -12,6 +12,7 @@ public:
 
 	bool isPushMarioOut;
 	bool isInHiddenMap;
+	int directionOy = 0;
 	int kindTreatmentPlayer;
 public:
 	Pipe();
@@ -20,7 +21,7 @@ public:
 		this->isHaveHiddenMap = true;
 	}
 	Pipe(int width, int height);
-	Pipe(int width, int height,bool isHaveHiddenMap  ,bool isInHiddenMap,bool isPushMarioOut );
+	Pipe(int width, int height,bool isHaveHiddenMap  ,bool isInHiddenMap,bool isPushMarioOut, int directionOyOfMario = 0);
 	virtual void Render();
 	virtual void GetBoundingBox(float& l, float& t, float& r, float& b);
 };

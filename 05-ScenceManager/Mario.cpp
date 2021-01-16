@@ -1,10 +1,10 @@
 #include "Mario.h"
 #include "P_Switch.h"
-#include "PortalStop.h"
 #include "WeakBrick.h"
 #include "RandomItem.h"
 #include "Mushroom.h"
 #include "MovingWood.h"
+#include "BoomerangBrother.h"
 
 // TODO: MARIO CAM RUA THA NUT ATACKKING CHUA DA DUOC	DONE
 // TODO: ANIMATION CAM RUA CON CHUA ON DINH				DONE
@@ -140,6 +140,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	this->x = x; 
 	this->y = y; 
 	this->type = Type::MARIO;
+	CGame::GetInstance()->SetCamPos(start_x,start_y);
 }
 
 void  CMario::ChainKickKoopas(CKoopas* &koopas,bool isElastic)
@@ -190,6 +191,17 @@ void CMario::AccurateCollisionWithEnemy(LPGAMEOBJECT enemies)
 		if (AABBCollision(enemies))
 		{
 			this->MarioHitEnemy();
+		}
+	}
+}
+
+void CMario::CollisionWithFireball(vector <LPGAMEOBJECT> listFireball)
+{
+	for (size_t i = 0; i < listFireball.size(); i++)
+	{
+		if (this->AABBCollision(listFireball[i]))
+		{
+			MarioHitEnemy();
 		}
 	}
 }
@@ -354,8 +366,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 
 		FilterCollision(coEvents_static_Obj, coEventsResult_static_Obj, min_tx, min_ty, nx, ny, rdx, rdy);
 		// how to push back Mario if collides with a moving objects, what if Mario is pushed this way into another object?
-		//if (rdx != 0 && rdx!=dx)
-			//x += nx*abs(rdx); 
+		
 
 		// block every object first!
 		x += min_tx * dx + nx * 0.2f;
@@ -390,6 +401,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 					OffPreventSpamSpace();
 					blockJumping = false;
 				}
+				else if (e->ny > 0)
+				{
+					this->vy = 0;
+				}
 			}
 			if (e->obj->getTypeObject() == Type::MOVINGWOOD)
 			{
@@ -398,6 +413,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 				{
 					MovingWood* wood = dynamic_cast<MovingWood*>(e->obj);
 					wood->SetState(MOVING_WOOD_STATE_FALLING);
+				}
+				else if (e->nx != 0)
+				{
+					/*if (rdx != 0 && rdx!=dx)
+						x += nx*abs(rdx); 
+					this->vy = 0;*/
 				}
 			}
 			else if (e->obj->getTypeObject() == Type::QUESTIONBRICK)
@@ -460,8 +481,10 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 			{
 				if (e->ny < 0)
 				{
-					vy = 0;
-					isOnGround = true;
+					this->vy = 0;
+					this->isOnGround = true;
+					OffPreventSpamSpace();
+					blockJumping = false;
 				}
 				else if (e->ny > 0)
 				{
@@ -495,6 +518,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 						!pipe->isPushMarioOut
 						)
 					{
+
 						vy = -0.02f;
 						y += dy;
 						this->MarioSlideIntoPipe();
@@ -562,14 +586,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 			//x += nx*abs(rdx); 
 
 		// block every object first!
-		x += min_tx * dx + nx * 0.4f;
+		//x += min_tx * dx + nx * 0.4f;
 		y += min_ty * dy + ny * 0.4f;
-		if (nx != 0)
-		{
-			vx = 0;
-		}
-		else imMovable = true;
-
 		if (ny != 0) {
 			vy = 0;
 			isEnteredFirstSpaceUp = false;
@@ -621,6 +639,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 
 		// block every object first!
 		x += min_tx * dx + nx * 0.2f;
+		y += min_ty * dy + ny * 0.1f;
 
 		if (nx != 0)
 		{
@@ -667,13 +686,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 					vy = -MARIO_ELASTIC;
 				}
 				if (e->nx != 0 || e->ny > 0 )
-				{
-					MarioHitEnemy();
-				}
-			}
-			else if (e->obj->getTypeObject() == Type::FIREBULLET)
-			{
-				if (e->ny != 0 || e->nx != 0)
 				{
 					MarioHitEnemy();
 				}
@@ -770,6 +782,28 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 					}
 				}
 			}
+			else if (e->obj->getTypeObject() == Type::BOOMERANGBROTHER)
+			{
+				if (e->ny != 0)
+				{
+					if (e->ny > 0)
+					{
+						MarioHitEnemy();
+					}
+					else if (e->ny < 0)
+					{
+						BoomerangBrother* brother = dynamic_cast<BoomerangBrother*>(e->obj);
+						brother->SetState(BOOMERANG_BROTHER_STATE_DEATH);
+						brother->subHealth();
+						brother->addPointToItem();
+						vy = -MARIO_ELASTIC;
+					}
+				}
+				else if (e->nx != 0)
+				{
+					MarioHitEnemy();
+				}
+			}
 		}
 	}
 	// clean up collision events
@@ -829,7 +863,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 							lastPortalStopIndex = i;
 						}
 					}
-					if (lastPortalStopIndex == i) isWalking = false;
+					if (lastPortalStopIndex == i) 
+						isWalking = false;
 				}
 			}
 			else if (listPortalStop->at(i)->getTypeObject() == Type::PORTAL)
@@ -837,6 +872,8 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 				if (this->isCanGetIntoWorldMap)
 				{
 					CPortal* portal = dynamic_cast<CPortal*>(listPortalStop->at(i));
+					portalStop->SetPosition(portal->x, portal->y);
+
 					this->SwitchScreen();
 					StoreScenceId(portal->GetSceneId());
 				}
@@ -1693,6 +1730,26 @@ void CMario::GetBoundingBox(float &left, float &top, float &right, float &bottom
 	this->BBox_RightOfMario = right;
 }
 
+void CMario::CollideWithCoinTransform(vector<LPGAMEOBJECT> listCoinTransform, vector<LPGAMEOBJECT> listWeakBrick)
+{
+	for (size_t i = 0; i < listCoinTransform.size(); i++)
+	{
+		if (this->AABBCollision(listCoinTransform[i]))
+		{
+			if (listCoinTransform[i]->isTouchable)
+			{
+				if (listCoinTransform[i]->getTypeObject() == Type::COIN)
+				{
+					this->IncreScoreMario();
+				}
+				listCoinTransform[i]->setObjDisappear();
+				listWeakBrick[i]->setObjDisappear();
+				// Increase Poin of Player
+			}
+		}
+	}
+}
+
 /*
 	Reset Mario status to the beginning state of a scene
 */
@@ -1781,7 +1838,7 @@ void CMario::Reset()
 {
 	SetState(MARIO_STATE_IDLE);
 	SetLevel((level > MARIO_LEVEL_BIG_TAIL)? MARIO_LEVEL_SMALL:++level);
-	SetPosition(start_x,start_y);
-	CGame::GetInstance()->SetCamPos(start_x, start_y);
+	SetPosition(x,y);
+	CGame::GetInstance()->SetCamPos(x, y);
 	SetSpeed(0, 0);
 }

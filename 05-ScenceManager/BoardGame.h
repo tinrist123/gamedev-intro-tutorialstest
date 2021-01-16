@@ -1,18 +1,14 @@
 #pragma once
-#pragma once
 #include "Sprites.h"
 #include "GameObject.h"
 #include <string>
 #include "CarretSpeed.h"
-#include "Letter.h"
 #include "Number.h"
 #include "BoardAddSprite.h"
 #include "PMaxSpeed.h"
 #include "Mario.h"
 #include "Timer.h"
-#include "LetterEndGame.h"
 #include "TripleBoxItem.h"
-#include "RandomItem.h"
 
 #define MAX_PLAY_TIME			300
 
@@ -22,13 +18,9 @@ class BoardGame : public BoardAddSprite
 	vector<LPGAMEOBJECT>  listNumber;
 	vector<LPGAMEOBJECT>  DitgitQuantityCoin;
 	vector<LPGAMEOBJECT>  DitgitScores;
-	vector<LPGAMEOBJECT>  listLetter_FirstRow;
-	vector<LPGAMEOBJECT>  listLetter_SecondRow;
 	vector<LPGAMEOBJECT>  listAssetOfMario;
 
-	RandomItem* randomizeItem;
 
-	Timer* timeToShowItemEndGame;
 	PMaxSpeed* pMaxSpeed;
 	TripleBoxItem* tripleBoxItem = new TripleBoxItem();
 
@@ -50,12 +42,8 @@ class BoardGame : public BoardAddSprite
 	int life;
 	int time;
 
-	void loadLetterEndGame();
-
-	void DrawCollectedItemEndGame();
 	void DrawAssetOfMario();
 	void DrawTripleBoxItem();
-	void DrawLetterEndGame();
 	void DrawBackGround();
 	void DrawScores();
 	void DrawQuantityCoin(float x, float y);
