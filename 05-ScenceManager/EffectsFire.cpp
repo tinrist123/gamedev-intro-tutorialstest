@@ -16,7 +16,7 @@ EffectsFire::~EffectsFire()
 void EffectsFire::Render()
 {
 	animation_set->at(0)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void EffectsFire::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)

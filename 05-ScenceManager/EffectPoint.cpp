@@ -6,7 +6,16 @@ EffectPoint::~EffectPoint()
 
 void EffectPoint::Render()
 {
-	animation_set->at(0)->Render(x,y);
+	if (state == EFFECT_STATE_7UP)
+	{
+		ani = EFFECT_ANI_7UP;
+	}
+	else
+	{
+		ani = 0;
+	}
+
+	animation_set->at(EFFECT_ANI_7UP)->Render(x,y);
 }
 void EffectPoint::GetBoundingBox(float& l, float& t, float& r, float& b)
 {

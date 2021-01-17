@@ -1,6 +1,10 @@
 #pragma once
 #include "ListEffects.h"
 
+#define EFFECT_STATE_7UP		9
+
+
+#define EFFECT_ANI_7UP			8
 
 class EffectPoint: public ListEffects
 {

@@ -228,14 +228,14 @@
     <ClCompile Include="EndGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BomerangWeapon.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="BoOmerangBrother.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SelectionCarret.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BomerangWeapon.cpp">
+      <Filter>Source Files\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="BoOmerangBrother.cpp">
+      <Filter>Source Files\Enemy</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

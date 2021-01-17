@@ -38,12 +38,16 @@ void Pipe::Render()
 	{
 		ani = 0;
 	}
-	else if (height >= 3)
+	else if (height == 4)
+	{
+		ani = 5;
+	}
+	else
 	{
 		ani = 1;
 	}
 	animation_set->at(ani)->Render(x, y);
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void Pipe::GetBoundingBox(float& l, float& t, float& r, float& b)

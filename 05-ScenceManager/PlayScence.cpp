@@ -9,6 +9,7 @@
 #include "MovingWood.h"
 #include "BoomerangBrother.h"
 #include "BomerangWeapon.h"
+#include "SelectionCarret.h"
 
 using namespace std;
 
@@ -53,6 +54,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath,bool isWorldSeletion, int typeCa
 
 
 #define OBJECT_TYPE_PORTAL				50
+#define OBJECT_TYPE_SELECTION_CARRET	51
 
 #define MAX_SCENE_LINE					1024
 
@@ -295,6 +297,12 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		obj = new ColorBox(width, height);
 		break;
 	}
+	case OBJECT_TYPE_SELECTION_CARRET:
+		obj = new SelectionCarret(player);
+		selectionCarret = new SelectionCarret(player);
+		selectionCarret->SetAnimationSet(ani_set);
+		selectionCarret->SetPosition(x, y);
+		break;
 	case OBJECT_TYPE_Pipe:
 	{
 		float width = atof(tokens[4].c_str());
@@ -311,11 +319,11 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			{
 				int directionOfMario = atof(tokens[9].c_str());
 				obj = new Pipe(width, height, isMapInside == 1, isInHiddenMap == 1, isPushMarioOut == 1,directionOfMario);
+				this->isSpecialPipeContext = true;
 			}
 			else
 			{
 				obj = new Pipe(width, height, isMapInside == 1, isInHiddenMap == 1, isPushMarioOut == 1);
-				this->isSpecialPipeContext = true;
 			}
 			
 		}
@@ -810,6 +818,7 @@ void CPlayScene::Update(DWORD dt)
 	grid->CheckCamGrid(objects);
 	GetObjectGrid();
 
+	
 
 	for (size_t i = 0; i < ObjectsInScreen.size(); i++)
 	{
@@ -836,6 +845,11 @@ void CPlayScene::Update(DWORD dt)
 				listWeakBrick.push_back(ObjectsInScreen[i]);
 			}
 		}
+	}
+
+	if (player->isIntroScence)
+	{
+		selectionCarret->Update(dt, &coObjects);
 	}
 
 	{
@@ -871,6 +885,9 @@ void CPlayScene::Update(DWORD dt)
 		}
 	}
 
+
+	DebugOut(L"size %d\n", listCoinTransform.size());
+
 	for (size_t i = 0; i < listWeakBrick.size(); i++)
 	{
 		if (this->isCreatedCoinFromPSwitch_Active)
@@ -893,6 +910,7 @@ void CPlayScene::Update(DWORD dt)
 					}
 					else if (weakBrick->isHaveP_Switch)
 					{
+						weakBrick->activeTranform();
 						Coin* coin = new Coin();
 						coin->SetPosition(weakBrick->x, weakBrick->y);
 						coin->isTranformed_Coin = true;
@@ -916,9 +934,9 @@ void CPlayScene::Update(DWORD dt)
 
 	for (size_t i = 0; i < listCBrick.size(); i++)
 	{
-		if (listCBrick[i]->health == 0 && dynamic_cast<QuestionBrick*>(listCBrick[i]) && !staticObjects[i]->isCreated)
+		if (listCBrick[i]->health == 0 && dynamic_cast<QuestionBrick*>(listCBrick[i]) && !listCBrick[i]->isCreated)
 		{
-			QuestionBrick* questionBrick = dynamic_cast<QuestionBrick*>(staticObjects[i]);
+			QuestionBrick* questionBrick = dynamic_cast<QuestionBrick*>(listCBrick[i]);
 			// TODO: EFFECT DISAPEAR SO COIN MUST DISAPEAR TOO, so Calculate it
 			// DONE
 			dynamicItems.push_back(CreateItemOfMario(questionBrick));
@@ -1047,12 +1065,11 @@ void CPlayScene::Update(DWORD dt)
 	int enemySize = enemies.size();
 	for (size_t i = 0; i < enemySize; i++)
 	{
-		if (enemies[i]->GetHealth() != 0)
 		{
 			if (fabs(enemies[i]->x - playerPositionX) < 90.0f && enemies[i]->getTypeObject() == Type::FLOWER)
 			{
 				CFlower* flower = dynamic_cast<CFlower*>(enemies[i]);
-
+				
 				if (flower->health == 0)
 				{
 					effects.push_back(flower->pointEff);
@@ -1492,7 +1509,14 @@ void CPlayScene::Render()
 		listCoinTransform[i]->Render();
 	}
 
-	player->Render();
+	if (!player->isIntroScence)
+	{
+		player->Render();
+	}
+	else {
+		selectionCarret->Render();
+	}
+
 
 	for (size_t i = 0; i < dynamicItems.size(); i++)
 	{
@@ -1562,7 +1586,10 @@ void CPlayScene::Render()
 		LightenTheScreen();
 	}
 
-	boardGame->Render();
+	if (!player->isIntroScence)
+	{
+		boardGame->Render();
+	}
 	
 	if (isTransitionScaleBg)
 	{
@@ -1719,7 +1746,16 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 			}
 			else if (KeyCode == DIK_S)
 			{
-				mario->isCanGetIntoWorldMap = true;
+				if (mario->isIntroScence)
+				{
+					mario->isIntroScence = false;
+					mario->isWalking = false;
+					CGame::GetInstance()->SwitchScene(SCENCE_ID_WORLD_SELECTION);
+				}
+				else
+				{
+					mario->isCanGetIntoWorldMap = true;
+				}
 			}
 		}
 	}

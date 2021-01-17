@@ -29,7 +29,7 @@ void P_Switch::Render()
 	else {
 		animation_set->at(PSWITCH_ANI_CRUSHED)->Render(x, y, 255);
 	}
-	//RenderBoundingBox();
+	RenderBoundingBox();
 }
 
 void P_Switch::GetBoundingBox(float& left, float& top, float& right, float& bottom)

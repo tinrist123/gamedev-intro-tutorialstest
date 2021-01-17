@@ -20,7 +20,7 @@ class BoardGame : public BoardAddSprite
 	vector<LPGAMEOBJECT>  DitgitScores;
 	vector<LPGAMEOBJECT>  listAssetOfMario;
 
-
+	Number* healthNumber = new Number();
 	PMaxSpeed* pMaxSpeed;
 	TripleBoxItem* tripleBoxItem = new TripleBoxItem();
 
@@ -42,6 +42,7 @@ class BoardGame : public BoardAddSprite
 	int life;
 	int time;
 
+	void DrawHealthNumber();
 	void DrawAssetOfMario();
 	void DrawTripleBoxItem();
 	void DrawBackGround();

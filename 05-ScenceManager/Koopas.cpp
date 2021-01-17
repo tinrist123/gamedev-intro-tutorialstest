@@ -20,8 +20,6 @@ CKoopas::CKoopas(float start_x,float start_y,int typeKoopas, int typeColorKoopas
 	this->TypeColorKoopas = typeColorKoopas;
 	nx = -1;
 
-	
-
 	autoLoadAni();
 	switch (this->TypeKoopas)
 	{
@@ -44,6 +42,10 @@ CKoopas::CKoopas(float start_x,float start_y,int typeKoopas, int typeColorKoopas
 	case KOOPAS_TYPE_HAVE_WING_FLYING:
 		this->start_state = KOOPAS_STATE_HAVE_WING_WALKING;
 		SetState(KOOPAS_STATE_HAVE_WING_WALKING);
+		health++;
+		break;
+	case KOOPAS_TYPE_HAVE_WING_JUST_FLYING:
+		SetState(KOOPAS_STATE_HAVE_WING_JUST_FLYING);
 		health++;
 		break;
 	default:
@@ -138,6 +140,17 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 	else
 	{
 		CGameObject::Update(dt, coObjects);
+		if (this->GetState() == KOOPAS_STATE_HAVE_WING_JUST_FLYING)
+		{
+			distanceOy += fabs(dy);
+			y += dy;
+			if (distanceOy >= KOOPAS_RANGE_VERTICAL_DISTANCE)
+			{
+				distanceOy = 0;
+				this->vy = -this->vy;
+			}
+			return;
+		}
 	}
 
 
@@ -214,7 +227,6 @@ void CKoopas::Update(DWORD dt, vector<LPGAMEOBJECT> *coObjects)
 		//
 		// Collision logic with other objects
 		//
-		DebugOut(L"%f\n", this->vx);
 		for (UINT i = 0; i < coEventsResult.size(); i++)
 		{
 			LPCOLLISIONEVENT e = coEventsResult[i];
@@ -387,14 +399,14 @@ void CKoopas::Render()
 		if (nx == 1 ) ani = listAnimationKoopas.at(0);
 		else if (nx == -1) ani = listAnimationKoopas.at(1);
 	}
-	else if (state == KOOPAS_STATE_HAVE_WING_JUMPING)
+	else if (state == KOOPAS_STATE_HAVE_WING_JUMPING || state == KOOPAS_STATE_HAVE_WING_JUST_FLYING)
 	{
 		if (nx == -1)
 			ani = listAnimationKoopas.at(13);
 		else if (nx == 1)
 			ani = listAnimationKoopas.at(12);
 	}
-	else if (state == KOOPAS_STATE_HAVE_WING_WALKING)
+	else if (state == KOOPAS_STATE_HAVE_WING_WALKING )
 	{
 		if (nx == -1)
 			ani = listAnimationKoopas.at(11);
@@ -492,6 +504,9 @@ void CKoopas::SetState(int state)
 	case KOOPAS_STATE_HAVE_WING_JUMPING:
 		vx = 0.05f *nx;
 		//vy = -0.10f;
+		break;
+	case KOOPAS_STATE_HAVE_WING_JUST_FLYING:
+		vy = KOOPAS_FLYING_SPEED;
 		break;
 	case KOOPAS_STATE_HAVE_WING_FLYING:
 

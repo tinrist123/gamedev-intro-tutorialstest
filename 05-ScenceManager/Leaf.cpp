@@ -15,7 +15,7 @@ void Leaf::Render()
 		animation_set->at(ITEM_ANI_LEAF_LEFT)->Render(x, y, 255);
 	}
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 void Leaf::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 {

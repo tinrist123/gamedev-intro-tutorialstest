@@ -36,6 +36,7 @@ public:
 	vector<int> listItemCollected;
 	Timer* timeToShowEndGameText;
 
+	bool isIntroScence = true;
 
 	/// <summary>
 	///  World Selection Variables
@@ -190,7 +191,7 @@ public:
 	void StartUntouchable() { untouchable = 1; untouchable_start = GetTickCount64(); }
 
 	void SetTimeFlyingForTail() { timeFlyingForTail = GetTickCount64(); }
-	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 7500;	}
+	bool CheckExpiredFlyingForTail() { return GetTickCount64() - timeFlyingForTail > 5500;	}
 	void ChainKickKoopas(CKoopas* &koopas,bool isElastic);
 
 	void MarioHitEnemy();

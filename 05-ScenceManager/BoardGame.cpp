@@ -3,6 +3,13 @@
 #include "RandomItem.h"
 
 
+void BoardGame::DrawHealthNumber()
+{
+	healthNumber->ani = mario->health;
+
+	healthNumber->Render();
+}
+
 void BoardGame::DrawAssetOfMario()
 {
 	for (size_t i = 0; i < listAssetOfMario.size(); i++)
@@ -146,6 +153,7 @@ void BoardGame::Update(DWORD dt, float camX, float camY)
 		listAssetOfMario[i]->SetPosition(CGame::GetInstance()->cam_x + 196 + 8 * i, posY + 6);
 	}*/
 	
+	healthNumber->SetPosition(posX + BBOX_BIT + BBOX_BIT/2 + BBOX_BIT / 4, posY + BBOX_BIT);
 }
 
 void BoardGame::Render()
@@ -177,7 +185,7 @@ void BoardGame::Render()
 	}
 
 	DrawTripleBoxItem();
-	//DrawAssetOfMario();
+	DrawHealthNumber();
 
 }
 

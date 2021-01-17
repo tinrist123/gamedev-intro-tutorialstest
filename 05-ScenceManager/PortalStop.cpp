@@ -26,7 +26,7 @@ PortalStop::PortalStop(int W, int H,int l ,int t , int r,int b)
 
 void PortalStop::Render()
 {
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void PortalStop::GetBoundingBox(float& l, float& t, float& r, float& b)

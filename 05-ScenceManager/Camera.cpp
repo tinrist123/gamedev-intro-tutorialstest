@@ -5,6 +5,8 @@ Camera::Camera(CMario* player, TileMap *map,int typeCamera)
 	this->player = player;
 	this->map = map;
 	this->typeCamera = typeCamera;
+	this->cam_x = player->x;
+	this->cam_y = player->y - 160.0f;
 }
 
 void Camera::Update(DWORD dt, float &posX_Player)
@@ -14,14 +16,11 @@ void Camera::Update(DWORD dt, float &posX_Player)
 
 	if (this->typeCamera == MOVING_CAMERA)
 	{
-		//cam_x += 0.03*dt;
-		cam_x = 2090;
+		cam_x += 0.03*dt;
 		if (cam_x  >= posX_Player)
 		{
 			posX_Player = cam_x;
 		}
-		DebugOut(L"player->x: %f\n", player->x);
-		DebugOut(L"player->y: %f\n", player->y);
 		if (cam_x > 1778 && cam_x < 1800)
 		{
 			cam_x = 1778.0f; //Lock Cam On End Pipe
@@ -67,7 +66,7 @@ void Camera::Update(DWORD dt, float &posX_Player)
 	}
 	else
 	{
-		cam_y = 436.0f;
+		cam_y = 466.0f;
 		isInHideMap = true;
 	}
 	//DebugOut(L"map->GetHeightMap(): %d ", map->GetHeightMap());

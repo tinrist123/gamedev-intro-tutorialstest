@@ -33,6 +33,9 @@
 # TRIPLE BOX ITEM
 8002	163	3	235	31	55
 
+# EFFECT 7UP
+8003	149	174	170	188	33
+
 #**********************************************PIPE
 # short pipe
 23000	201	415	233	447	21
@@ -443,8 +446,8 @@
 #GOOMBA
 # GOOMBA BROWN
 #Walking
-30001	65	4	81	20	60
-30002	15	4	31	20	60
+30001	65	3	81	21	60
+30002	15	3	31	21	60
 #die
 30003	315	0	331	16	60
 # BROWN GOOMBA SUPINE
@@ -461,8 +464,8 @@
 # RED DIE
 30008	313	50	331	66	60
 # WALKING RED
-30009	13	47	31	70	60
-30010	63	47	81	70	60
+30009	13	45	31	72	60
+30010	63	45	81	72	60
 # PARAGOOMBA SUPINE
 30011	199	94	215	110	52
 
@@ -1070,8 +1073,11 @@
 22998	7	100	8	100
 22999	9	100	10	100
 
+
 5000	8001	100
 5001	8002	100
+# EFFECT 7UP
+5003	8003	100
 
 # id	ani1	ani2	ani3
 #
@@ -1093,7 +1099,7 @@
 # effect fire hit Something
 8	17
 # effect point
-9	911	912	913	914	915	916	917	918
+9	911	912	913	914	915	916	917	918	5003
 # EFFECT TAIL HIT SOMETHING
 10	902
 # QUESTION BRICK
@@ -1110,8 +1116,9 @@
 # type	x	y	ani_set_id	extra_settings per object type
 # type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas,4 = Flower, 5 = Ground, 6 = ColorBox, 7 = Pipe, 8 = QuestionBrick, 9 = WeakBreak, 10 = CloundBrick, 11 = Item, 12 = Bullet, 13 = Effects
 # MARIO
-0	2040	80	1
-#0	2200	80	1
+#0	0	384	1
+#0	2240	80	1
+0	2440	80	1
 
 # KOOPAS
 3	576	350	4	2	2
@@ -1180,7 +1187,7 @@
 1	2256	304	2	1	1
 1	2272	304	2	1	1
 
-9	2590	360	2	1	1	1
+9	2590	360	2	1	1	3
 
 # Weak Brick
 9	1440	128	2	1	1
@@ -1239,9 +1246,9 @@
 
 7	2320	384	14	2	2	0	0	1
 
-7	2096	480	14	2	1	0	1	1
+7	2096	464	14	2	1	0	1	1
 
-7	2320	480	14	2	1	0	1	0
+7	2320	464	14	2	1	0	1	0
 
 # Item
 #11	175	332	5	1	1	1	1

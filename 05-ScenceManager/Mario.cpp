@@ -140,7 +140,7 @@ CMario::CMario(float x, float y) : CGameObject()
 	this->x = x; 
 	this->y = y; 
 	this->type = Type::MARIO;
-	CGame::GetInstance()->SetCamPos(start_x,start_y);
+	health = 4;
 }
 
 void  CMario::ChainKickKoopas(CKoopas* &koopas,bool isElastic)
@@ -159,6 +159,7 @@ void  CMario::ChainKickKoopas(CKoopas* &koopas,bool isElastic)
 
 void CMario::MarioHitEnemy()
 {
+	DebugOut(L"untouchable %d\n", untouchable);
 	if (untouchable == 0)
 	{
 		if (level == MARIO_LEVEL_SMALL)
@@ -169,7 +170,6 @@ void CMario::MarioHitEnemy()
 		else
 		{
 			this->SetLevel(--level);
-			//constant->changeLevelMario(level);
 			StartUntouchable();
 		}
 	}
@@ -370,7 +370,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 
 		// block every object first!
 		x += min_tx * dx + nx * 0.2f;
-		y += min_ty * dy + ny * 0.4f;
+		y += min_ty * dy + ny * 0.2f;
 
 		if (nx != 0)
 		{
@@ -380,7 +380,7 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 		if (ny != 0) {
 			if (ny < 0)
 			{
-				//vy = 0;
+				vy = 0;
 				isEnteredFirstSpaceUp = false;
 				isPreventedSpamSpace = false;
 			}
@@ -586,8 +586,11 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 			//x += nx*abs(rdx); 
 
 		// block every object first!
-		//x += min_tx * dx + nx * 0.4f;
-		y += min_ty * dy + ny * 0.4f;
+		x += min_tx * dx + nx * 0.4f;
+		y += min_ty * dy + ny * 0.1f;
+
+		if (nx != 0) vx = 0;
+
 		if (ny != 0) {
 			vy = 0;
 			isEnteredFirstSpaceUp = false;
@@ -607,6 +610,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 					P_Switch* p_switch = dynamic_cast<P_Switch*>(e->obj);
 					this->MarioSetOnGround();
 					p_switch->isActived = true;
+
+					this->vy = -MARIO_ELASTIC;
+				}
+				else if (e->nx != 0)
+				{
+					vx = 0;
 				}
 			}
 		}
@@ -821,7 +830,6 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 				if (i != lastPortalStopIndex)
 				{
 					PortalStop* pStop = dynamic_cast<PortalStop*>(listPortalStop->at(i));
-
 					this->isMovedToLeft = pStop->isMovedLeft == 1;
 					this->isMovedToTop = pStop->isMovedTop == 1;
 					this->isMovedToRight = pStop->isMovedRight == 1;
@@ -1771,6 +1779,9 @@ void CMario::CollideWithEnemy(vector<LPGAMEOBJECT> enemies)
 void CMario::playerHittingSpecialItem(LPGAMEOBJECT& item, vector<LPGAMEOBJECT>& listEffect)
 {
 	item->SetState(ITEM_STATE_HITTING_MARIO);
+	
+	EffectPoint* effect = new EffectPoint();
+
 	if (item->getTypeObject() == Type::SUPER_MUSHROOM)
 	{
 		Mushroom* mushroom = static_cast<Mushroom*>(item);
@@ -1782,6 +1793,9 @@ void CMario::playerHittingSpecialItem(LPGAMEOBJECT& item, vector<LPGAMEOBJECT>& 
 		else if (mushroom->kindOfMushroom == KIND_GREEN_MUSHROOM)
 		{
 			this->health++;
+			effect->SetState(EFFECT_STATE_7UP);
+			this->scores-=100;
+
 		}
 	}
 	else if (item->getTypeObject() == Type::SUPER_LEAF)
@@ -1789,10 +1803,8 @@ void CMario::playerHittingSpecialItem(LPGAMEOBJECT& item, vector<LPGAMEOBJECT>& 
 		this->SetLevel(++this->level);
 	}
 
-	EffectPoint* effect = new EffectPoint();
-	effect->SetPosition(item->x, item->y);
 	listEffect.push_back(effect);
-
+	effect->SetPosition(item->x, item->y);
 	this->increScores();
 }
 

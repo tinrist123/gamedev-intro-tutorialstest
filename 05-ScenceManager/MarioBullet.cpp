@@ -179,9 +179,13 @@ void MarioBullet::Update(DWORD dt, vector<LPGAMEOBJECT>* coObjects)
 			{
 				if (e->ny != 0 || e->nx != 0)
 				{
+					CFlower* flower = dynamic_cast<CFlower*>(e->obj);
+					flower->addPointToItem();
+					flower->health = 0;
+					flower->setObjDisappear();
+
 					this->BulletCollision();
 					DisapearBullet();
-					e->obj->setObjDisappear();
 				}
 			}
 			else if (e->obj->getTypeObject() == Type::GOOMBA)

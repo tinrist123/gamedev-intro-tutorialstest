@@ -112,8 +112,8 @@ void MarioTail::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj, vector<LPGAMEO
 						CFlower* flower = dynamic_cast<CFlower*>(e);
 						CreateEffect();
 						flower->addPointToItem();
-						e->subHealth();
-						//flower->setObjDisappear();
+						flower->health = 0;
+						flower->setObjDisappear();
 					}
 					else if (e->getTypeObject() == Type::BOOMERANGBROTHER)
 					{
@@ -135,7 +135,7 @@ void MarioTail::Render()
 	for (LPGAMEOBJECT effect : listEffect)
 		effect->Render();
 
-	RenderBoundingBox();
+	//RenderBoundingBox();
 }
 
 void MarioTail::GetBoundingBox(float& left, float& top, float& right, float& bottom)

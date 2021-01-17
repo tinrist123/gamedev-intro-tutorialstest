@@ -8,12 +8,14 @@
 #include "EffectHitTail.h"
 
 #define KOOPAS_WALKING_SPEED 0.05f;
+#define KOOPAS_FLYING_SPEED 0.03f;
 
 #define KOOPAS_TYPE_HAVE_WING										1
 #define KOOPAS_TYPE_NORMAL											2
 #define KOOPAS_TYPE_HAVE_WING_WALKING								3
 #define KOOPAS_TYPE_HAVE_WING_JUMPING								4
 #define KOOPAS_TYPE_HAVE_WING_FLYING								5
+#define KOOPAS_TYPE_HAVE_WING_JUST_FLYING							6
 
 
 #define KOOPAS_BBOX_WIDTH											16
@@ -32,6 +34,8 @@
 #define KOOPAS_STATE_PRE_REVIE_2									10
 #define KOOPAS_STATE_HIT_BY_WEAPON_MARIO							11
 #define KOOPAS_STATE_HAVE_WING_FLYING								12
+#define KOOPAS_STATE_HAVE_WING_JUST_FLYING							14
+
 
 #define KOOPAS_ANI_WALKING_LEFT										0
 #define KOOPAS_ANI_WALKING_RIGHT									1
@@ -72,6 +76,7 @@
 #define KOOPAS_GREEN_TYPE											1
 #define KOOPAS_RED_TYPE												2
 
+#define KOOPAS_RANGE_VERTICAL_DISTANCE								112
 
 // TODO : KOOPAS
 //	DONE	KOOPAS 2 loai mau
@@ -92,6 +97,8 @@ public:
 	int TypeColorKoopas = KOOPAS_GREEN_TYPE;
 	int TypeKoopas;
 	DWORD revivalTime;
+
+	float distanceOy = 0;
 
 	
 	int marioPositionX = 0;

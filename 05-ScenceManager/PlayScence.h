@@ -63,6 +63,8 @@ public:
 	vector<LPGAMEOBJECT> marioBullet;
 	vector<LPGAMEOBJECT> listPipe;
 
+	LPGAMEOBJECT selectionCarret;
+
 	float posOfTextEndGame_x;
 	float posOfTextEndGame_y;
 
