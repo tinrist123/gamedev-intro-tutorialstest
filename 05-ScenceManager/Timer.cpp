@@ -1,4 +1,5 @@
 #include "Timer.h"
+#include "Utils.h"
 
 Timer::Timer(ULONGLONG limitedTime)
 {

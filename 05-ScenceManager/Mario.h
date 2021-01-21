@@ -31,6 +31,7 @@ public:
 	bool isSwitchedScreen = false;
 	bool isEndMap = false;
 	
+	bool isForcusTurnOffIntro = false;
 
 	// Asset of Mario
 	vector<int> listItemCollected;

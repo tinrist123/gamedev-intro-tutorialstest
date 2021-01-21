@@ -32,9 +32,91 @@ int Screen_Game_Height;
 
 
 
+struct object_value_Id
+{
+	string typeObj;
+	int posX;
+	int posY;
+	int ID_Grid;
+
+	void StoreValue(string typeObj, int x, int y, int ID_Grid)
+	{
+		this->typeObj = typeObj;
+		this->posX = x;
+		this->posY = y;
+		this->ID_Grid = ID_Grid;
+	}
+
+};
+
+vector<object_value_Id> listObject_value;
 
 // Format CELL POSITION - OBJECTS IN CELL
 unordered_map<int, unordered_map<int, vector<string>>> allCells;
+
+// Type--- List<X-Y>
+unordered_map<string,vector<unordered_map<int,int>>> allObjKey_Value;
+
+
+unordered_map<int,int> listNumber_store;
+
+bool checkExistObjInCell(string typeObj, int posX, int posY)
+{
+	for (unordered_map<int, int> list : allObjKey_Value[typeObj])
+	{
+		if (list[posX] == posY)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+void storeObjKey_value(vector <string> tokens)
+{
+	string typeObj = tokens[0];
+
+	unordered_map<int, int> positionObj({
+		{atoi(tokens[1].c_str()),
+		atoi(tokens[2].c_str())}
+		});
+
+	allObjKey_Value[typeObj].push_back(positionObj);
+}
+
+bool checkObjValue(string typeObj, int x, int y)
+{
+	for (int i = 0; i < listObject_value.size(); i++)
+	{
+		if (listObject_value[i].posX == x
+			&&
+			listObject_value[i].posY == y
+			&&
+			listObject_value[i].typeObj == typeObj
+			)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+int getObjValue_Id(string typeObj, int x, int y)
+{
+	for (int i = 0; i < listObject_value.size(); i++)
+	{
+		if (listObject_value[i].posX == x
+			&&
+			listObject_value[i].posY == y
+			&&
+			listObject_value[i].typeObj == typeObj
+			)
+		{
+			return listObject_value[i].ID_Grid;
+		}
+	}
+
+	return -1;
+}
 
 vector<string> split(string line, string delimeter)
 {
@@ -116,12 +198,46 @@ void formatLineString(vector<string> tokensLine, int left, int top, int right, i
 	{
 		for (int col = left; col < right; col++)
 		{
+
 			// Clone value to detect last col
 			vector<string> tokens = tokensLine;
 
+			string typeObj = tokens[0];
+			int posX = atoi(tokens[1].c_str());
+			int posY = atoi(tokens[2].c_str());
+			int randomId = rand() % 200;
+
+			if (checkExistObjInCell(typeObj,posX,posY))
+			{
+				if (checkObjValue(typeObj, posX, posY))
+				{
+					randomId = getObjValue_Id(typeObj,posX,posY);
+				}
+			}
+			else
+			{
+				while (listNumber_store[randomId] == 1)
+				{
+					randomId = rand() % 200;
+				}
+				listNumber_store[randomId] = 1;
+
+				object_value_Id obj;
+
+				obj.StoreValue(typeObj, posX, posY, randomId);
+				listObject_value.push_back(obj);
+				storeObjKey_value(tokensLine);
+			}
+
+			if (randomId == 48)
+			{
+				int x = 3;
+			}
+
+			tokens.push_back(to_string(randomId));
 			// Change BBox value to Cell position Value
-			tokens[lastIndexString] = to_string(row);
-			tokens[preLastIndexString] = to_string(col);
+			tokens[lastIndexString] = to_string(col);
+			tokens[preLastIndexString] = to_string(row);
 
 			// Join to string
 			string line = join(tokens, "\t");
@@ -130,6 +246,9 @@ void formatLineString(vector<string> tokensLine, int left, int top, int right, i
 	}
 
 }
+
+
+
 
 void _ParseSection_OBJECT(string line)
 {
@@ -176,20 +295,6 @@ void exportFile_ObjectsAndCell()
 			}
 		}
 	}
-
-	//for (int i = 0; i < allCells.size(); i++)
-	//{
-	//	for (int j = 0; i < allCells[i].size(); j++)
-	//	{
-	//		for (int k = 0; k < allCells[i][j].size(); k++)
-	//		{
-	//			//string s = allCells[i][j].at(k);
-	//			//myfile << allCells[i][j].at(k);
-	//			//myfile << "CELL " << i << " " << j;
-	//		}
-	//	}
-	//}
-
 	myfile.close();
 }
 
@@ -237,28 +342,3 @@ int main()
 
 
 
-//# Ground
-//5	0	416	22	39	1
-//5	624	400	22	29	1
-//5	1152	416	22	22	1
-//5	1536	416	22	5	1
-//5	1664	416	22	36	1
-//5	2256	416	22	35	1
-//5 - 16	384	22	1	10
-//5	1505	336	22	2	1
-//5	1569	400	22	1	1
-//5	1585	384	22	1	2
-//5	1601	368	22	1	3
-//5	1665	368	22	1	3
-//5	1681	384	22	1	2
-//5	1697	400	22	1	1
-//5	1968	464	22	8	12
-//5	2096	624	22	8	2
-//5	2224	608	22	1	3
-//5	2240	593	22	1	4
-//5	2256	576	22	1	5
-//5	2272	560	22	1	6
-//5	2288	544	22	1	7
-//5	2304	528	22	3	8
-//5	2352	464	22	8	12
-//5	2128	464	22	12	1

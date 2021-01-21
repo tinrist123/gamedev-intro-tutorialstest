@@ -29,7 +29,7 @@ void TileMap::LoadMap()
 			int id_SPRITE = id + id_sprite;
 			sprites->Add(id_SPRITE, tileset_width * j, tileset_height * i, tileset_width * (j + 1), tileset_height * (i + 1), texTileMap);
 			id_sprite = id_sprite + 1;
-			DebugOut(L"id_sprite = %d\n", id_SPRITE);
+			//DebugOut(L"id_sprite = %d\n", id_SPRITE);
 		}
 	}
 }
@@ -38,11 +38,11 @@ void TileMap::LoadMap()
 
 void TileMap::Load()
 {
-	DebugOut(L"[INFO] Start loading map resources from : %s \n", filePath_data);
+	//DebugOut(L"[INFO] Start loading map resources from : %s \n", filePath_data);
 	ifstream fs(filePath_data, ios::in);
 	if (fs.fail())
 	{
-		DebugOut(L"[ERROR] TileMap::Load_MapData failed: ID=%d", id);
+		//DebugOut(L"[ERROR] TileMap::Load_MapData failed: ID=%d", id);
 		fs.close();
 		return;
 	}
@@ -52,7 +52,7 @@ void TileMap::Load()
 			fs >> tilemap[i][j];
 	}
 	fs.close();
-	DebugOut(L"[INFO] Done loading map resources %s\n", filePath_data);
+	//DebugOut(L"[INFO] Done loading map resources %s\n", filePath_data);
 }
 
 void TileMap::Draw()

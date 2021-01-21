@@ -55,6 +55,9 @@
     <Filter Include="Source Files\Intro">
       <UniqueIdentifier>{ca13c84a-df48-49c0-9940-b28f1c80b358}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\NewFilter1">
+      <UniqueIdentifier>{413778ef-e6cf-46bd-9e45-4f7571625eab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -236,6 +239,15 @@
     </ClCompile>
     <ClCompile Include="BoOmerangBrother.cpp">
       <Filter>Source Files\Enemy</Filter>
+    </ClCompile>
+    <ClCompile Include="Sympol_3.cpp">
+      <Filter>Source Files\Intro</Filter>
+    </ClCompile>
+    <ClCompile Include="GreetingDoor.cpp">
+      <Filter>Source Files\Intro</Filter>
+    </ClCompile>
+    <ClCompile Include="AdvertisementText.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -420,6 +432,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SelectionCarret.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Sympol_3.h">
+      <Filter>Source Files\Intro</Filter>
+    </ClInclude>
+    <ClInclude Include="GreetingDoor.h">
+      <Filter>Source Files\Intro</Filter>
+    </ClInclude>
+    <ClInclude Include="AdvertisementText.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

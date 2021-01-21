@@ -31,6 +31,13 @@ enum Type
 	PORTALSTOP = 70,
 
 	SHAKETREE = 81,
+
+
+	// Intro Scence Element
+	GREETINGDOOR = 110,
+	SELECTIONCARRET = 111,
+	ADVERTISEMENT = 112,
+	SYMPOL3 = 113,
 };
 
 enum Category

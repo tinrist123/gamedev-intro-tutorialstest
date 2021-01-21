@@ -125,6 +125,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AdvertisementText.cpp" />
     <ClCompile Include="Animations.cpp" />
     <ClCompile Include="BoardAddSprite.cpp" />
     <ClCompile Include="BoardGame.cpp" />
@@ -143,6 +144,7 @@
     <ClCompile Include="EndGame.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="FireBullet.cpp" />
+    <ClCompile Include="GreetingDoor.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ColorBox.cpp" />
@@ -172,6 +174,7 @@
     <ClCompile Include="RandomItem.cpp" />
     <ClCompile Include="SelectionCarret.cpp" />
     <ClCompile Include="ShakeTree.cpp" />
+    <ClCompile Include="Sympol_3.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="TripleBoxItem.cpp" />
     <ClCompile Include="Utils.cpp" />
@@ -187,6 +190,7 @@
     <ClCompile Include="WeakBrick.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AdvertisementText.h" />
     <ClInclude Include="Animations.h" />
     <ClInclude Include="BoardAddSprite.h" />
     <ClInclude Include="BoardGame.h" />
@@ -206,6 +210,7 @@
     <ClInclude Include="EndGame.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="FireBullet.h" />
+    <ClInclude Include="GreetingDoor.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="ColorBox.h" />
@@ -235,6 +240,7 @@
     <ClInclude Include="RandomItem.h" />
     <ClInclude Include="SelectionCarret.h" />
     <ClInclude Include="ShakeTree.h" />
+    <ClInclude Include="Sympol_3.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="TripleBoxItem.h" />
     <ClInclude Include="Utils.h" />

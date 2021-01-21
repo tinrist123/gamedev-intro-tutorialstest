@@ -46,7 +46,23 @@ class CPlayScene: public CScene
 public: 
 	CMario *player;					// A play scene has to have player, right? 
 	
-	Grid* gridObjMoving;
+
+	// intro scence
+	Timer* timeMovingGreetingDoor = new Timer(200);
+	Timer* timeToRemoveAdvertisement = new Timer(1000);
+	bool isEndGreetingDoor = false;
+	bool isAdvertisementStart = false;
+	bool isBlackBackground = true;
+	bool isRender = false;
+	//END INTRO SCENCE
+	
+	
+	Grid* gridGame;
+
+	vector<int> listId_grid;
+
+	// ID--ROW--COL---OBJ
+	unordered_map<int, vector<unordered_map<int, int>>> objects_cell;
 
 	// Default List to get Static Obj, this is Constant
 	vector<LPGAMEOBJECT> listStaticObj;
@@ -60,6 +76,9 @@ public:
 
 	// All objects include: Moving and static Obj
 	vector<LPGAMEOBJECT> objects;
+	
+	// Use for Grid, Hashmap
+	unordered_map<int, LPGAMEOBJECT> objectsGrid;
 
 	// All obj Indepen on Grid, Just push once
 	vector<LPGAMEOBJECT> StaticObjects;
@@ -139,6 +158,8 @@ public:
 	virtual void Unload();
 	void GetObjectGrid();
 
+
+	bool checkElementExist(int idGrid);
 	void CheckTimeExpired_Transformed();
 	Item* CreateItemOfMario(QuestionBrick* object);
 	Item* CreateItemForWeakBrick(WeakBrick* object);
@@ -180,6 +201,13 @@ public:
 
 	float camY;
 	//friend class CPlayScenceKeyHandler;
+
+	void DrawBackGround()
+	{
+		LPDIRECT3DTEXTURE9 darken = CTextures::GetInstance()->Get(1);
+
+		CGame::GetInstance()->Draw(0, 0, darken, 0, 0, 300,187, 255);
+	}
 };
 
 class CPlayScenceKeyHandler : public CScenceKeyHandler

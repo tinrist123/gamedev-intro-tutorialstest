@@ -2,7 +2,9 @@
 #include <iostream>
 #include <fstream>
 #include "PlayScence.h"
-
+#include "Sympol_3.h"
+#include "GreetingDoor.h"
+#include "AdvertisementText.h"
 
 using namespace std;
 
@@ -48,6 +50,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath,bool isWorldSeletion, int typeCa
 
 #define OBJECT_TYPE_PORTAL				50
 #define OBJECT_TYPE_SELECTION_CARRET	51
+#define OBJECT_TYPE_SYMPOL_3			52
 
 #define MAX_SCENE_LINE					1024
 
@@ -82,7 +85,7 @@ void CPlayScene::_ParseSection_SPRITES(string line)
 	LPDIRECT3DTEXTURE9 tex = CTextures::GetInstance()->Get(texID);
 	if (tex == NULL)
 	{
-		DebugOut(L"[ERROR] Texture ID %d not found!\n", texID);
+		//DebugOut(L"[ERROR] Texture ID %d not found!\n", texID);
 		return; 
 	}
 
@@ -148,8 +151,10 @@ void CPlayScene::_ParseSection_Map(string line)
 	float heightGrid = atoi(tokens[10].c_str());
 	
 
-	gridObjMoving = new Grid();
-	gridObjMoving->Resize(widthGrid,heightGrid);
+	gridGame = new Grid();
+	gridGame->storeGrid_Object_FromFile(objects_cell);
+	gridGame->Resize(widthGrid,heightGrid);
+	gridGame->Firstly_PushObjects(objectsGrid);
 
 	map = new TileMap(ID, filePath_texture.c_str(), filePath_data.c_str(), num_row_on_texture, num_col_on_textture, num_row_on_tilemap, num_col_on_tilemap, tileset_width, tileset_height);
 	boardGame = new BoardGame(player);
@@ -170,34 +175,28 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	int object_type = atoi(tokens[0].c_str());
 	float x = atof(tokens[1].c_str());
 	float y = atof(tokens[2].c_str());
-
 	int ani_set_id = atoi(tokens[3].c_str());
 
 	CAnimationSets* animation_sets = CAnimationSets::GetInstance();
 	LPANIMATION_SET ani_set = animation_sets->Get(ani_set_id);
+
+
 
 	CGameObject *obj = NULL;
 
 	switch (object_type)
 	{
 	case OBJECT_TYPE_MARIO:
-		//if (player!=NULL) 
-		//{
-		//	//DebugOut(L"[ERROR] MARIO object was created before!\n");
-		//	return;
-		//}
-		//else
 		{
 			player = CMario::GetInstance();
 			player->SetAnimationSet(ani_set);
 			player->SetPosition(x, y);
 			return;
 		}
-		//DebugOut(L"[INFO] Player object created!\n");
 		break;
 	case OBJECT_TYPE_GOOMBA: {
 		int typeGoomba = atof(tokens[4].c_str());
-		obj = new CGoomba(x,y,typeGoomba); 
+		obj = new CGoomba(x,y,typeGoomba);
 		break;
 	}
 	case OBJECT_TYPE_MOVING_WOOD:
@@ -298,6 +297,9 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		selectionCarret->SetAnimationSet(ani_set);
 		selectionCarret->SetPosition(x, y);
 		break;
+	case OBJECT_TYPE_SYMPOL_3:
+		obj = new Sympol_3();
+		break;
 	case OBJECT_TYPE_Pipe:
 	{
 		float width = atof(tokens[4].c_str());
@@ -351,9 +353,29 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		return;
 	}
 
+	int lastCol = tokens.size() - 1;
+
+	int id_grid = atoi(tokens[lastCol].c_str());
+
+	obj->idGrid = id_grid;
+
 	// General object setup
 	obj->SetAnimationSet(ani_set);
 	obj->SetPosition(x, y);
+
+
+	int row_cell = atoi(tokens[lastCol - 1].c_str());
+	int col_cell = atoi(tokens[lastCol - 2].c_str());
+
+
+	if (id_grid == 190)
+	{
+		int x = 3;
+	}
+
+	if (id_grid != -1)
+		objects_cell[id_grid].push_back(unordered_map<int, int>({ {row_cell,col_cell} }));
+
 
 	if (obj->getTypeObject() == Type::PIPE)
 	{
@@ -373,6 +395,13 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	}
 	else if (!player->isInWorldSelectionMap)
 	{
+		if (checkElementExist(id_grid))
+		{
+			return;
+		}
+
+		listId_grid.push_back(id_grid);
+
 		if (obj->getCategoryObject() == Category::ENEMY)
 		{
 			listMovingObject.push_back(obj);
@@ -382,7 +411,14 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 			listStaticObj.push_back(obj);
 		}
 		objects.push_back(obj);
+		objectsGrid[id_grid] = obj;
 	}
+	else if (player->isIntroScence)
+	{
+		objects.push_back(obj);
+	}
+
+
 }
 
 void CPlayScene::Load()
@@ -390,6 +426,7 @@ void CPlayScene::Load()
 	//DebugOut(L"[INFO] Start loading scene resources from : %s \n", sceneFilePath);
 	//mapScence = new TileMap();
 	
+
 	ifstream f;
 	f.open(sceneFilePath);
 	// current resource section flag
@@ -433,7 +470,29 @@ void CPlayScene::Load()
 
 	CTextures::GetInstance()->Add(ID_TEX_BBOX, L"textures\\bbox.png", D3DCOLOR_XRGB(255, 255, 255));
 
+	if (player->isIntroScence)
+	{
+		GreetingDoor* door = new GreetingDoor();
+		door->SetPosition(16, 0);
+		objects.push_back(door);
+
+		AdvertisementText* advertisement = new AdvertisementText();
+		advertisement->SetPosition(16, -300);
+		objects.push_back(advertisement);
+	}
+
 	//DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
+}
+
+
+bool CPlayScene::checkElementExist(int idGrid)
+{
+	for (size_t i = 0; i < listId_grid.size(); i++)
+	{
+		if (listId_grid[i] == idGrid) return true;
+	}
+
+	return false;
 }
 
 
@@ -838,19 +897,23 @@ void CPlayScene::GetObjectGrid()
 	listWeakBrick.clear();
 	enemies.clear();
 
-	for (size_t i = 0; i < listStaticObj.size(); i++)
-	{
-		ObjectsInScreen.push_back(listStaticObj[i]);
-	}
-
-
-	// Temporary vector to save all dynamic obj in Screen 
+	// Temporary vector to save all dynamic and idle obj in Screen 
 	vector<LPGAMEOBJECT> listObjMoveInScreen;
+	vector<LPGAMEOBJECT> listObIdleInScreen;
 	// Get dynamic obj
-	gridObjMoving->GetGrid(listObjMoveInScreen);
+	
+	gridGame->GetObjInGrid(listObIdleInScreen, listObjMoveInScreen);
+
 	for (size_t i = 0; i < listObjMoveInScreen.size(); i++)
 	{
 		ObjectsInScreen.push_back(listObjMoveInScreen[i]);
+	}
+
+	DebugOut(L"enemy = %d \n", listObjMoveInScreen.size());
+
+	for (size_t i = 0; i < listObIdleInScreen.size(); i++)
+	{
+		ObjectsInScreen.push_back(listObIdleInScreen[i]);
 	}
 }
 
@@ -864,16 +927,75 @@ void CPlayScene::Update(DWORD dt)
 	float playerPositionX = player->x;
 	float playerPositionY = player->y;
 
-	gridObjMoving->ResetCamGrid(listMovingObject);
+	gridGame->ResetCamGrid(listMovingObject);
+	gridGame->ResetCamGrid(listStaticObj);
+
 	GetObjectGrid();
 	
 	SplitObjectsToDetect(coObjects);
 	
-
 	if (player->isIntroScence)
 	{
-		selectionCarret->Update(dt, &coObjects);
+		for (size_t i = 0; i < objects.size(); i++)
+		{
+			objects[i]->Update(dt, &coObjects);
+			if (objects[i]->getTypeObject() == Type::GREETINGDOOR)
+			{
+				if (objects[i]->y < -180)
+				{
+					this->isAdvertisementStart = true;
+					objects.erase(objects.begin() + i);
+				}
+				if (!timeMovingGreetingDoor->isStarted)
+				{
+					timeMovingGreetingDoor->isStarted = true;
+					timeMovingGreetingDoor->Start();
+				}
+				else if (timeMovingGreetingDoor->IsTimeUp())
+				{
+					objects[i]->SetSpeed(0, -0.1);
+					timeMovingGreetingDoor->Stop();
+				}
+			}
+			else if (objects[i]->getTypeObject() == Type::ADVERTISEMENT)
+			{
+				if (this->isAdvertisementStart)
+				{
+					if (objects[i]->y > 0)
+					{
+						objects[i]->SetSpeed(0, 0);
+						this->isAdvertisementStart = false;
+						this->isBlackBackground = false;
+						timeToRemoveAdvertisement->Start();
+					}
+					else
+					{
+						objects[i]->SetSpeed(0, 0.15);
+					}
+				}
+			}
+
+			
+		}
+		if (timeToRemoveAdvertisement->IsTimeUp())
+		{
+			for (size_t i = 0; i < objects.size(); i++)
+			{
+				if (objects[i]->getTypeObject() == Type::ADVERTISEMENT)
+				{
+					objects.erase(objects.begin() + i);
+					isRender = true;
+				}
+			}
+		}
+		return;
 	}
+
+
+	/*if (player->isIntroScence)
+	{
+		selectionCarret->Update(dt, &coObjects);
+	}*/
 
 	{
 		if (player->isFireShoot)
@@ -981,18 +1103,6 @@ void CPlayScene::Update(DWORD dt)
 			weakBrick->setObjDisappear();
 		}
 
-		/*if (listCBrick[i]->checkInActiveUpdated())
-		{
-			if (this->isReversedCoinToWeakBrick)
-			{
-				WeakBrick* weakBrick = dynamic_cast<WeakBrick*>(listCBrick[i]);
-				weakBrick->activeUpdate();
-				weakBrick->isRendered = true;
-				weakBrick->isTranformed = false;
-			}
-			continue;
-		}*/
-
 		listCBrick[i]->Update(dt, NULL);
 
 	}
@@ -1082,6 +1192,8 @@ void CPlayScene::Update(DWORD dt)
 	player->CollideWithCoinTransform(listCoinTransform,listWeakBrick);
 	player->CollisionWithFireball(listFireBall);
 
+
+	
 
 	int enemySize = enemies.size();
 	for (size_t i = 0; i < enemySize; i++)
@@ -1504,7 +1616,7 @@ void CPlayScene::Update(DWORD dt)
 
 	if (!player->isEndMap)
 	{
-		gridObjMoving->ResetGrid(listMovingObject);
+		gridGame->ResetGrid(listStaticObj,listMovingObject);
 	}
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
@@ -1516,6 +1628,42 @@ void CPlayScene::Update(DWORD dt)
 void CPlayScene::Render()
 {
 	map->Draw();
+	if (this->isBlackBackground && !player->isForcusTurnOffIntro)
+	{
+		DrawBackGround();
+	}
+	if (player->isInWorldSelectionMap || player->isIntroScence)
+	{
+		for (size_t i = 0; i < objects.size(); i++)
+		{
+			if (objects[i]->getTypeObject() == Type::GREETINGDOOR)
+			{
+				if (objects[i]->y < 100)
+				{
+					objects[i]->Render();
+				}
+			}
+			else if (objects[i]->getTypeObject() == Type::ADVERTISEMENT)
+			{
+				if (this->isAdvertisementStart)
+				{
+					if (objects[i]->y > 0)
+					{
+						isRender = true;
+					}
+					else
+					{
+						objects[i]->Render();
+					}
+				}
+			}
+			if (isRender)
+			{
+				objects[i]->Render();
+			}
+		}
+	}
+	
 
 
 
@@ -1537,9 +1685,9 @@ void CPlayScene::Render()
 	{
 		player->Render();
 	}
-	else {
+	/*else {
 		selectionCarret->Render();
-	}
+	}*/
 
 
 	for (size_t i = 0; i < dynamicItems.size(); i++)
@@ -1551,13 +1699,7 @@ void CPlayScene::Render()
 	{
 		listPortalStop[i]->Render();
 	}
-	if (player->isInWorldSelectionMap)
-	{
-		for (size_t i = 0; i < objects.size(); i++)
-		{
-			objects[i]->Render();
-		}
-	}
+	
 			
 	for (size_t i = 0; i < items.size(); i++)
 	{
@@ -1668,7 +1810,7 @@ void CPlayScene::Unload()
 	 delete Portal;
 
 	//player = NULL;
-	DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
+	//DebugOut(L"[INFO] Scene %s unloaded! \n", sceneFilePath);
 }
 
 
@@ -1774,6 +1916,7 @@ void CPlayScenceKeyHandler::OnKeyDown(int KeyCode)
 				{
 					mario->isIntroScence = false;
 					mario->isWalking = false;
+					mario->isForcusTurnOffIntro = true;
 					CGame::GetInstance()->SwitchScene(SCENCE_ID_WORLD_SELECTION);
 				}
 				else

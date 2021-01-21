@@ -70,6 +70,7 @@ public:
 	bool isInCamera;
 	bool isUnupdated = false;
 
+	int idGrid;
 	int type;
 	int category = -1;
 

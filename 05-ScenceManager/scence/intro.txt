@@ -32,6 +32,19 @@
 
 9000	30	307	37	315	93
 
+# so 3 nhap nhay
+9050	194	363	236	404	93
+9051	240	363	282	404	93
+9052	287	363	329	404	93
+9053	333	363	375	404	93
+
+# CAI MAN CHAO SAN
+9060	0	0	256	187	93
+
+# ADVERTISEMENT
+9061	516	0	772	187	93
+
+
 #================================BOMERANG BROTHER
 # RIGHT
 #===WAlKING OR ATTACKING
@@ -1105,6 +1118,15 @@
 
 5002	9000	100
 
+# so 3 nhap nhay
+5050	9050	100	9051	100	9052	100	9053	100
+
+# cai man chao san
+5060	9060	100
+
+# ADVERTISEMENT
+5061	9061	100
+
 #=====================BOMERANG BROTHER
 # RIGHT
 # WALKING OR ATTACKING
@@ -1123,7 +1145,7 @@
 # IDLE LEFT
 201	8028	100
 
-202	8028	100	8031	100	8030	100	8029	100
+202	8028	300	8031	300	8030	300	8029	300
 
 
 # id	ani1	ani2	ani3
@@ -1167,6 +1189,9 @@
 18	200	201	202
 #========== SELECTION CARRET
 19	5002
+#========= SO 3 NHAP NHAY
+20	5050	5060	5061
+
 [OBJECTS]
 # type	x	y	ani_set_id	extra_settings per object type
 # type: 0 = Mario , 1 = Brick, 2 = Goomba, 3 = Koopas,4 = Flower, 5 = Ground, 6 = ColorBox, 7 = Pipe, 8 = QuestionBrick, 9 = WeakBreak, 10 = CloundBrick, 11 = Item, 12 = Bullet, 13 = Effects
@@ -1174,9 +1199,11 @@
 # MARIO
 0	0	384	1
 #0	2200	80	1
-
 #SELECTION CARRET
-51	80	145	19
+51	80	145	19	-1
+
+#SO 3 NHAP NHAY
+52	128	95	20	-1
 
 [TILEMAP]
 9999	textures\intro.png	textures\intro.txt	11	11	17	49	16	16	800	600
