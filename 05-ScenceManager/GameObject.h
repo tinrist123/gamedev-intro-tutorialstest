@@ -5,7 +5,6 @@
 #include "Sprites.h"
 #include "Animations.h"
 #include "define.h"
-#include <d3dx9.h>
 #include <algorithm>
 #include "Textures.h"
 #include "Game.h"

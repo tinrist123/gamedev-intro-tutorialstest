@@ -29,7 +29,7 @@ class CMario : public CGameObject
 public:
 	static CMario* __instance;
 	bool isSwitchedScreen = false;
-
+	bool isEndMap = false;
 	
 
 	// Asset of Mario

@@ -14,7 +14,7 @@ void FireBullet::GetBoundingBox(float& l, float& t, float& r, float& b)
 	if (!isBoundingBox)
 	{
 		l = r;
-		t - b;
+		t = b;
 	}
 	else
 	{

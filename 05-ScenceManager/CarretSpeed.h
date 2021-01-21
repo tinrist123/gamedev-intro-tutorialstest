@@ -1,5 +1,4 @@
 #pragma once
-#pragma warning
 
 #include "BoardAddSprite.h"
 class CarretSpeed

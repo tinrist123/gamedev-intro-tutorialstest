@@ -32,35 +32,64 @@
 #include "LetterEndGame.h"
 #include "BoxItem.h"
 #include "RandomItem.h"
+#include "P_Switch.h"
+#include "ShakeTree.h"
+#include "PortalStop.h"
+#include "P_Switch.h"
+#include "MovingWood.h"
+#include "BoomerangBrother.h"
+#include "BomerangWeapon.h"
+#include "SelectionCarret.h"
 
 class CPlayScene: public CScene
 {
 public: 
 	CMario *player;					// A play scene has to have player, right? 
-	Grid* grid;
+	
+	Grid* gridObjMoving;
+
+	// Default List to get Static Obj, this is Constant
+	vector<LPGAMEOBJECT> listStaticObj;
+
+	// Default List to get dyniamic/moving Obj, this is Constant
+	vector<LPGAMEOBJECT> listMovingObject;
+
 	Camera* cam;
 	Timer* expiredTimeOfCoin;
 	Timer* EndGameTime = new Timer(900);
 
+	// All objects include: Moving and static Obj
 	vector<LPGAMEOBJECT> objects;
-	vector<LPGAMEOBJECT> mapObjects;
+
+	// All obj Indepen on Grid, Just push once
+	vector<LPGAMEOBJECT> StaticObjects;
+
+	// World Selection obj
 	vector<LPGAMEOBJECT> listPortalStop;
-	// Waiting for Grid
+	
+	// Use grid to Get all objects in Screen
 	vector<LPGAMEOBJECT> ObjectsInScreen;
+
+	// All small lists
 	vector<LPGAMEOBJECT> items;
 	vector<LPGAMEOBJECT> dynamicItems;
 	vector<LPGAMEOBJECT> enemies;
-	vector<LPGAMEOBJECT> staticObjects;
 	vector<LPGAMEOBJECT> listCBrick;
+
+
 
 	// This List is special, It Trigger Event P_switch active 
 	// Transform Coin to Weak or turn back
 	vector<LPGAMEOBJECT> listWeakBrick;
 	vector<LPGAMEOBJECT> listCoinTransform;
+	// Trigger for P_switch
 
+	// Special list, Independence on Grid
 	vector<LPGAMEOBJECT> effects;
 	vector<LPGAMEOBJECT> listFireBall;
 	vector<LPGAMEOBJECT> marioBullet;
+
+	// Trigger for Slipe into Pipe
 	vector<LPGAMEOBJECT> listPipe;
 
 	LPGAMEOBJECT selectionCarret;
@@ -145,6 +174,7 @@ public:
 	TileMap* map;
 	CMario * GetPlayer() { return player; } 
 
+	void SplitObjectsToDetect(vector<LPGAMEOBJECT>& coObjects);
 
 	void DetectSpecialAttributeOfMap();
 

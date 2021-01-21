@@ -42,8 +42,8 @@ void CGoomba::GetBoundingBox(float &left, float &top, float &right, float &botto
 		if (this->level == PARAGOOMBA)
 		{
 			top = y + GOOMBA_BBOX_DISTANCE_MAX_HEIGHT - 1;
-			bottom = y + GOOMBA_BBOX_HEIGHT;
 			right = x + GOOMBA_BBOX_WIDTH ;
+			bottom = y + GOOMBA_BBOX_HEIGHT;
 		}
 		if (state == GOOMBA_STATE_DIE)
 		{

@@ -2,11 +2,9 @@
 #include"GameObject.h"
 #include"Game.h"
 #include"Utils.h"
-#define CELL_WIDTH 250
-#define CELL_HEIGHT 250
+#define CELL_WIDTH	195
+#define CELL_HEIGHT 328
 
-//#define CELL_WIDTH 10
-//#define CELL_HEIGHT 10
 
 #define MAP_WIDTH 3328
 #define MAP_HEIGHT  1000
@@ -25,7 +23,8 @@ public:
 	void ClearGrid(int nums_row, int nums_col);
 	void ResetGrid(vector<LPGAMEOBJECT> list);
 	void PushGrid(vector<LPGAMEOBJECT> list);
-	void GetGrid(vector<LPGAMEOBJECT>& list);
+	void UpdateGrid(vector<LPGAMEOBJECT> listStaticObj, vector<LPGAMEOBJECT> listDynamicObj);
+	void GetGrid(vector<LPGAMEOBJECT>& listObjMove);
 	void PushGridStart(LPGAMEOBJECT obj, int row, int col);
-	void CheckCamGrid(vector<LPGAMEOBJECT>& list);
+	void ResetCamGrid(vector<LPGAMEOBJECT>& list);
 };

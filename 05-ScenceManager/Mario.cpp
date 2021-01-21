@@ -417,8 +417,13 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 				else if (e->nx != 0)
 				{
 					/*if (rdx != 0 && rdx!=dx)
-						x += nx*abs(rdx); 
-					this->vy = 0;*/
+						x += nx*abs(rdx); */
+					//this->vx = 0;
+					//this->MarioSetOnGround();
+				}
+				else if (e->ny > 0)
+				{
+					this->MarioSetOnGround();
 				}
 			}
 			else if (e->obj->getTypeObject() == Type::QUESTIONBRICK)
@@ -609,9 +614,12 @@ void CMario::Update(DWORD dt, vector<LPGAMEOBJECT>* staticObj , vector<LPGAMEOBJ
 				{
 					P_Switch* p_switch = dynamic_cast<P_Switch*>(e->obj);
 					this->MarioSetOnGround();
-					p_switch->isActived = true;
+					if (!p_switch->isActived)
+					{
+						p_switch->isActived = true;
+						this->vy = -MARIO_ELASTIC;
+					}
 
-					this->vy = -MARIO_ELASTIC;
 				}
 				else if (e->nx != 0)
 				{
@@ -1375,6 +1383,7 @@ void CMario::SetState(int state)
 		vx = 0;
 		vy = 0;
 		nx = 1;
+		isEndMap = true;
 		break;
 	case MARIO_SELECTION_MAP_STATE_MOVE_RIGHT:
 		vx = MARIO_SELECTION_MAP_MOVE_SPEED;

@@ -2,14 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "PlayScence.h"
-#include "P_Switch.h"
-#include "ShakeTree.h"
-#include "PortalStop.h"
-#include "P_Switch.h"
-#include "MovingWood.h"
-#include "BoomerangBrother.h"
-#include "BomerangWeapon.h"
-#include "SelectionCarret.h"
+
 
 using namespace std;
 
@@ -153,9 +146,11 @@ void CPlayScene::_ParseSection_Map(string line)
 	int tileset_height = atoi(tokens[8].c_str());
 	float widthGrid = atoi(tokens[9].c_str());
 	float heightGrid = atoi(tokens[10].c_str());
-	grid = new Grid();
-	grid->Resize(widthGrid, heightGrid);
-	grid->PushGrid(objects);
+	
+
+	gridObjMoving = new Grid();
+	gridObjMoving->Resize(widthGrid,heightGrid);
+
 	map = new TileMap(ID, filePath_texture.c_str(), filePath_data.c_str(), num_row_on_texture, num_col_on_textture, num_row_on_tilemap, num_col_on_tilemap, tileset_width, tileset_height);
 	boardGame = new BoardGame(player);
 	cam = new Camera(player,map,this->typeCamera);
@@ -378,6 +373,14 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	}
 	else if (!player->isInWorldSelectionMap)
 	{
+		if (obj->getCategoryObject() == Category::ENEMY)
+		{
+			listMovingObject.push_back(obj);
+		}
+		else
+		{
+			listStaticObj.push_back(obj);
+		}
 		objects.push_back(obj);
 	}
 }
@@ -673,6 +676,7 @@ void CPlayScene::SwitchToSelectionWorld()
 	player->SetPosition(player->portalStop->x, player->portalStop->y);
 	player->isWalking = false;
 	player->isCanGetIntoWorldMap = false;
+	player->isEndMap = false;
 
 	CGame::GetInstance()->ResetCamera();
 	return;
@@ -767,6 +771,38 @@ void CPlayScene::Alter_Opacity_AlphaForBackground_Screen_By_Time(bool isDark)
 		}
 	}
 }
+void CPlayScene::SplitObjectsToDetect(vector<LPGAMEOBJECT>& coObjects)
+{
+	for (size_t i = 0; i < ObjectsInScreen.size(); i++)
+	{
+		coObjects.push_back(ObjectsInScreen[i]);
+
+		// Split Static Obj to small List.
+		if (ObjectsInScreen[i]->getCategoryObject() == Category::GROUND)
+		{
+			StaticObjects.push_back(ObjectsInScreen[i]);
+		}
+		else if (ObjectsInScreen[i]->getCategoryObject() == Category::ENEMY)
+		{
+			enemies.push_back(ObjectsInScreen[i]);
+		}
+		else if (ObjectsInScreen[i]->getCategoryObject() == Category::ITEM)
+		{
+			items.push_back(ObjectsInScreen[i]);
+		}
+		else if (ObjectsInScreen[i]->getCategoryObject() == Category::BRICK)
+		{
+			// Trigger for Logical P_Switch
+			listCBrick.push_back(ObjectsInScreen[i]);
+			StaticObjects.push_back(ObjectsInScreen[i]);
+			if (ObjectsInScreen[i]->getTypeObject() == Type::WEAKBRICK)
+			{
+				listWeakBrick.push_back(ObjectsInScreen[i]);
+			}
+		}
+	}
+
+}
 void CPlayScene::DetectSpecialAttributeOfMap()
 {
 	if (player->scenceId == SCENCE_ID_WORLD_MOVING_CAMERA)
@@ -797,12 +833,25 @@ void CPlayScene::GetObjectGrid()
 {
 	ObjectsInScreen.clear();
 	items.clear();
-	staticObjects.clear();
+	StaticObjects.clear();
 	listCBrick.clear();
 	listWeakBrick.clear();
 	enemies.clear();
 
-	grid->GetGrid(ObjectsInScreen);
+	for (size_t i = 0; i < listStaticObj.size(); i++)
+	{
+		ObjectsInScreen.push_back(listStaticObj[i]);
+	}
+
+
+	// Temporary vector to save all dynamic obj in Screen 
+	vector<LPGAMEOBJECT> listObjMoveInScreen;
+	// Get dynamic obj
+	gridObjMoving->GetGrid(listObjMoveInScreen);
+	for (size_t i = 0; i < listObjMoveInScreen.size(); i++)
+	{
+		ObjectsInScreen.push_back(listObjMoveInScreen[i]);
+	}
 }
 
 void CPlayScene::Update(DWORD dt)
@@ -815,37 +864,11 @@ void CPlayScene::Update(DWORD dt)
 	float playerPositionX = player->x;
 	float playerPositionY = player->y;
 
-	grid->CheckCamGrid(objects);
+	gridObjMoving->ResetCamGrid(listMovingObject);
 	GetObjectGrid();
-
 	
-
-	for (size_t i = 0; i < ObjectsInScreen.size(); i++)
-	{
-		coObjects.push_back(ObjectsInScreen[i]);
-
-		if (ObjectsInScreen[i]->getCategoryObject() == Category::GROUND)
-		{
-			staticObjects.push_back(ObjectsInScreen[i]);
-		}
-		else if (ObjectsInScreen[i]->getCategoryObject() == Category::ENEMY)
-		{
-			enemies.push_back(ObjectsInScreen[i]);
-		}
-		else if (ObjectsInScreen[i]->getCategoryObject() == Category::ITEM)
-		{
-			items.push_back(ObjectsInScreen[i]);
-		}
-		else if (ObjectsInScreen[i]->getCategoryObject() == Category::BRICK)
-		{
-			listCBrick.push_back(ObjectsInScreen[i]);
-			staticObjects.push_back(ObjectsInScreen[i]);
-			if (ObjectsInScreen[i]->getTypeObject() == Type::WEAKBRICK)
-			{
-				listWeakBrick.push_back(ObjectsInScreen[i]);
-			}
-		}
-	}
+	SplitObjectsToDetect(coObjects);
+	
 
 	if (player->isIntroScence)
 	{
@@ -881,12 +904,10 @@ void CPlayScene::Update(DWORD dt)
 				this->isTransition_For_LightScreen = true;
 				player->CompleteSwitchedScreen();
 			}
-			player->Update(dt, &staticObjects, &dynamicItems, &enemies);
+			player->Update(dt, &StaticObjects, &dynamicItems, &enemies);
 		}
 	}
 
-
-	DebugOut(L"size %d\n", listCoinTransform.size());
 
 	for (size_t i = 0; i < listWeakBrick.size(); i++)
 	{
@@ -1053,7 +1074,7 @@ void CPlayScene::Update(DWORD dt)
 
 	for (size_t i = 0; i < items.size(); i++)
 	{
-		items[i]->Update(dt, &staticObjects);
+		items[i]->Update(dt, &StaticObjects);
 	}
 
 	player->CollideWithItem(items, effects);
@@ -1271,7 +1292,7 @@ void CPlayScene::Update(DWORD dt)
 			}
 		}*/
 
-		enemies[i]->Update(dt, &staticObjects);
+		enemies[i]->Update(dt, &StaticObjects);
 	}
 
 	//player->CollideWithEnemy(enemies);
@@ -1481,7 +1502,10 @@ void CPlayScene::Update(DWORD dt)
 	}
 #pragma endregion
 
-	//grid->ResetGrid(objects);
+	if (!player->isEndMap)
+	{
+		gridObjMoving->ResetGrid(listMovingObject);
+	}
 
 	// skip the rest if scene was already unloaded (Mario::Update might trigger PlayScene::Unload)
 	if (player == NULL ) return; 
@@ -1541,11 +1565,11 @@ void CPlayScene::Render()
 	}
 
 	
-	for (size_t i = 0; i < staticObjects.size(); i++)
+	for (size_t i = 0; i < StaticObjects.size(); i++)
 	{
-		if (staticObjects[i]->isRendered)
+		if (StaticObjects[i]->isRendered)
 		{
-			staticObjects[i]->Render();
+			StaticObjects[i]->Render();
 		}
 
 	}
@@ -1626,14 +1650,14 @@ void CPlayScene::Unload()
 		delete objects[i];
 	objects.clear();
 	
-	 mapObjects.clear();
+	listStaticObj.clear();
+	listMovingObject.clear();
 	 listPortalStop.clear();
-	
 	 ObjectsInScreen.clear();
 	 items.clear();
 	 dynamicItems.clear();
 	 enemies.clear();
-	 staticObjects.clear();
+	 StaticObjects.clear();
 	 listCBrick.clear();
 
 	 effects.clear();

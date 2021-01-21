@@ -46,6 +46,24 @@ void Grid::PushGrid(vector<LPGAMEOBJECT> list)
 	}
 }
 
+void Grid::UpdateGrid(vector<LPGAMEOBJECT> listStaticObj, vector<LPGAMEOBJECT> listDynamicObj)
+{
+	for (int i = 0; i < list.size(); i++)
+	{
+		float l, t, r, b;
+		list[i]->GetBoundingBox(l, t, r, b);
+		int top = int(t / cell_height);
+		int bottom = ceil(b / cell_height);
+		int left = int(l / cell_width);
+		int right = ceil(r / cell_width);
+
+		if (!list[i]->objectDisappear())
+			for (int row = top; row < bottom; row++)
+				for (int col = left; col < right; col++)
+					allcells[row][col].push_back(list[i]);
+	}
+}
+
 void Grid::PushGridStart(LPGAMEOBJECT obj, int row, int col)
 {
 	allcells[row][col].push_back(obj);
@@ -58,7 +76,7 @@ void Grid::ResetGrid(vector<LPGAMEOBJECT> list)
 	PushGrid(list);
 }
 
-void Grid::CheckCamGrid(vector<LPGAMEOBJECT>& list)
+void Grid::ResetCamGrid(vector<LPGAMEOBJECT>& list)
 {
 	for (int i = 0; i < list.size(); i++)
 		list[i]->isInCamera = false;
@@ -73,7 +91,7 @@ void Grid::GetGrid(vector<LPGAMEOBJECT>& list)
 	int totalRow = ceil((CGame::GetInstance()->GetCamPosY() + (CGame::GetInstance()->GetScreenHeight())) / cell_height) ;
 
 	for (int i = firstRow; i < totalRow; i++)
-	{
+	{ 
 		for (int j = firstCol; j < lastCol; j++)	
 		{
 			for (int k = 0; k < allcells[i][j].size(); k++)
