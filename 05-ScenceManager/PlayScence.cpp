@@ -24,6 +24,7 @@ CPlayScene::CPlayScene(int id, LPCWSTR filePath,bool isWorldSeletion, int typeCa
 #define SCENE_SECTION_ANIMATION_SETS	5
 #define SCENE_SECTION_OBJECTS			6
 #define SCENE_SECTION_TILEMAP			7
+#define SCENE_SECTION_CELL_GRID			8
 
 #define OBJECT_TYPE_MARIO				0
 #define OBJECT_TYPE_BRICK				1
@@ -149,16 +150,27 @@ void CPlayScene::_ParseSection_Map(string line)
 	int tileset_height = atoi(tokens[8].c_str());
 	float widthGrid = atoi(tokens[9].c_str());
 	float heightGrid = atoi(tokens[10].c_str());
-	
 
-	gridGame = new Grid();
+	
+	gridGame = new Grid(this->cell_width, this->cell_height);
 	gridGame->storeGrid_Object_FromFile(objects_cell);
-	gridGame->Resize(widthGrid,heightGrid);
+	gridGame->Resize(widthGrid, heightGrid);
 	gridGame->Firstly_PushObjects(objectsGrid);
 
 	map = new TileMap(ID, filePath_texture.c_str(), filePath_data.c_str(), num_row_on_texture, num_col_on_textture, num_row_on_tilemap, num_col_on_tilemap, tileset_width, tileset_height);
 	boardGame = new BoardGame(player);
 	cam = new Camera(player,map,this->typeCamera);
+}
+
+void CPlayScene::_ParseSection_Cell_Size(string line)
+{
+	vector<string> tokens = split(line);
+	if (tokens.size() < 2) return;
+
+	int cell_width = atoi(tokens[0].c_str());
+	int cell_height = atoi(tokens[1].c_str());
+
+	this->storeCell_size(cell_width, cell_height);
 }
 
 /*		
@@ -247,7 +259,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 		float width = atof(tokens[4].c_str());
 		float height = atof(tokens[5].c_str());
 		int isHaveItem = 0;
-		if (tokens.size() == 7)
+		if (tokens.size() > 7)
 			isHaveItem = atof(tokens[6].c_str());
 		obj = new WeakBrick(width, height, isHaveItem);
 		obj->start_x = x;
@@ -367,14 +379,7 @@ void CPlayScene::_ParseSection_OBJECTS(string line)
 	int row_cell = atoi(tokens[lastCol - 1].c_str());
 	int col_cell = atoi(tokens[lastCol - 2].c_str());
 
-
-	if (id_grid == 190)
-	{
-		int x = 3;
-	}
-
-	if (id_grid != -1)
-		objects_cell[id_grid].push_back(unordered_map<int, int>({ {row_cell,col_cell} }));
+	objects_cell[id_grid].push_back(unordered_map<int, int>({ {row_cell,col_cell} }));
 
 
 	if (obj->getTypeObject() == Type::PIPE)
@@ -450,6 +455,8 @@ void CPlayScene::Load()
 			section = SCENE_SECTION_OBJECTS; continue; }
 		if (line == "[TILEMAP]") { 
 			section = SCENE_SECTION_TILEMAP; continue; }
+		if (line == "[CELL_SIZE]") { 
+			section = SCENE_SECTION_CELL_GRID; continue; }
 		if (line[0] == '[') { section = SCENE_SECTION_UNKNOWN; continue; }	
 
 		//
@@ -463,6 +470,7 @@ void CPlayScene::Load()
 			case SCENE_SECTION_ANIMATION_SETS: _ParseSection_ANIMATION_SETS(line); break;
 			case SCENE_SECTION_OBJECTS: _ParseSection_OBJECTS(line); break;
 			case SCENE_SECTION_TILEMAP: _ParseSection_Map(line); break;
+			case SCENE_SECTION_CELL_GRID: _ParseSection_Cell_Size(line); break;
 		}
 	}
 
@@ -480,6 +488,8 @@ void CPlayScene::Load()
 		advertisement->SetPosition(16, -300);
 		objects.push_back(advertisement);
 	}
+
+
 
 	//DebugOut(L"[INFO] Done loading scene resources %s\n", sceneFilePath);
 }
@@ -908,8 +918,6 @@ void CPlayScene::GetObjectGrid()
 	{
 		ObjectsInScreen.push_back(listObjMoveInScreen[i]);
 	}
-
-	DebugOut(L"enemy = %d \n", listObjMoveInScreen.size());
 
 	for (size_t i = 0; i < listObIdleInScreen.size(); i++)
 	{

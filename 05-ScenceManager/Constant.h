@@ -3,7 +3,7 @@
 using namespace std;
 
 #define MARIO_RUNNING_PRE_MAX_SPEED						0.15f
-#define MARIO_RUNNING_MAX_SPEED							0.2f
+#define MARIO_RUNNING_MAX_SPEED							0.2001f
 
 #define MARIO_WALKING_DECELERATION						0.004875f
 #define MARIO_WALKING_ACCELEROMETER						0.002175f

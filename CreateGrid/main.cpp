@@ -229,10 +229,6 @@ void formatLineString(vector<string> tokensLine, int left, int top, int right, i
 				storeObjKey_value(tokensLine);
 			}
 
-			if (randomId == 48)
-			{
-				int x = 3;
-			}
 
 			tokens.push_back(to_string(randomId));
 			// Change BBox value to Cell position Value
@@ -253,6 +249,9 @@ void formatLineString(vector<string> tokensLine, int left, int top, int right, i
 void _ParseSection_OBJECT(string line)
 {
 	vector<string> tokens = split(line);
+	int posX = atoi(tokens[1].c_str());
+	int posY = atoi(tokens[2].c_str());
+
 
 	float l, t,  r,b;
 	TinNgoGetBoundingBox(l, t, r, b, tokens);
@@ -264,10 +263,6 @@ void _ParseSection_OBJECT(string line)
 
 	formatLineString(tokens,left,top,right, bottom);
 
-	
-
-	//koopas->GetBoundingBox(l, t, r, b);
-	
 }
 
 void formatListStringAscending(unordered_map<int, vector<string>> listString)
@@ -295,6 +290,10 @@ void exportFile_ObjectsAndCell()
 			}
 		}
 	}
+
+	myfile << "[CELL_SIZE]" << endl;
+	myfile << cell_width<<"\t"<<cell_height << endl;
+
 	myfile.close();
 }
 

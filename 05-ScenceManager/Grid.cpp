@@ -7,6 +7,13 @@ Grid::Grid(int cell_width, int cell_height)
 	this->objects_cell = objects_cell;
 }
 
+void Grid::storeCell_Size(int x, int y)
+{
+	this->cell_width = x;
+	this->cell_height = y;
+
+}
+
 void Grid::storeGrid_Object_FromFile(unordered_map<int, vector<unordered_map<int, int>>> objects_cell)
 {
 	this->objects_cell = objects_cell;
@@ -159,10 +166,6 @@ void Grid::Firstly_PushObjects(unordered_map<int, LPGAMEOBJECT> hashmapObjects)
 			int id_object = posCell.first;
 			for (size_t i = 0; i < posCell.second.size(); i++)
 			{
-				if (id_object == 190)
-				{
-					int x = 3;
-				}
 				LPGAMEOBJECT obj = hashmapObjects[id_object];
 				if (obj)
 				{

@@ -766,5 +766,7 @@
 # type	l	t	ani_set_id	r	b	scene_id
 #50	300	98	0	380	150	1
 
+[CELL_SIZE]
+195	328
 [TILEMAP]
-99999	textures\world_selection.png	textures\worldmap.txt	11	5	14	53	16	16	752	784
+99999	textures\world_selection.png	textures\worldmap.txt	11	5	14	53	16	16	752	784	195	328

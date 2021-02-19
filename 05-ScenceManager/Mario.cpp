@@ -1859,7 +1859,7 @@ void CMario::Reset()
 {
 	SetState(MARIO_STATE_IDLE);
 	SetLevel((level > MARIO_LEVEL_BIG_TAIL)? MARIO_LEVEL_SMALL:++level);
-	SetPosition(x,y);
-	CGame::GetInstance()->SetCamPos(x, y);
+	SetPosition(1860,0);
+	CGame::GetInstance()->SetCamPos(1860, 0);
 	SetSpeed(0, 0);
 }

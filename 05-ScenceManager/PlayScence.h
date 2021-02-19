@@ -57,6 +57,9 @@ public:
 	//END INTRO SCENCE
 	
 	
+
+	int cell_width = 195;
+	int cell_height = 262;
 	Grid* gridGame;
 
 	vector<int> listId_grid;
@@ -122,6 +125,11 @@ public:
 		this->posOfTextEndGame_y = y;
 	}
 
+	void storeCell_size(int x, int y) {
+		this->cell_width = x;
+		this->cell_height = y;
+	}
+
 	CPortal* Portal;
 
 	bool secondStringCreated = false;
@@ -148,6 +156,8 @@ public:
 	void _ParseSection_ANIMATION_SETS(string line);
 	void _ParseSection_OBJECTS(string line);
 	void _ParseSection_Map(string line);
+
+	void _ParseSection_Cell_Size(string line);
 	
 public: 
 	CPlayScene(int id, LPCWSTR filePath, bool isWorldSeletion, int typeCamera);

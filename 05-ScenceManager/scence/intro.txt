@@ -1204,7 +1204,8 @@
 
 #SO 3 NHAP NHAY
 52	128	95	20	-1
-
+[CELL_SIZE]
+195	328
 [TILEMAP]
-9999	textures\intro.png	textures\intro.txt	11	11	17	49	16	16	800	600
+9999	textures\intro.png	textures\intro.txt	11	11	17	49	16	16	800	600	195	328
 #99999	textures\intro.png	textures\wintrointro.txt	24	35	24	69	16	16	800	600

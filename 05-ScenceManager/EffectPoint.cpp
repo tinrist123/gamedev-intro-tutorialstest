@@ -15,7 +15,7 @@ void EffectPoint::Render()
 		ani = 0;
 	}
 
-	animation_set->at(EFFECT_ANI_7UP)->Render(x,y);
+	animation_set->at(ani)->Render(x,y);
 }
 void EffectPoint::GetBoundingBox(float& l, float& t, float& r, float& b)
 {

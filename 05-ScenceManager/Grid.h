@@ -2,14 +2,6 @@
 #include"GameObject.h"
 #include"Game.h"
 #include"Utils.h"
-#define CELL_WIDTH	195
-#define CELL_HEIGHT 328
-
-
-#define MAP_WIDTH 3328
-#define MAP_HEIGHT  1000
-
-
 
 class Grid
 {	
@@ -20,7 +12,8 @@ class Grid
 	unordered_map<int, vector<unordered_map<int, int>>> objects_cell;
 
 public:
-	Grid(int cell_width = CELL_WIDTH, int cell_height = CELL_HEIGHT);
+	Grid(int cell_width = 195, int cell_height = 328);
+	void storeCell_Size(int x, int y);
 	~Grid();
 
 	void Firstly_PushObjects(unordered_map<int, LPGAMEOBJECT>);
